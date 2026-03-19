@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenYap Technologies — Expansion Roadmap</title>
+<meta name="description" content="AI Construction Intelligence Platform — Expansion Roadmap">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OpenYap Roadmap">
+<meta name="theme-color" content="#0A0D14">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiT3BlbllhcCBSb2FkbWFwIiwic2hvcnRfbmFtZSI6Ik9wZW5ZYXAiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBBMEQxNCIsInRoZW1lX2NvbG9yIjoiIzBBMEQxNCJ9">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0A0D14;
+  --card: #12161E;
+  --card-hover: #181D28;
+  --border: #1E2330;
+  --red: #EF3340;
+  --gold: #C9A84C;
+  --green: #34D399;
+  --blue: #4A90D9;
+  --purple: #A78BFA;
+  --text: #F0F0F2;
+  --text-secondary: #8A8F9E;
+  --text-dim: #5A5F6E;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Loading Overlay */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  margin-top: 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Section */
+.section {
+  padding: 80px 0;
+}
+
+.section-header {
+  margin-bottom: 48px;
+}
+
+.section-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 120px 0 80px;
+  text-align: center;
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(239, 51, 64, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-confidential {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 40px;
+}
+
+.hero-company {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 60px;
+}
+
+.hero-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.kpi-hero-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.kpi-hero-card:hover {
+  border-color: rgba(201, 168, 76, 0.3);
+}
+
+.kpi-hero-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.kpi-hero-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.5px;
+}
+
+/* ===== PHASE FILTER ===== */
+.phase-filter-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 13, 20, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+.phase-filter {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.phase-filter::-webkit-scrollbar { display: none; }
+
+.phase-pill {
+  flex-shrink: 0;
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.phase-pill:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+}
+
+.phase-pill.active {
+  color: #fff;
+  border-color: transparent;
+}
+
+.phase-pill[data-phase="all"].active { background: var(--red); }
+.phase-pill[data-phase="Origin"].active { background: var(--green); color: #0A0D14; }
+.phase-pill[data-phase="Year 1"].active { background: var(--red); }
+.phase-pill[data-phase="Year 2"].active { background: var(--blue); }
+.phase-pill[data-phase="Year 3"].active { background: var(--purple); }
+.phase-pill[data-phase="Year 5"].active { background: var(--gold); color: #0A0D14; }
+
+/* ===== TIMELINE ===== */
+.timeline-section {
+  padding: 60px 0 80px;
+}
+
+.timeline {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Center line */
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent 0%, var(--red) 5%, var(--red) 95%, transparent 100%);
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  position: relative;
+  width: 50%;
+  padding: 0 40px 48px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-item.hidden-by-filter {
+  display: none;
+}
+
+.timeline-item:nth-child(odd) {
+  left: 0;
+  padding-right: 60px;
+  text-align: right;
+}
+
+.timeline-item:nth-child(even) {
+  left: 50%;
+  padding-left: 60px;
+  text-align: left;
+}
+
+/* Dot */
+.timeline-dot {
+  position: absolute;
+  top: 8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--text-dim);
+  background: var(--bg);
+  z-index: 2;
+}
+
+.timeline-item:nth-child(odd) .timeline-dot {
+  right: -7px;
+}
+
+.timeline-item:nth-child(even) .timeline-dot {
+  left: -7px;
+}
+
+.timeline-dot.done {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.timeline-dot.current {
+  background: var(--red);
+  border-color: var(--red);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 51, 64, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 51, 64, 0); }
+}
+
+.timeline-dot.planned {
+  background: var(--bg);
+  border-color: var(--text-dim);
+}
+
+/* Card */
+.timeline-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  display: inline-block;
+  text-align: left;
+  max-width: 420px;
+  transition: border-color 0.3s ease, transform 0.2s ease;
+}
+
+.timeline-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.timeline-item:nth-child(odd) .timeline-card {
+  float: right;
+}
+
+.timeline-date {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.phase-Origin .timeline-date { color: var(--green); }
+.phase-year-1 .timeline-date { color: var(--red); }
+.phase-year-2 .timeline-date { color: var(--blue); }
+.phase-year-3 .timeline-date { color: var(--purple); }
+.phase-year-5 .timeline-date { color: var(--gold); }
+
+.timeline-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.timeline-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-right: 4px;
+}
+
+.status-badge.done {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--green);
+}
+
+.status-badge.current {
+  background: rgba(239, 51, 64, 0.12);
+  color: var(--red);
+}
+
+.status-badge.planned {
+  background: rgba(138, 143, 158, 0.1);
+  color: var(--text-dim);
+}
+
+.tag-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.metric-box {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(201, 168, 76, 0.06);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.3px;
+}
+
+/* ===== FINANCIAL TABLE ===== */
+.financials-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.financials-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.financials-table thead th {
+  padding: 16px 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.financials-table thead th:not(:first-child) {
+  text-align: right;
+}
+
+.financials-table tbody td {
+  padding: 18px 20px;
+  font-size: 15px;
+  color: var(--text);
+  border-bottom: 1px solid rgba(30, 35, 48, 0.6);
+  white-space: nowrap;
+}
+
+.financials-table tbody td:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.financials-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.financials-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.financials-table .year-cell {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.financials-table .revenue {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.financials-table .net-positive {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.financials-table .net-negative {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.financials-table .roi-cell {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ===== KEY METRICS GRID ===== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 24px;
+  transition: border-color 0.3s ease, transform 0.2s ease;
+}
+
+.kpi-card:hover {
+  border-color: rgba(201, 168, 76, 0.2);
+  transform: translateY(-2px);
+}
+
+.kpi-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.kpi-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  padding: 60px 0 40px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.footer-line {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.footer-line:first-child {
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* ===== FADE IN ANIMATION ===== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== ERROR STATE ===== */
+.error-banner {
+  background: rgba(239, 51, 64, 0.08);
+  border: 1px solid rgba(239, 51, 64, 0.2);
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin: 24px auto;
+  max-width: 600px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  display: none;
+}
+
+.error-banner.show { display: block; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hero { padding: 80px 0 60px; }
+  .hero-company { font-size: 36px; letter-spacing: -1px; }
+  .hero-subtitle { font-size: 15px; margin-bottom: 40px; }
+  .hero-kpis {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .kpi-hero-card { padding: 20px 16px; }
+  .kpi-hero-value { font-size: 22px; }
+
+  .section { padding: 60px 0; }
+  .section-title { font-size: 24px; }
+
+  .timeline::before {
+    left: 20px;
+  }
+
+  .timeline-item {
+    width: 100%;
+    left: 0 !important;
+    padding: 0 0 36px 52px !important;
+    text-align: left !important;
+  }
+
+  .timeline-item:nth-child(odd) .timeline-card,
+  .timeline-item:nth-child(even) .timeline-card {
+    float: none;
+    max-width: 100%;
+  }
+
+  .timeline-dot {
+    left: 13px !important;
+    right: auto !important;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .phase-filter { padding: 0 16px; }
+}
+
+@media (max-width: 480px) {
+  .hero-company { font-size: 28px; }
+  .hero-kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi-hero-card { padding: 16px 12px; }
+  .kpi-hero-value { font-size: 20px; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .container { padding: 0 16px; }
+  .timeline-card { padding: 18px; }
+  .timeline-title { font-size: 16px; }
+  .metric-value { font-size: 16px; }
+  .kpi-value { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading Roadmap</div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-confidential">Confidential</div>
+    <h1 class="hero-company">OpenYap Technologies</h1>
+    <p class="hero-subtitle">AI Construction Intelligence Platform — Expansion Roadmap</p>
+    <div class="hero-kpis" id="hero-kpis">
+      <!-- Populated by JS -->
+    </div>
+    <div class="error-banner" id="error-banner">
+      Unable to load live data. Displaying cached version.
+    </div>
+  </div>
+</section>
+
+<!-- Phase Filter -->
+<div class="phase-filter-wrapper">
+  <div class="phase-filter" id="phase-filter">
+    <button class="phase-pill active" data-phase="all">All</button>
+    <button class="phase-pill" data-phase="Origin">Origin</button>
+    <button class="phase-pill" data-phase="Year 1">Year 1</button>
+    <button class="phase-pill" data-phase="Year 2">Year 2</button>
+    <button class="phase-pill" data-phase="Year 3">Year 3</button>
+    <button class="phase-pill" data-phase="Year 5">Year 5</button>
+  </div>
+</div>
+
+<!-- Timeline -->
+<section class="timeline-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-label">Roadmap</div>
+      <h2 class="section-title">Expansion Timeline</h2>
+    </div>
+    <div class="timeline" id="timeline">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Financial Projections -->
+<section class="section" id="financials-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-label">Projections</div>
+      <h2 class="section-title">Financial Projections</h2>
+    </div>
+    <div class="financials-table-wrapper fade-in" id="financials-wrapper">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Key Metrics -->
+<section class="section" id="kpis-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-label">Performance</div>
+      <h2 class="section-title">Key Metrics</h2>
+    </div>
+    <div class="kpi-grid" id="kpi-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-line">Confidential — OpenYap Technologies</div>
+    <div class="footer-line">Prepared by Danzel Yap | Q2 2026</div>
+    <div class="footer-line">Not for distribution outside Webcor leadership</div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  const SHEET_ID = '1Qitd17OuDbsglRTwPgiDiw1dhWo76fg9d6VpuSMX7RE';
+  const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+
+  const PHASE_COLORS = {
+    'Origin':  '#34D399',
+    'Year 1':  '#EF3340',
+    'Year 2':  '#4A90D9',
+    'Year 3':  '#A78BFA',
+    'Year 5':  '#C9A84C'
+  };
+
+  // ---------- DATA FETCHING ----------
+
+  function gvizUrl(sheetName) {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  }
+
+  function parseGviz(text) {
+    // Strip the wrapper: google.visualization.Query.setResponse({...});
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('Invalid gviz response');
+    return JSON.parse(text.substring(start, end + 1));
+  }
+
+  function gvizToRows(data) {
+    const cols = data.table.cols;
+    const rows = data.table.rows;
+    // Determine headers: use label if available, otherwise first row values
+    let headers = cols.map(c => c.label).filter(Boolean);
+    let dataRows = rows;
+
+    if (headers.length === 0 || headers.every(h => h === '')) {
+      // Headers are in the first data row
+      if (rows.length > 0) {
+        headers = rows[0].c.map(cell => (cell && cell.v != null) ? String(cell.v) : '');
+        dataRows = rows.slice(1);
+      }
+    }
+
+    return dataRows.map(row => {
+      const obj = {};
+      row.c.forEach((cell, i) => {
+        const key = headers[i] || `col${i}`;
+        obj[key] = (cell && cell.v != null) ? cell.v : (cell && cell.f != null ? cell.f : null);
+      });
+      return obj;
+    });
+  }
+
+  async function fetchSheet(sheetName) {
+    const cacheKey = `openyap_${sheetName}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < CACHE_TTL) {
+          return parsed.data;
+        }
+      } catch (e) { /* ignore bad cache */ }
+    }
+
+    const resp = await fetch(gvizUrl(sheetName));
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+    const data = parseGviz(text);
+    const rows = gvizToRows(data);
+
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: rows }));
+    } catch (e) { /* storage full, ignore */ }
+
+    return rows;
+  }
+
+  // ---------- RENDER: HERO KPIs ----------
+
+  function renderHeroKPIs(kpis) {
+    const container = document.getElementById('hero-kpis');
+    const first4 = kpis.slice(0, 4);
+    container.innerHTML = first4.map(k => `
+      <div class="kpi-hero-card">
+        <div class="kpi-hero-label">${esc(k.KPI)}</div>
+        <div class="kpi-hero-value">${esc(k.Value)}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- RENDER: TIMELINE ----------
+
+  function phaseClass(phase) {
+    if (!phase) return '';
+    return 'phase-' + phase.toLowerCase().replace(/\s+/g, '-');
+  }
+
+  function renderTimeline(items) {
+    const container = document.getElementById('timeline');
+    container.innerHTML = items.map((item, i) => {
+      const phase = item.Phase || '';
+      const status = (item.Status || '').toLowerCase();
+      const tags = item.Tags ? item.Tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const hasMetric = item['Metric Label'] && item['Metric Value'];
+
+      let statusBadgeHTML = '';
+      if (status === 'done') {
+        statusBadgeHTML = '<span class="status-badge done">Complete</span>';
+      } else if (status === 'current') {
+        statusBadgeHTML = '<span class="status-badge current">Current</span>';
+      } else {
+        statusBadgeHTML = '<span class="status-badge planned">Planned</span>';
+      }
+
+      const tagsHTML = tags.map(t => `<span class="tag-pill">${esc(t)}</span>`).join('');
+
+      const metricHTML = hasMetric ? `
+        <div class="metric-box">
+          <span class="metric-label">${esc(item['Metric Label'])}</span>
+          <span class="metric-value">${esc(item['Metric Value'])}</span>
+        </div>
+      ` : '';
+
+      return `
+        <div class="timeline-item ${phaseClass(phase)}" data-phase="${esc(phase)}">
+          <div class="timeline-dot ${status}"></div>
+          <div class="timeline-card">
+            <div class="timeline-date">${esc(item.Date || '')}</div>
+            <div class="timeline-title">${esc(item.Title || '')}</div>
+            <div class="timeline-desc">${esc(item.Description || '')}</div>
+            <div class="timeline-meta">
+              ${statusBadgeHTML}
+              ${tagsHTML}
+            </div>
+            ${metricHTML}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ---------- RENDER: FINANCIALS ----------
+
+  function renderFinancials(rows) {
+    const wrapper = document.getElementById('financials-wrapper');
+    if (!rows || rows.length === 0) {
+      wrapper.innerHTML = '<p style="color:var(--text-dim);padding:24px;">No financial data available.</p>';
+      return;
+    }
+
+    const headers = ['Year', 'Revenue', 'Expenses', 'Net', 'Webcor Savings', 'Board 49% Return', 'Cumulative ROI'];
+
+    const theadHTML = headers.map(h => `<th>${esc(h)}</th>`).join('');
+
+    const tbodyHTML = rows.map(row => {
+      const year = row['Year'] || '';
+      const revenue = row['Revenue'] || '';
+      const expenses = row['Expenses'] || '';
+      const net = row['Net'] || '';
+      const savings = row['Webcor Savings'] || '';
+      const boardReturn = row['Board 49% Return'] || '';
+      const roi = row['Cumulative ROI'] || '';
+
+      const isNegative = String(net).includes('-');
+      const netClass = isNegative ? 'net-negative' : 'net-positive';
+
+      return `<tr>
+        <td class="year-cell">${esc(year)}</td>
+        <td class="revenue">${esc(revenue)}</td>
+        <td>${esc(expenses)}</td>
+        <td class="${netClass}">${esc(net)}</td>
+        <td>${esc(savings)}</td>
+        <td>${esc(boardReturn)}</td>
+        <td class="roi-cell">${esc(roi)}</td>
+      </tr>`;
+    }).join('');
+
+    wrapper.innerHTML = `
+      <table class="financials-table">
+        <thead><tr>${theadHTML}</tr></thead>
+        <tbody>${tbodyHTML}</tbody>
+      </table>
+    `;
+  }
+
+  // ---------- RENDER: KPI GRID ----------
+
+  function renderKPIGrid(kpis) {
+    const container = document.getElementById('kpi-grid');
+    container.innerHTML = kpis.map(k => `
+      <div class="kpi-card fade-in">
+        <div class="kpi-name">${esc(k.KPI)}</div>
+        <div class="kpi-value">${esc(k.Value)}</div>
+        <div class="kpi-desc">${esc(k.Description || '')}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- PHASE FILTER ----------
+
+  function setupPhaseFilter() {
+    const pills = document.querySelectorAll('.phase-pill');
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const phase = pill.getAttribute('data-phase');
+        filterTimeline(phase);
+      });
+    });
+  }
+
+  function filterTimeline(phase) {
+    const items = document.querySelectorAll('.timeline-item');
+    items.forEach(item => {
+      if (phase === 'all' || item.getAttribute('data-phase') === phase) {
+        item.classList.remove('hidden-by-filter');
+      } else {
+        item.classList.add('hidden-by-filter');
+      }
+    });
+    // Re-trigger visibility for newly shown items
+    observeElements();
+  }
+
+  // ---------- SCROLL ANIMATIONS ----------
+
+  let observer;
+
+  function observeElements() {
+    if (observer) observer.disconnect();
+
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.timeline-item:not(.hidden-by-filter), .fade-in').forEach(el => {
+      observer.observe(el);
+    });
+  }
+
+  // ---------- UTILITY ----------
+
+  function esc(str) {
+    if (str == null) return '';
+    const s = String(str);
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  // ---------- INIT ----------
+
+  async function init() {
+    const overlay = document.getElementById('loading-overlay');
+    const errorBanner = document.getElementById('error-banner');
+
+    try {
+      const [timeline, financials, kpis] = await Promise.all([
+        fetchSheet('Timeline'),
+        fetchSheet('Financials'),
+        fetchSheet('KPIs')
+      ]);
+
+      renderHeroKPIs(kpis);
+      renderTimeline(timeline);
+      renderFinancials(financials);
+      renderKPIGrid(kpis);
+    } catch (err) {
+      console.error('Failed to fetch sheet data:', err);
+      errorBanner.classList.add('show');
+
+      // Try cached data as fallback
+      try {
+        const cachedTimeline = localStorage.getItem('openyap_Timeline');
+        const cachedFinancials = localStorage.getItem('openyap_Financials');
+        const cachedKPIs = localStorage.getItem('openyap_KPIs');
+
+        if (cachedTimeline && cachedFinancials && cachedKPIs) {
+          renderHeroKPIs(JSON.parse(cachedKPIs).data);
+          renderTimeline(JSON.parse(cachedTimeline).data);
+          renderFinancials(JSON.parse(cachedFinancials).data);
+          renderKPIGrid(JSON.parse(cachedKPIs).data);
+        }
+      } catch (cacheErr) {
+        console.error('Cache fallback also failed:', cacheErr);
+      }
+    }
+
+    setupPhaseFilter();
+    observeElements();
+
+    // Dismiss loading
+    requestAnimationFrame(() => {
+      overlay.classList.add('hidden');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
