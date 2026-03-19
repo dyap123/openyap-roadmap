@@ -405,6 +405,138 @@ body::after {
   margin-bottom: 0;
 }
 
+/* Overview charts panel */
+.overview-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Equity donut chart */
+.equity-chart {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+}
+.equity-chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.donut-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 20px;
+}
+.donut-svg { width: 180px; height: 180px; transform: rotate(-90deg); }
+.donut-ring { fill: none; stroke-width: 20; }
+.donut-segment { fill: none; stroke-width: 20; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
+.donut-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.donut-center-value { font-size: 28px; font-weight: 700; color: var(--text); }
+.donut-center-label { font-size: 11px; color: var(--text-muted); }
+.equity-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+.equity-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.equity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Revenue growth mini chart */
+.revenue-chart {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+.revenue-chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.rev-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 120px;
+  padding-top: 8px;
+}
+.rev-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.rev-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rev-bar-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.rev-bar-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Key stat row */
+.key-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.key-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+}
+.key-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.key-stat-value.gold { color: var(--gold); }
+.key-stat-value.red { color: var(--red); }
+.key-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* Legacy KPI grid (kept for KPI section at bottom) */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1339,8 +1471,45 @@ body::after {
         <p>Now it runs on a live Webcor project -- processing plans, tracking RFIs, managing submittals, and generating takeoffs with a purpose-built AI agent. Not a demo. Not a prototype. A working system used by a real construction team.</p>
         <p>The pitch is simple: partner with a builder who already has the technology running, scale it across the portfolio, and own the platform that becomes the industry standard.</p>
       </div>
-      <div class="kpi-grid" id="kpi-grid">
-        <!-- Populated by JS -->
+      <div class="overview-charts" id="overview-charts">
+        <!-- Equity donut chart -->
+        <div class="equity-chart reveal">
+          <div class="equity-chart-title">Equity Structure</div>
+          <div class="donut-container">
+            <svg class="donut-svg" viewBox="0 0 180 180">
+              <circle class="donut-ring" cx="90" cy="90" r="70" stroke="rgba(255,255,255,0.04)"/>
+              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#EF3340" stroke-dasharray="0 440" id="donut-founder"/>
+              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#C9A84C" stroke-dasharray="0 440" id="donut-board"/>
+              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#555" stroke-dasharray="0 440" id="donut-karo"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-center-value">50%</div>
+              <div class="donut-center-label">Founder</div>
+            </div>
+          </div>
+          <div class="equity-legend">
+            <div class="equity-legend-item"><div class="equity-dot" style="background:#EF3340"></div>Founder 50%</div>
+            <div class="equity-legend-item"><div class="equity-dot" style="background:#555"></div>Karo 1%</div>
+            <div class="equity-legend-item"><div class="equity-dot" style="background:#C9A84C"></div>Board 49%</div>
+          </div>
+        </div>
+
+        <!-- Revenue growth chart -->
+        <div class="revenue-chart reveal">
+          <div class="revenue-chart-title">Revenue Projection</div>
+          <div class="rev-bars" id="rev-bars">
+            <div class="rev-bar-col"><div class="rev-bar-value">$0</div><div class="rev-bar" style="height:2px;background:rgba(255,255,255,0.1)" id="revbar-0"></div><div class="rev-bar-label">Y1<br>Build</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$25M</div><div class="rev-bar" style="height:2px;background:var(--gold)" id="revbar-1"></div><div class="rev-bar-label">Y2<br>Deploy</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$35M</div><div class="rev-bar" style="height:2px;background:var(--gold)" id="revbar-2"></div><div class="rev-bar-label">Y3<br>Scale</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$60M+</div><div class="rev-bar" style="height:2px;background:var(--gold)" id="revbar-3"></div><div class="rev-bar-label">Y5<br>Exit</div></div>
+          </div>
+        </div>
+
+        <!-- Key stats -->
+        <div class="key-stats">
+          <div class="key-stat reveal"><div class="key-stat-value gold">196%</div><div class="key-stat-label">Board ROI Year 2</div></div>
+          <div class="key-stat reveal"><div class="key-stat-value red">$9.8M</div><div class="key-stat-label">Board Return Year 2</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1936,6 +2105,49 @@ body::after {
 
   var observer;
 
+  /* ===========================================
+     CHARTS ANIMATION
+     =========================================== */
+
+  var chartsAnimated = false;
+  function animateCharts() {
+    if (chartsAnimated) return;
+    chartsAnimated = true;
+
+    // Donut chart — animate segments
+    var circumference = 2 * Math.PI * 70; // ~440
+    var founder = circumference * 0.50;
+    var board = circumference * 0.49;
+    var karo = circumference * 0.01;
+
+    var founderEl = document.getElementById('donut-founder');
+    var boardEl = document.getElementById('donut-board');
+    var karoEl = document.getElementById('donut-karo');
+
+    if (founderEl) {
+      setTimeout(function() { founderEl.style.strokeDasharray = founder + ' ' + circumference; }, 200);
+      setTimeout(function() {
+        boardEl.style.strokeDashoffset = -founder;
+        boardEl.style.strokeDasharray = board + ' ' + circumference;
+      }, 500);
+      setTimeout(function() {
+        karoEl.style.strokeDashoffset = -(founder + board);
+        karoEl.style.strokeDasharray = karo + ' ' + circumference;
+      }, 800);
+    }
+
+    // Revenue bars — animate heights
+    var heights = [2, 42, 58, 100]; // percentages
+    ['revbar-0','revbar-1','revbar-2','revbar-3'].forEach(function(id, i) {
+      var el = document.getElementById(id);
+      if (el) {
+        setTimeout(function() {
+          el.style.height = heights[i] + '%';
+        }, 400 + (i * 200));
+      }
+    });
+  }
+
   function observeElements() {
     if (observer) observer.disconnect();
 
@@ -1943,6 +2155,10 @@ body::after {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
+          // Trigger chart animations when overview section is visible
+          if (entry.target.closest && entry.target.closest('#overview-section')) {
+            animateCharts();
+          }
         }
       });
     }, {
