@@ -1518,8 +1518,8 @@ body::after {
 <!-- SECTION 4: TIMELINE -->
 <section class="timeline-section" id="timeline-section">
   <div class="container">
-    <div class="section-label reveal">THE ROADMAP</div>
-    <h2 class="section-headline reveal">Every milestone, mapped.</h2>
+    <div class="section-label reveal">MILESTONES</div>
+    <h2 class="section-headline reveal">Timeline</h2>
     <div class="phase-filters reveal" id="phase-filters">
       <button class="phase-pill active" data-phase="all">All</button>
       <!-- Populated by JS with phases from data -->
@@ -1582,7 +1582,7 @@ body::after {
       <!-- Populated by JS -->
     </div>
     <div class="reveal" style="text-align:center;margin-top:48px;">
-      <a class="agreement-doc-link" href="https://docs.google.com/spreadsheets/d/1Qitd17OuDbsglRTwPgiDiw1dhWo76fg9d6VpuSMX7RE" target="_blank" rel="noopener">View Full Source Document</a>
+      <a class="agreement-doc-link" href="https://docs.google.com/document/d/1bFhSGH3J4tZjT6DWi-JPBthC5I6UJ2SrA7EaIRSf-sk/edit" target="_blank" rel="noopener">View Full Operating Agreement (Draft)</a>
     </div>
   </div>
 </section>
@@ -1752,10 +1752,7 @@ body::after {
 
   function renderKPIGrid(kpis) {
     var container = document.getElementById('kpi-grid');
-    if (!kpis || kpis.length === 0) {
-      container.innerHTML = '';
-      return;
-    }
+    if (!container || !kpis || kpis.length === 0) return;
 
     container.innerHTML = kpis.map(function(k, i) {
       var name = k.KPI || k.Metric || k.Name || '';
@@ -2192,10 +2189,11 @@ body::after {
       var kpis = results[2];
       var agreement = results[3];
 
-      renderKPIGrid(kpis);
-      renderTimeline(timeline);
-      renderFinancials(financials);
-      renderAgreement(agreement);
+      if (kpis) renderKPIGrid(kpis);
+      if (timeline) renderTimeline(timeline);
+      if (financials) renderFinancials(financials);
+      if (agreement) renderAgreement(agreement);
+      animateCharts();
     } catch (err) {
       console.error('Failed to fetch sheet data:', err);
 
