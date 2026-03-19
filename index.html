@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenYap Technologies</title>
+<title>OpenYap</title>
 <meta name="description" content="AI-Powered Construction Intelligence Platform">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -193,29 +193,30 @@ body::after {
   max-width: 900px;
 }
 
-.hero-title-line1 {
-  font-size: 96px;
+.hero-title {
+  font-size: 88px;
   font-weight: 700;
   letter-spacing: -3px;
-  line-height: 1.05;
+  line-height: 1;
   color: var(--text);
+  margin-bottom: 16px;
 }
 
-.hero-title-line2 {
-  font-size: 96px;
-  font-weight: 200;
-  letter-spacing: -2px;
-  line-height: 1.05;
-  color: var(--text);
-  margin-bottom: 20px;
+.hero-title span {
+  background: linear-gradient(135deg, #fff 0%, rgba(239,51,64,0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hero-tagline {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-  margin-bottom: 64px;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+  margin-bottom: 48px;
+  max-width: 500px;
+  line-height: 1.6;
 }
 
 .hero-stats {
@@ -1131,8 +1132,7 @@ body::after {
 }
 
 @media (max-width: 768px) {
-  .hero-title-line1,
-  .hero-title-line2 {
+  .hero-title {
     font-size: 56px;
     letter-spacing: -2px;
   }
@@ -1230,8 +1230,7 @@ body::after {
 }
 
 @media (max-width: 480px) {
-  .hero-title-line1,
-  .hero-title-line2 {
+  .hero-title {
     font-size: 40px;
     letter-spacing: -1.5px;
   }
@@ -1300,25 +1299,24 @@ body::after {
 <!-- SECTION 1: HERO -->
 <section class="hero" id="hero">
   <div class="hero-content">
-    <div class="hero-title-line1">OpenYap</div>
-    <div class="hero-title-line2">Technologies</div>
-    <div class="hero-tagline">AI-Powered Construction Intelligence Platform</div>
+    <div class="hero-title"><span>OpenYap</span></div>
+    <div class="hero-tagline">Machine learning infrastructure for construction.<br>Built in-house. Running in production. Ready to scale.</div>
     <div class="hero-stats" id="hero-stats">
       <div class="stat-pill">
-        <span class="stat-value">$1.2M &rarr; $5M</span>
-        <span class="stat-label">Staged Funding</span>
+        <span class="stat-value">$5M</span>
+        <span class="stat-label">Investment</span>
       </div>
       <div class="stat-pill">
-        <span class="stat-value">50 / 1 / 49</span>
-        <span class="stat-label">Equity Split</span>
+        <span class="stat-value">50/1/49</span>
+        <span class="stat-label">Equity</span>
       </div>
       <div class="stat-pill">
-        <span class="stat-value">Year 1</span>
-        <span class="stat-label">ROI Target</span>
+        <span class="stat-value">$25M</span>
+        <span class="stat-label">Year 2</span>
       </div>
       <div class="stat-pill">
-        <span class="stat-value">$25M+</span>
-        <span class="stat-label">Year 2 Revenue</span>
+        <span class="stat-value">196%</span>
+        <span class="stat-label">Board ROI</span>
       </div>
     </div>
     <div class="error-banner" id="error-banner">
@@ -1423,7 +1421,7 @@ body::after {
 <!-- SECTION 8: FOOTER -->
 <footer class="footer">
   <div class="container">
-    <div class="footer-line">Confidential &mdash; OpenYap Technologies</div>
+    <div class="footer-line">Confidential &mdash; OpenYap</div>
     <div class="footer-line">Prepared by Danzel Yap &ensp;|&ensp; Q2 2026</div>
     <div class="footer-line">Not for distribution outside Webcor leadership</div>
     <div class="footer-line">This site updates live from the source data</div>
