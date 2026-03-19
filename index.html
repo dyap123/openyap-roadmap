@@ -3,30 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenYap Technologies — Expansion Roadmap</title>
-<meta name="description" content="AI Construction Intelligence Platform — Expansion Roadmap">
+<title>OpenYap Technologies</title>
+<meta name="description" content="AI-Powered Construction Intelligence Platform">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="OpenYap Roadmap">
-<meta name="theme-color" content="#0A0D14">
+<meta name="apple-mobile-web-app-title" content="OpenYap">
+<meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiT3BlbllhcCBSb2FkbWFwIiwic2hvcnRfbmFtZSI6Ik9wZW5ZYXAiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBBMEQxNCIsInRoZW1lX2NvbG9yIjoiIzBBMEQxNCJ9">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiT3BlbllhcCBUZWNobm9sb2dpZXMiLCJzaG9ydF9uYW1lIjoiT3BlbllhcCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMDAwMDAwIiwidGhlbWVfY29sb3IiOiIjMDAwMDAwIn0=">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #0A0D14;
-  --card: #12161E;
-  --card-hover: #181D28;
-  --border: #1E2330;
+  --bg: #000000;
+  --card: #111111;
   --red: #EF3340;
   --gold: #C9A84C;
   --green: #34D399;
-  --blue: #4A90D9;
-  --purple: #A78BFA;
-  --text: #F0F0F2;
-  --text-secondary: #8A8F9E;
-  --text-dim: #5A5F6E;
+  --text: #FFFFFF;
+  --text-body: #999999;
+  --text-muted: #555555;
+  --border: rgba(255,255,255,0.06);
+  --radius: 18px;
 }
 
 html {
@@ -37,14 +35,48 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  position: relative;
 }
 
-/* Loading Overlay */
+/* ===== NOISE TEXTURE ===== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== DOT GRID BACKGROUND ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== LOADING OVERLAY ===== */
 #loading-overlay {
   position: fixed;
   inset: 0;
@@ -53,8 +85,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
+  z-index: 10000;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
 }
 
 #loading-overlay.hidden {
@@ -64,200 +96,401 @@ body {
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--border);
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(255,255,255,0.08);
   border-top-color: var(--red);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 .loading-text {
-  margin-top: 20px;
-  color: var(--text-secondary);
-  font-size: 13px;
-  letter-spacing: 2px;
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== SKELETON SHIMMER ===== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== ERROR STATE ===== */
+.error-banner {
+  background: rgba(239,51,64,0.06);
+  border: 1px solid rgba(239,51,64,0.15);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  margin: 24px auto;
+  max-width: 500px;
+  text-align: center;
+  color: var(--text-body);
+  font-size: 14px;
+  display: none;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.error-banner.show { display: block; }
+
+/* ========================================
+   SECTION 1: HERO
+   ======================================== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  padding: 80px 24px;
+}
+
+/* Red gradient orb */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(circle, rgba(239,51,64,0.08) 0%, rgba(239,51,64,0.02) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.hero-title-line1 {
+  font-size: 96px;
+  font-weight: 700;
+  letter-spacing: -3px;
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.hero-title-line2 {
+  font-size: 96px;
+  font-weight: 200;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.hero-tagline {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 64px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.stat-pill {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 14px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 160px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.stat-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: bounce-down 2s ease-in-out infinite;
 }
 
-/* Container */
-.container {
+.scroll-arrow {
+  width: 24px;
+  height: 24px;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: rotate(45deg);
+  margin-top: -4px;
+}
+
+@keyframes bounce-down {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.5; }
+  50% { transform: translateX(-50%) translateY(10px); opacity: 1; }
+}
+
+/* ========================================
+   SECTION 2: STICKY NAV
+   ======================================== */
+.sticky-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sticky-nav.visible {
+  transform: translateY(0);
+}
+
+.nav-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
 }
 
-/* Section */
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+
+.nav-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-body);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+.nav-link.active {
+  color: var(--text);
+}
+
+.nav-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 1px solid rgba(239,51,64,0.3);
+  border-radius: 100px;
+  padding: 4px 12px;
+}
+
+/* ========================================
+   SECTION 3: OVERVIEW
+   ======================================== */
 .section {
-  padding: 80px 0;
-}
-
-.section-header {
-  margin-bottom: 48px;
+  padding: 140px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .section-label {
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--red);
-  margin-bottom: 12px;
-}
-
-.section-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
-
-/* ===== HERO ===== */
-.hero {
-  padding: 120px 0 80px;
-  text-align: center;
-  position: relative;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(239, 51, 64, 0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.hero-confidential {
-  font-size: 11px;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 40px;
-}
-
-.hero-company {
-  font-size: 56px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  line-height: 1.1;
-  color: var(--text);
+  color: var(--red);
   margin-bottom: 16px;
 }
 
-.hero-subtitle {
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  letter-spacing: 1px;
-  margin-bottom: 60px;
+.section-headline {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1.5px;
+  line-height: 1.15;
+  margin-bottom: 16px;
 }
 
-.hero-kpis {
+.overview-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  max-width: 900px;
-  margin: 0 auto;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-top: 64px;
+  align-items: start;
 }
 
-.kpi-hero-card {
+.overview-narrative p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--text-body);
+  margin-bottom: 24px;
+}
+
+.overview-narrative p:last-child {
+  margin-bottom: 0;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.kpi-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 28px 20px;
-  text-align: center;
-  transition: border-color 0.3s ease;
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  will-change: transform;
 }
 
-.kpi-hero-card:hover {
-  border-color: rgba(201, 168, 76, 0.3);
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
 }
 
-.kpi-hero-label {
+.kpi-name {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
 }
 
-.kpi-hero-value {
+.kpi-value {
   font-size: 28px;
   font-weight: 700;
-  color: var(--gold);
   letter-spacing: -0.5px;
+  margin-bottom: 6px;
+  line-height: 1.2;
 }
 
-/* ===== PHASE FILTER ===== */
-.phase-filter-wrapper {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(10, 13, 20, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 0;
+.kpi-value.gold { color: var(--gold); }
+.kpi-value.white { color: var(--text); }
+
+.kpi-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
-.phase-filter {
+/* ========================================
+   SECTION 4: TIMELINE
+   ======================================== */
+.timeline-section {
+  padding: 140px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.phase-filters {
   display: flex;
   gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 0 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+  flex-wrap: wrap;
+  margin-top: 48px;
+  margin-bottom: 64px;
 }
 
-.phase-filter::-webkit-scrollbar { display: none; }
-
 .phase-pill {
-  flex-shrink: 0;
   padding: 8px 20px;
   border-radius: 100px;
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 500;
   cursor: pointer;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.1);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-body);
   transition: all 0.25s ease;
   white-space: nowrap;
+  font-family: inherit;
 }
 
 .phase-pill:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255,255,255,0.2);
   color: var(--text);
 }
 
 .phase-pill.active {
-  color: #fff;
-  border-color: transparent;
-}
-
-.phase-pill[data-phase="all"].active { background: var(--red); }
-.phase-pill[data-phase="Origin"].active { background: var(--green); color: #0A0D14; }
-.phase-pill[data-phase="Year 1"].active { background: var(--red); }
-.phase-pill[data-phase="Year 2"].active { background: var(--blue); }
-.phase-pill[data-phase="Year 3"].active { background: var(--purple); }
-.phase-pill[data-phase="Year 5"].active { background: var(--gold); color: #0A0D14; }
-
-/* ===== TIMELINE ===== */
-.timeline-section {
-  padding: 60px 0 80px;
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  font-weight: 600;
 }
 
 .timeline {
@@ -273,18 +506,19 @@ body {
   top: 0;
   bottom: 0;
   left: 50%;
-  width: 2px;
-  background: linear-gradient(to bottom, transparent 0%, var(--red) 5%, var(--red) 95%, transparent 100%);
+  width: 1px;
+  background: rgba(239,51,64,0.15);
   transform: translateX(-50%);
 }
 
 .timeline-item {
   position: relative;
   width: 50%;
-  padding: 0 40px 48px;
+  padding: 0 40px 56px;
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 .timeline-item.visible {
@@ -308,62 +542,56 @@ body {
   text-align: left;
 }
 
-/* Dot */
+/* Dot on timeline */
 .timeline-dot {
   position: absolute;
   top: 8px;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  border: 2px solid var(--text-dim);
-  background: var(--bg);
   z-index: 2;
 }
 
-.timeline-item:nth-child(odd) .timeline-dot {
-  right: -7px;
-}
-
-.timeline-item:nth-child(even) .timeline-dot {
-  left: -7px;
-}
+.timeline-item:nth-child(odd) .timeline-dot { right: -6px; }
+.timeline-item:nth-child(even) .timeline-dot { left: -6px; }
 
 .timeline-dot.done {
   background: var(--green);
-  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(52,211,153,0.15);
 }
 
 .timeline-dot.current {
   background: var(--red);
-  border-color: var(--red);
-  animation: pulse-dot 2s ease-in-out infinite;
+  animation: pulse-red 2s ease-in-out infinite;
 }
 
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 51, 64, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(239, 51, 64, 0); }
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,51,64,0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(239,51,64,0); }
 }
 
 .timeline-dot.planned {
-  background: var(--bg);
-  border-color: var(--text-dim);
+  background: transparent;
+  border: 1.5px solid var(--text-muted);
 }
 
-/* Card */
+/* Timeline card */
 .timeline-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 24px;
+  border-radius: var(--radius);
+  padding: 28px;
   display: inline-block;
   text-align: left;
   max-width: 420px;
-  transition: border-color 0.3s ease, transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
 }
 
 .timeline-card:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.1);
 }
 
 .timeline-item:nth-child(odd) .timeline-card {
@@ -372,17 +600,12 @@ body {
 
 .timeline-date {
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
   text-transform: uppercase;
   margin-bottom: 8px;
+  color: var(--text-muted);
 }
-
-.phase-Origin .timeline-date { color: var(--green); }
-.phase-year-1 .timeline-date { color: var(--red); }
-.phase-year-2 .timeline-date { color: var(--blue); }
-.phase-year-3 .timeline-date { color: var(--purple); }
-.phase-year-5 .timeline-date { color: var(--gold); }
 
 .timeline-title {
   font-size: 18px;
@@ -395,9 +618,9 @@ body {
 
 .timeline-desc {
   font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 12px;
+  color: var(--text-body);
+  line-height: 1.7;
+  margin-bottom: 14px;
 }
 
 .timeline-meta {
@@ -407,53 +630,27 @@ body {
   align-items: center;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 100px;
-  margin-right: 4px;
-}
-
-.status-badge.done {
-  background: rgba(52, 211, 153, 0.12);
-  color: var(--green);
-}
-
-.status-badge.current {
-  background: rgba(239, 51, 64, 0.12);
-  color: var(--red);
-}
-
-.status-badge.planned {
-  background: rgba(138, 143, 158, 0.1);
-  color: var(--text-dim);
-}
-
 .tag-pill {
   display: inline-block;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-dim);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
 }
 
 .metric-box {
-  margin-top: 12px;
+  margin-top: 14px;
   padding: 12px 16px;
-  background: rgba(201, 168, 76, 0.06);
-  border: 1px solid rgba(201, 168, 76, 0.15);
-  border-radius: 6px;
+  background: rgba(201,168,76,0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -461,7 +658,7 @@ body {
 
 .metric-label {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-body);
   font-weight: 500;
 }
 
@@ -472,191 +669,494 @@ body {
   letter-spacing: -0.3px;
 }
 
-/* ===== FINANCIAL TABLE ===== */
-.financials-table-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card);
+/* ========================================
+   SECTION 5: FINANCIALS
+   ======================================== */
+.financials-section {
+  padding: 140px 0;
+  position: relative;
+  z-index: 1;
 }
 
-.financials-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 700px;
-}
-
-.financials-table thead th {
-  padding: 16px 20px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-
-.financials-table thead th:not(:first-child) {
-  text-align: right;
-}
-
-.financials-table tbody td {
-  padding: 18px 20px;
-  font-size: 15px;
-  color: var(--text);
-  border-bottom: 1px solid rgba(30, 35, 48, 0.6);
-  white-space: nowrap;
-}
-
-.financials-table tbody td:not(:first-child) {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.financials-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.financials-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.015);
-}
-
-.financials-table .year-cell {
-  font-weight: 700;
-  color: var(--text);
-}
-
-.financials-table .revenue {
-  color: var(--gold);
-  font-weight: 600;
-}
-
-.financials-table .net-positive {
-  color: var(--green);
-  font-weight: 600;
-}
-
-.financials-table .net-negative {
-  color: var(--red);
-  font-weight: 600;
-}
-
-.financials-table .roi-cell {
-  color: var(--gold);
-  font-weight: 700;
-}
-
-/* ===== KEY METRICS GRID ===== */
-.kpi-grid {
+.financial-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+  margin-top: 64px;
 }
 
-.kpi-card {
+.financial-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 28px 24px;
-  transition: border-color 0.3s ease, transform 0.2s ease;
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  will-change: transform;
 }
 
-.kpi-card:hover {
-  border-color: rgba(201, 168, 76, 0.2);
-  transform: translateY(-2px);
+.financial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
 }
 
-.kpi-name {
-  font-size: 11px;
+.fin-year {
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
-.kpi-value {
-  font-size: 28px;
+.fin-revenue {
+  font-size: 32px;
   font-weight: 700;
   color: var(--gold);
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
   line-height: 1.2;
 }
 
-.kpi-desc {
-  font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.4;
+.fin-revenue-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
 }
 
-/* ===== FOOTER ===== */
+.fin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+}
+
+.fin-row-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.fin-row-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-row-value.positive { color: var(--green); }
+.fin-row-value.negative { color: var(--red); }
+
+/* Revenue bar chart */
+.revenue-bars {
+  margin-top: 64px;
+  padding: 40px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.bar-chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-body);
+  letter-spacing: 0.5px;
+  margin-bottom: 32px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bar-row:last-child { margin-bottom: 0; }
+
+.bar-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 60px;
+  text-align: right;
+}
+
+.bar-track {
+  flex: 1;
+  height: 28px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.6));
+  border-radius: 6px;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  min-width: 0;
+}
+
+.bar-amount {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bg);
+  white-space: nowrap;
+}
+
+/* ========================================
+   SECTION 6: EQUITY & GOVERNANCE
+   ======================================== */
+.equity-section {
+  padding: 140px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.equity-visual {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 48px;
+  margin-top: 64px;
+  margin-bottom: 80px;
+}
+
+.equity-circle-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.equity-circle {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: -1px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.equity-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+
+.equity-circle.large {
+  width: 180px;
+  height: 180px;
+  font-size: 40px;
+  color: var(--text);
+}
+
+.equity-circle.small {
+  width: 100px;
+  height: 100px;
+  font-size: 24px;
+  color: var(--red);
+  border-color: rgba(239,51,64,0.2);
+}
+
+.equity-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-body);
+  text-align: center;
+}
+
+.equity-sublabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 2px;
+}
+
+.governance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.governance-row {
+  display: contents;
+}
+
+.governance-term {
+  padding: 20px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.governance-desc {
+  padding: 20px 28px;
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border);
+}
+
+.governance-row:nth-child(odd) .governance-term,
+.governance-row:nth-child(odd) .governance-desc {
+  background: var(--card);
+}
+
+.governance-row:nth-child(even) .governance-term,
+.governance-row:nth-child(even) .governance-desc {
+  background: rgba(17,17,17,0.5);
+}
+
+.governance-row:last-child .governance-term,
+.governance-row:last-child .governance-desc {
+  border-bottom: none;
+}
+
+/* ========================================
+   SECTION 7: AGREEMENT
+   ======================================== */
+.agreement-section {
+  padding: 140px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.accordion {
+  margin-top: 64px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.accordion-group {
+  border-bottom: 1px solid var(--border);
+}
+
+.accordion-group:last-child {
+  border-bottom: none;
+}
+
+.accordion-header {
+  width: 100%;
+  background: var(--card);
+  border: none;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  transition: background 0.2s ease;
+}
+
+.accordion-header:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.accordion-chevron {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-chevron::before,
+.accordion-chevron::after {
+  content: '';
+  position: absolute;
+  background: var(--text-muted);
+  border-radius: 1px;
+}
+
+.accordion-chevron::before {
+  width: 10px;
+  height: 1.5px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: right center;
+}
+
+.accordion-chevron::after {
+  width: 10px;
+  height: 1.5px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: left center;
+}
+
+.accordion-group.open .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-group.open .accordion-body {
+  max-height: 2000px;
+}
+
+.accordion-content {
+  padding: 0 28px 20px;
+  background: var(--card);
+}
+
+.agreement-term {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.agreement-term:last-child { border-bottom: none; }
+
+.agreement-term-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.agreement-term-detail {
+  font-size: 13px;
+  color: var(--text-body);
+  line-height: 1.5;
+}
+
+.agreement-doc-link {
+  display: inline-block;
+  margin-top: 40px;
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--text-body);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: all 0.25s ease;
+}
+
+.agreement-doc-link:hover {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   SECTION 8: FOOTER
+   ======================================== */
 .footer {
-  padding: 60px 0 40px;
+  padding: 80px 0 60px;
   text-align: center;
   border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
 }
 
 .footer-line {
-  font-size: 12px;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  line-height: 1.6;
 }
 
 .footer-line:first-child {
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-body);
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  font-size: 12px;
+  margin-bottom: 16px;
 }
 
-/* ===== FADE IN ANIMATION ===== */
-.fade-in {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+.footer-line:last-child {
+  margin-top: 24px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.6;
 }
 
-.fade-in.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ===== ERROR STATE ===== */
-.error-banner {
-  background: rgba(239, 51, 64, 0.08);
-  border: 1px solid rgba(239, 51, 64, 0.2);
-  border-radius: 8px;
-  padding: 16px 24px;
-  margin: 24px auto;
-  max-width: 600px;
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  display: none;
-}
-
-.error-banner.show { display: block; }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .hero { padding: 80px 0 60px; }
-  .hero-company { font-size: 36px; letter-spacing: -1px; }
-  .hero-subtitle { font-size: 15px; margin-bottom: 40px; }
-  .hero-kpis {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1024px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
   }
-  .kpi-hero-card { padding: 20px 16px; }
-  .kpi-hero-value { font-size: 22px; }
 
-  .section { padding: 60px 0; }
-  .section-title { font-size: 24px; }
+  .equity-visual {
+    gap: 32px;
+  }
+
+  .equity-circle.large {
+    width: 150px;
+    height: 150px;
+    font-size: 34px;
+  }
+
+  .equity-circle.small {
+    width: 85px;
+    height: 85px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title-line1,
+  .hero-title-line2 {
+    font-size: 56px;
+    letter-spacing: -2px;
+  }
+
+  .hero-tagline { font-size: 16px; }
+
+  .hero-stats {
+    gap: 10px;
+  }
+
+  .stat-pill {
+    min-width: 140px;
+    padding: 12px 20px;
+  }
+
+  .stat-value { font-size: 17px; }
+
+  .section { padding: 100px 0; }
+  .timeline-section { padding: 100px 0; }
+  .financials-section { padding: 100px 0; }
+  .equity-section { padding: 100px 0; }
+  .agreement-section { padding: 100px 0; }
+
+  .section-headline { font-size: 36px; }
 
   .timeline::before {
     left: 20px;
@@ -669,35 +1169,110 @@ body {
     text-align: left !important;
   }
 
-  .timeline-item:nth-child(odd) .timeline-card,
-  .timeline-item:nth-child(even) .timeline-card {
+  .timeline-item:nth-child(odd) .timeline-card {
     float: none;
     max-width: 100%;
   }
 
+  .timeline-item:nth-child(even) .timeline-card {
+    max-width: 100%;
+  }
+
   .timeline-dot {
-    left: 13px !important;
+    left: 14px !important;
     right: auto !important;
   }
 
   .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
   }
 
-  .phase-filter { padding: 0 16px; }
+  .governance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .governance-term,
+  .governance-desc {
+    padding: 16px 24px;
+  }
+
+  .governance-term {
+    border-bottom: none;
+    padding-bottom: 4px;
+  }
+
+  .equity-visual {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .equity-circle.large {
+    width: 120px;
+    height: 120px;
+    font-size: 28px;
+  }
+
+  .equity-circle.small {
+    width: 70px;
+    height: 70px;
+    font-size: 18px;
+  }
+
+  .nav-links { gap: 20px; }
+  .nav-link { font-size: 12px; }
+  .nav-badge { display: none; }
+
+  .financial-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .revenue-bars { padding: 24px; }
 }
 
 @media (max-width: 480px) {
-  .hero-company { font-size: 28px; }
-  .hero-kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .kpi-hero-card { padding: 16px 12px; }
-  .kpi-hero-value { font-size: 20px; }
-  .kpi-grid { grid-template-columns: 1fr; }
+  .hero-title-line1,
+  .hero-title-line2 {
+    font-size: 40px;
+    letter-spacing: -1.5px;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-pill {
+    width: 100%;
+    max-width: 280px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .section-headline { font-size: 28px; }
+
   .container { padding: 0 16px; }
-  .timeline-card { padding: 18px; }
-  .timeline-title { font-size: 16px; }
-  .metric-value { font-size: 16px; }
+
+  .kpi-grid { grid-template-columns: 1fr; }
+
+  .financial-cards { grid-template-columns: 1fr; }
+
+  .fin-revenue { font-size: 26px; }
+
   .kpi-value { font-size: 24px; }
+
+  .equity-visual { flex-wrap: wrap; justify-content: center; }
+
+  .governance-grid { grid-template-columns: 1fr; }
+
+  .accordion-header {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+
+  .accordion-content { padding: 0 20px 16px; }
+
+  .timeline-card { padding: 20px; }
+  .timeline-title { font-size: 16px; }
 }
 </style>
 </head>
@@ -706,42 +1281,81 @@ body {
 <!-- Loading Overlay -->
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
-  <div class="loading-text">Loading Roadmap</div>
+  <div class="loading-text">Loading</div>
 </div>
 
-<!-- Hero Section -->
+<!-- Sticky Nav -->
+<nav class="sticky-nav" id="sticky-nav">
+  <div class="nav-inner">
+    <div class="nav-links">
+      <a class="nav-link" data-target="overview-section">Overview</a>
+      <a class="nav-link" data-target="timeline-section">Timeline</a>
+      <a class="nav-link" data-target="financials-section">Financials</a>
+      <a class="nav-link" data-target="agreement-section">Agreement</a>
+    </div>
+    <div class="nav-badge">Confidential</div>
+  </div>
+</nav>
+
+<!-- SECTION 1: HERO -->
 <section class="hero" id="hero">
-  <div class="container">
-    <div class="hero-confidential">Confidential</div>
-    <h1 class="hero-company">OpenYap Technologies</h1>
-    <p class="hero-subtitle">AI Construction Intelligence Platform — Expansion Roadmap</p>
-    <div class="hero-kpis" id="hero-kpis">
-      <!-- Populated by JS -->
+  <div class="hero-content">
+    <div class="hero-title-line1">OpenYap</div>
+    <div class="hero-title-line2">Technologies</div>
+    <div class="hero-tagline">AI-Powered Construction Intelligence Platform</div>
+    <div class="hero-stats" id="hero-stats">
+      <div class="stat-pill">
+        <span class="stat-value">$1.2M &rarr; $5M</span>
+        <span class="stat-label">Staged Funding</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-value">50 / 1 / 49</span>
+        <span class="stat-label">Equity Split</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-value">Year 1</span>
+        <span class="stat-label">ROI Target</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-value">$25M+</span>
+        <span class="stat-label">Year 2 Revenue</span>
+      </div>
     </div>
     <div class="error-banner" id="error-banner">
       Unable to load live data. Displaying cached version.
     </div>
   </div>
+  <div class="scroll-indicator">
+    <div class="scroll-arrow"></div>
+  </div>
 </section>
 
-<!-- Phase Filter -->
-<div class="phase-filter-wrapper">
-  <div class="phase-filter" id="phase-filter">
-    <button class="phase-pill active" data-phase="all">All</button>
-    <button class="phase-pill" data-phase="Origin">Origin</button>
-    <button class="phase-pill" data-phase="Year 1">Year 1</button>
-    <button class="phase-pill" data-phase="Year 2">Year 2</button>
-    <button class="phase-pill" data-phase="Year 3">Year 3</button>
-    <button class="phase-pill" data-phase="Year 5">Year 5</button>
-  </div>
-</div>
-
-<!-- Timeline -->
-<section class="timeline-section">
+<!-- SECTION 3: OVERVIEW -->
+<section class="section" id="overview-section">
   <div class="container">
-    <div class="section-header fade-in">
-      <div class="section-label">Roadmap</div>
-      <h2 class="section-title">Expansion Timeline</h2>
+    <div class="section-label reveal">THE OPPORTUNITY</div>
+    <h2 class="section-headline reveal">From one engineer<br>to industry platform.</h2>
+    <div class="overview-grid">
+      <div class="overview-narrative reveal">
+        <p>OpenYap started at a desk inside Clune Construction. One project engineer saw the gap between what AI could do and what the industry was willing to try. When the idea was taken and rebuilt without him, he spent 18 months learning to build it himself.</p>
+        <p>Now it runs on a live Webcor project -- processing plans, tracking RFIs, managing submittals, and generating takeoffs with a purpose-built AI agent. Not a demo. Not a prototype. A working system used by a real construction team.</p>
+        <p>The pitch is simple: partner with a builder who already has the technology running, scale it across the portfolio, and own the platform that becomes the industry standard.</p>
+      </div>
+      <div class="kpi-grid" id="kpi-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: TIMELINE -->
+<section class="timeline-section" id="timeline-section">
+  <div class="container">
+    <div class="section-label reveal">THE ROADMAP</div>
+    <h2 class="section-headline reveal">Every milestone, mapped.</h2>
+    <div class="phase-filters reveal" id="phase-filters">
+      <button class="phase-pill active" data-phase="all">All</button>
+      <!-- Populated by JS with phases from data -->
     </div>
     <div class="timeline" id="timeline">
       <!-- Populated by JS -->
@@ -749,38 +1363,70 @@ body {
   </div>
 </section>
 
-<!-- Financial Projections -->
-<section class="section" id="financials-section">
+<!-- SECTION 5: FINANCIALS -->
+<section class="financials-section" id="financials-section">
   <div class="container">
-    <div class="section-header fade-in">
-      <div class="section-label">Projections</div>
-      <h2 class="section-title">Financial Projections</h2>
+    <div class="section-label reveal">THE NUMBERS</div>
+    <h2 class="section-headline reveal">Built to return 166%+ in Year 2.</h2>
+    <div class="financial-cards" id="financial-cards">
+      <!-- Populated by JS -->
     </div>
-    <div class="financials-table-wrapper fade-in" id="financials-wrapper">
+    <div class="revenue-bars reveal" id="revenue-bars">
+      <div class="bar-chart-title">Revenue Growth Projection</div>
       <!-- Populated by JS -->
     </div>
   </div>
 </section>
 
-<!-- Key Metrics -->
-<section class="section" id="kpis-section">
+<!-- SECTION 6: EQUITY & GOVERNANCE -->
+<section class="equity-section" id="equity-section">
   <div class="container">
-    <div class="section-header fade-in">
-      <div class="section-label">Performance</div>
-      <h2 class="section-title">Key Metrics</h2>
+    <div class="section-label reveal">THE STRUCTURE</div>
+    <h2 class="section-headline reveal">Equal partnership.<br>Independent tiebreaker.</h2>
+    <div class="equity-visual reveal">
+      <div class="equity-circle-wrap">
+        <div class="equity-circle large">50%</div>
+        <div class="equity-label">Danzel Yap</div>
+        <div class="equity-sublabel">Founder / CTO</div>
+      </div>
+      <div class="equity-circle-wrap">
+        <div class="equity-circle small">1%</div>
+        <div class="equity-label">Tiebreaker</div>
+        <div class="equity-sublabel">Independent Board</div>
+      </div>
+      <div class="equity-circle-wrap">
+        <div class="equity-circle large">49%</div>
+        <div class="equity-label">Webcor</div>
+        <div class="equity-sublabel">Strategic Partner</div>
+      </div>
     </div>
-    <div class="kpi-grid" id="kpi-grid">
+    <div class="governance-grid reveal" id="governance-grid">
       <!-- Populated by JS -->
     </div>
   </div>
 </section>
 
-<!-- Footer -->
+<!-- SECTION 7: AGREEMENT -->
+<section class="agreement-section" id="agreement-section">
+  <div class="container">
+    <div class="section-label reveal">THE AGREEMENT</div>
+    <h2 class="section-headline reveal">Terms, structured for trust.</h2>
+    <div class="accordion reveal" id="agreement-accordion">
+      <!-- Populated by JS -->
+    </div>
+    <div class="reveal" style="text-align:center;margin-top:48px;">
+      <a class="agreement-doc-link" href="https://docs.google.com/spreadsheets/d/1Qitd17OuDbsglRTwPgiDiw1dhWo76fg9d6VpuSMX7RE" target="_blank" rel="noopener">View Full Source Document</a>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 8: FOOTER -->
 <footer class="footer">
   <div class="container">
-    <div class="footer-line">Confidential — OpenYap Technologies</div>
-    <div class="footer-line">Prepared by Danzel Yap | Q2 2026</div>
+    <div class="footer-line">Confidential &mdash; OpenYap Technologies</div>
+    <div class="footer-line">Prepared by Danzel Yap &ensp;|&ensp; Q2 2026</div>
     <div class="footer-line">Not for distribution outside Webcor leadership</div>
+    <div class="footer-line">This site updates live from the source data</div>
   </div>
 </footer>
 
@@ -788,305 +1434,585 @@ body {
 (function() {
   'use strict';
 
+  /* ===========================================
+     CONFIGURATION
+     =========================================== */
+
   const SHEET_ID = '1Qitd17OuDbsglRTwPgiDiw1dhWo76fg9d6VpuSMX7RE';
   const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
-  const PHASE_COLORS = {
-    'Origin':  '#34D399',
-    'Year 1':  '#EF3340',
-    'Year 2':  '#4A90D9',
-    'Year 3':  '#A78BFA',
-    'Year 5':  '#C9A84C'
-  };
-
-  // ---------- DATA FETCHING ----------
+  /* ===========================================
+     DATA FETCHING
+     =========================================== */
 
   function gvizUrl(sheetName) {
-    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(sheetName);
   }
 
   function parseGviz(text) {
-    // Strip the wrapper: google.visualization.Query.setResponse({...});
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start === -1 || end === -1) throw new Error('Invalid gviz response');
-    return JSON.parse(text.substring(start, end + 1));
+    var start = text.indexOf('{');
+    var end = text.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('Invalid gviz response — no JSON object found');
+    var json;
+    try {
+      json = JSON.parse(text.substring(start, end + 1));
+    } catch (e) {
+      throw new Error('Failed to parse gviz JSON: ' + e.message);
+    }
+    if (!json.table || !json.table.cols || !json.table.rows) {
+      throw new Error('Unexpected gviz structure — missing table/cols/rows');
+    }
+    return json;
   }
 
   function gvizToRows(data) {
-    const cols = data.table.cols;
-    const rows = data.table.rows;
-    // Determine headers: use label if available, otherwise first row values
-    let headers = cols.map(c => c.label).filter(Boolean);
-    let dataRows = rows;
+    var cols = data.table.cols;
+    var rows = data.table.rows;
 
-    if (headers.length === 0 || headers.every(h => h === '')) {
-      // Headers are in the first data row
+    // Determine headers: use label if available
+    var headers = cols.map(function(c) { return c.label; }).filter(Boolean);
+    var dataRows = rows;
+
+    if (headers.length === 0 || headers.every(function(h) { return h === ''; })) {
       if (rows.length > 0) {
-        headers = rows[0].c.map(cell => (cell && cell.v != null) ? String(cell.v) : '');
+        headers = rows[0].c.map(function(cell) {
+          return (cell && cell.v != null) ? String(cell.v) : '';
+        });
         dataRows = rows.slice(1);
       }
     }
 
-    return dataRows.map(row => {
-      const obj = {};
-      row.c.forEach((cell, i) => {
-        const key = headers[i] || `col${i}`;
-        obj[key] = (cell && cell.v != null) ? cell.v : (cell && cell.f != null ? cell.f : null);
+    return dataRows.map(function(row) {
+      var obj = {};
+      if (!row.c) return obj;
+      row.c.forEach(function(cell, i) {
+        var key = headers[i] || ('col' + i);
+        if (cell && cell.v != null) {
+          obj[key] = cell.v;
+        } else if (cell && cell.f != null) {
+          obj[key] = cell.f;
+        } else {
+          obj[key] = null;
+        }
       });
       return obj;
+    }).filter(function(row) {
+      // Filter out completely empty rows
+      return Object.values(row).some(function(v) { return v != null && v !== ''; });
     });
   }
 
-  async function fetchSheet(sheetName) {
-    const cacheKey = `openyap_${sheetName}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
+  function getCachedData(sheetName) {
+    var cacheKey = 'openyap_v2_' + sheetName;
+    try {
+      var cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        var parsed = JSON.parse(cached);
         if (Date.now() - parsed.ts < CACHE_TTL) {
           return parsed.data;
         }
-      } catch (e) { /* ignore bad cache */ }
-    }
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
 
-    const resp = await fetch(gvizUrl(sheetName));
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const text = await resp.text();
-    const data = parseGviz(text);
-    const rows = gvizToRows(data);
-
+  function setCachedData(sheetName, data) {
+    var cacheKey = 'openyap_v2_' + sheetName;
     try {
-      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: rows }));
-    } catch (e) { /* storage full, ignore */ }
+      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: data }));
+    } catch (e) { /* storage full */ }
+  }
 
+  function getAnyCachedData(sheetName) {
+    var cacheKey = 'openyap_v2_' + sheetName;
+    try {
+      var cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        return JSON.parse(cached).data;
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  async function fetchSheet(sheetName) {
+    // Try fresh cache first
+    var cached = getCachedData(sheetName);
+    if (cached) return cached;
+
+    var resp = await fetch(gvizUrl(sheetName));
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + sheetName);
+    var text = await resp.text();
+    var data = parseGviz(text);
+    var rows = gvizToRows(data);
+    setCachedData(sheetName, rows);
     return rows;
   }
 
-  // ---------- RENDER: HERO KPIs ----------
+  /* ===========================================
+     UTILITY
+     =========================================== */
 
-  function renderHeroKPIs(kpis) {
-    const container = document.getElementById('hero-kpis');
-    const first4 = kpis.slice(0, 4);
-    container.innerHTML = first4.map(k => `
-      <div class="kpi-hero-card">
-        <div class="kpi-hero-label">${esc(k.KPI)}</div>
-        <div class="kpi-hero-value">${esc(k.Value)}</div>
-      </div>
-    `).join('');
+  function esc(str) {
+    if (str == null) return '';
+    var s = String(str);
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
   }
 
-  // ---------- RENDER: TIMELINE ----------
-
-  function phaseClass(phase) {
-    if (!phase) return '';
-    return 'phase-' + phase.toLowerCase().replace(/\s+/g, '-');
+  function parseMoneyToNumber(str) {
+    if (str == null) return 0;
+    var s = String(str).replace(/[^0-9.\-]/g, '');
+    return parseFloat(s) || 0;
   }
 
-  function renderTimeline(items) {
-    const container = document.getElementById('timeline');
-    container.innerHTML = items.map((item, i) => {
-      const phase = item.Phase || '';
-      const status = (item.Status || '').toLowerCase();
-      const tags = item.Tags ? item.Tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-      const hasMetric = item['Metric Label'] && item['Metric Value'];
-
-      let statusBadgeHTML = '';
-      if (status === 'done') {
-        statusBadgeHTML = '<span class="status-badge done">Complete</span>';
-      } else if (status === 'current') {
-        statusBadgeHTML = '<span class="status-badge current">Current</span>';
-      } else {
-        statusBadgeHTML = '<span class="status-badge planned">Planned</span>';
-      }
-
-      const tagsHTML = tags.map(t => `<span class="tag-pill">${esc(t)}</span>`).join('');
-
-      const metricHTML = hasMetric ? `
-        <div class="metric-box">
-          <span class="metric-label">${esc(item['Metric Label'])}</span>
-          <span class="metric-value">${esc(item['Metric Value'])}</span>
-        </div>
-      ` : '';
-
-      return `
-        <div class="timeline-item ${phaseClass(phase)}" data-phase="${esc(phase)}">
-          <div class="timeline-dot ${status}"></div>
-          <div class="timeline-card">
-            <div class="timeline-date">${esc(item.Date || '')}</div>
-            <div class="timeline-title">${esc(item.Title || '')}</div>
-            <div class="timeline-desc">${esc(item.Description || '')}</div>
-            <div class="timeline-meta">
-              ${statusBadgeHTML}
-              ${tagsHTML}
-            </div>
-            ${metricHTML}
-          </div>
-        </div>
-      `;
-    }).join('');
+  function isFinancialKPI(name) {
+    if (!name) return false;
+    var lower = name.toLowerCase();
+    return lower.includes('$') || lower.includes('revenue') || lower.includes('funding') ||
+           lower.includes('cost') || lower.includes('return') || lower.includes('roi') ||
+           lower.includes('savings') || lower.includes('budget');
   }
 
-  // ---------- RENDER: FINANCIALS ----------
+  function isFinancialValue(val) {
+    if (!val) return false;
+    return String(val).includes('$') || String(val).includes('%');
+  }
 
-  function renderFinancials(rows) {
-    const wrapper = document.getElementById('financials-wrapper');
-    if (!rows || rows.length === 0) {
-      wrapper.innerHTML = '<p style="color:var(--text-dim);padding:24px;">No financial data available.</p>';
+  /* ===========================================
+     RENDER: KPI GRID (Overview section)
+     =========================================== */
+
+  function renderKPIGrid(kpis) {
+    var container = document.getElementById('kpi-grid');
+    if (!kpis || kpis.length === 0) {
+      container.innerHTML = '';
       return;
     }
 
-    const headers = ['Year', 'Revenue', 'Expenses', 'Net', 'Webcor Savings', 'Board 49% Return', 'Cumulative ROI'];
+    container.innerHTML = kpis.map(function(k, i) {
+      var name = k.KPI || k.Metric || k.Name || '';
+      var value = k.Value || k.Amount || '';
+      var desc = k.Description || k.Detail || k.Notes || '';
+      var isGold = isFinancialKPI(name) || isFinancialValue(value);
+      var colorClass = isGold ? 'gold' : 'white';
+      var delay = i * 80;
 
-    const theadHTML = headers.map(h => `<th>${esc(h)}</th>`).join('');
-
-    const tbodyHTML = rows.map(row => {
-      const year = row['Year'] || '';
-      const revenue = row['Revenue'] || '';
-      const expenses = row['Expenses'] || '';
-      const net = row['Net'] || '';
-      const savings = row['Webcor Savings'] || '';
-      const boardReturn = row['Board 49% Return'] || '';
-      const roi = row['Cumulative ROI'] || '';
-
-      const isNegative = String(net).includes('-');
-      const netClass = isNegative ? 'net-negative' : 'net-positive';
-
-      return `<tr>
-        <td class="year-cell">${esc(year)}</td>
-        <td class="revenue">${esc(revenue)}</td>
-        <td>${esc(expenses)}</td>
-        <td class="${netClass}">${esc(net)}</td>
-        <td>${esc(savings)}</td>
-        <td>${esc(boardReturn)}</td>
-        <td class="roi-cell">${esc(roi)}</td>
-      </tr>`;
+      return '<div class="kpi-card reveal" style="transition-delay:' + delay + 'ms">' +
+        '<div class="kpi-name">' + esc(name) + '</div>' +
+        '<div class="kpi-value ' + colorClass + '">' + esc(value) + '</div>' +
+        '<div class="kpi-desc">' + esc(desc) + '</div>' +
+      '</div>';
     }).join('');
 
-    wrapper.innerHTML = `
-      <table class="financials-table">
-        <thead><tr>${theadHTML}</tr></thead>
-        <tbody>${tbodyHTML}</tbody>
-      </table>
-    `;
+    // Re-observe new elements
+    observeElements();
   }
 
-  // ---------- RENDER: KPI GRID ----------
+  /* ===========================================
+     RENDER: TIMELINE
+     =========================================== */
 
-  function renderKPIGrid(kpis) {
-    const container = document.getElementById('kpi-grid');
-    container.innerHTML = kpis.map(k => `
-      <div class="kpi-card fade-in">
-        <div class="kpi-name">${esc(k.KPI)}</div>
-        <div class="kpi-value">${esc(k.Value)}</div>
-        <div class="kpi-desc">${esc(k.Description || '')}</div>
-      </div>
-    `).join('');
+  function renderPhaseFilters(items) {
+    var phases = [];
+    items.forEach(function(item) {
+      var phase = item.Phase || '';
+      if (phase && phases.indexOf(phase) === -1) {
+        phases.push(phase);
+      }
+    });
+
+    var container = document.getElementById('phase-filters');
+    var html = '<button class="phase-pill active" data-phase="all">All</button>';
+    phases.forEach(function(phase) {
+      html += '<button class="phase-pill" data-phase="' + esc(phase) + '">' + esc(phase) + '</button>';
+    });
+    container.innerHTML = html;
+    setupPhaseFilter();
   }
 
-  // ---------- PHASE FILTER ----------
+  function renderTimeline(items) {
+    var container = document.getElementById('timeline');
+    if (!items || items.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">No timeline data available.</p>';
+      return;
+    }
+
+    renderPhaseFilters(items);
+
+    container.innerHTML = items.map(function(item, i) {
+      var phase = item.Phase || '';
+      var status = (item.Status || '').toLowerCase().trim();
+      var tags = item.Tags ? item.Tags.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
+      var hasMetric = item['Metric Label'] && item['Metric Value'];
+      var delay = (i % 6) * 100; // stagger in groups
+
+      var dotClass = 'planned';
+      if (status === 'done' || status === 'complete' || status === 'completed') dotClass = 'done';
+      else if (status === 'current' || status === 'active' || status === 'in progress') dotClass = 'current';
+
+      var tagsHTML = tags.map(function(t) {
+        return '<span class="tag-pill">' + esc(t) + '</span>';
+      }).join('');
+
+      var metricHTML = '';
+      if (hasMetric) {
+        metricHTML = '<div class="metric-box">' +
+          '<span class="metric-label">' + esc(item['Metric Label']) + '</span>' +
+          '<span class="metric-value">' + esc(item['Metric Value']) + '</span>' +
+        '</div>';
+      }
+
+      return '<div class="timeline-item" data-phase="' + esc(phase) + '" style="transition-delay:' + delay + 'ms">' +
+        '<div class="timeline-dot ' + dotClass + '"></div>' +
+        '<div class="timeline-card">' +
+          '<div class="timeline-date">' + esc(item.Date || '') + '</div>' +
+          '<div class="timeline-title">' + esc(item.Title || '') + '</div>' +
+          '<div class="timeline-desc">' + esc(item.Description || '') + '</div>' +
+          '<div class="timeline-meta">' + tagsHTML + '</div>' +
+          metricHTML +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    observeElements();
+  }
+
+  /* ===========================================
+     RENDER: FINANCIALS
+     =========================================== */
+
+  function renderFinancials(rows) {
+    var cardsContainer = document.getElementById('financial-cards');
+    var barsContainer = document.getElementById('revenue-bars');
+
+    if (!rows || rows.length === 0) {
+      cardsContainer.innerHTML = '<p style="color:var(--text-muted);padding:24px;">No financial data available.</p>';
+      barsContainer.style.display = 'none';
+      return;
+    }
+
+    // Render cards
+    cardsContainer.innerHTML = rows.map(function(row, i) {
+      var year = row['Year'] || '';
+      var revenue = row['Revenue'] || '';
+      var expenses = row['Expenses'] || '';
+      var net = row['Net'] || '';
+      var boardReturn = row['Board 49% Return'] || row['Board Return'] || '';
+
+      var isNegative = String(net).includes('-') || String(net).includes('(');
+      var netClass = isNegative ? 'negative' : 'positive';
+      var delay = i * 100;
+
+      var detailRows = '';
+      if (expenses) {
+        detailRows += '<div class="fin-row"><span class="fin-row-label">Expenses</span><span class="fin-row-value">' + esc(expenses) + '</span></div>';
+      }
+      if (net) {
+        detailRows += '<div class="fin-row"><span class="fin-row-label">Net</span><span class="fin-row-value ' + netClass + '">' + esc(net) + '</span></div>';
+      }
+      if (boardReturn) {
+        detailRows += '<div class="fin-row"><span class="fin-row-label">Board Return</span><span class="fin-row-value">' + esc(boardReturn) + '</span></div>';
+      }
+
+      return '<div class="financial-card reveal" style="transition-delay:' + delay + 'ms">' +
+        '<div class="fin-year">' + esc(year) + '</div>' +
+        '<div class="fin-revenue">' + esc(revenue) + '</div>' +
+        '<div class="fin-revenue-label">Revenue</div>' +
+        detailRows +
+      '</div>';
+    }).join('');
+
+    // Render revenue bar chart
+    var revenues = rows.map(function(row) {
+      return {
+        year: row['Year'] || '',
+        amount: row['Revenue'] || '',
+        numeric: parseMoneyToNumber(row['Revenue'])
+      };
+    });
+
+    var maxRev = Math.max.apply(null, revenues.map(function(r) { return r.numeric; }));
+    if (maxRev <= 0) maxRev = 1;
+
+    var barsHTML = '<div class="bar-chart-title">Revenue Growth Projection</div>';
+    revenues.forEach(function(r) {
+      var pct = Math.max(2, (r.numeric / maxRev) * 100);
+      barsHTML += '<div class="bar-row">' +
+        '<span class="bar-label">' + esc(r.year) + '</span>' +
+        '<div class="bar-track">' +
+          '<div class="bar-fill" style="width:0%" data-width="' + pct + '%">' +
+            '<span class="bar-amount">' + esc(r.amount) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    barsContainer.innerHTML = barsHTML;
+    barsContainer.style.display = '';
+
+    // Animate bars after a small delay
+    setTimeout(function() {
+      var fills = barsContainer.querySelectorAll('.bar-fill');
+      fills.forEach(function(fill) {
+        fill.style.width = fill.getAttribute('data-width');
+      });
+    }, 300);
+
+    observeElements();
+  }
+
+  /* ===========================================
+     RENDER: AGREEMENT (Accordion)
+     =========================================== */
+
+  function renderAgreement(rows) {
+    var accordion = document.getElementById('agreement-accordion');
+    var govGrid = document.getElementById('governance-grid');
+
+    if (!rows || rows.length === 0) {
+      accordion.innerHTML = '<p style="color:var(--text-muted);padding:24px;">No agreement data available.</p>';
+      return;
+    }
+
+    // Group by Section
+    var groups = {};
+    var groupOrder = [];
+    rows.forEach(function(row) {
+      var section = row.Section || row.Category || row.Group || 'General';
+      if (!groups[section]) {
+        groups[section] = [];
+        groupOrder.push(section);
+      }
+      groups[section].push(row);
+    });
+
+    // Render accordion
+    accordion.innerHTML = groupOrder.map(function(section) {
+      var terms = groups[section];
+      var termsHTML = terms.map(function(term) {
+        var name = term.Term || term.Name || term.Item || '';
+        var detail = term.Detail || term.Description || term.Value || '';
+        return '<div class="agreement-term">' +
+          '<div class="agreement-term-name">' + esc(name) + '</div>' +
+          '<div class="agreement-term-detail">' + esc(detail) + '</div>' +
+        '</div>';
+      }).join('');
+
+      return '<div class="accordion-group">' +
+        '<button class="accordion-header">' +
+          '<span>' + esc(section) + '</span>' +
+          '<span class="accordion-chevron"></span>' +
+        '</button>' +
+        '<div class="accordion-body">' +
+          '<div class="accordion-content">' + termsHTML + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Setup accordion interactions
+    accordion.querySelectorAll('.accordion-header').forEach(function(header) {
+      header.addEventListener('click', function() {
+        var group = header.parentElement;
+        var wasOpen = group.classList.contains('open');
+
+        // Close all
+        accordion.querySelectorAll('.accordion-group').forEach(function(g) {
+          g.classList.remove('open');
+        });
+
+        // Toggle clicked
+        if (!wasOpen) {
+          group.classList.add('open');
+        }
+      });
+    });
+
+    // Populate governance grid (pick key terms from Structure/Governance sections)
+    var govTerms = [];
+    ['Structure', 'Governance', 'IP', 'Funding'].forEach(function(sec) {
+      if (groups[sec]) {
+        groups[sec].forEach(function(t) {
+          govTerms.push(t);
+        });
+      }
+    });
+
+    // Show first 8 governance terms
+    var displayTerms = govTerms.slice(0, 8);
+    if (displayTerms.length > 0) {
+      govGrid.innerHTML = displayTerms.map(function(term) {
+        var name = term.Term || term.Name || term.Item || '';
+        var detail = term.Detail || term.Description || term.Value || '';
+        return '<div class="governance-row">' +
+          '<div class="governance-term">' + esc(name) + '</div>' +
+          '<div class="governance-desc">' + esc(detail) + '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  /* ===========================================
+     PHASE FILTER
+     =========================================== */
 
   function setupPhaseFilter() {
-    const pills = document.querySelectorAll('.phase-pill');
-    pills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        pills.forEach(p => p.classList.remove('active'));
+    var pills = document.querySelectorAll('#phase-filters .phase-pill');
+    pills.forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        pills.forEach(function(p) { p.classList.remove('active'); });
         pill.classList.add('active');
-        const phase = pill.getAttribute('data-phase');
+        var phase = pill.getAttribute('data-phase');
         filterTimeline(phase);
       });
     });
   }
 
   function filterTimeline(phase) {
-    const items = document.querySelectorAll('.timeline-item');
-    items.forEach(item => {
+    var items = document.querySelectorAll('.timeline-item');
+    items.forEach(function(item) {
       if (phase === 'all' || item.getAttribute('data-phase') === phase) {
         item.classList.remove('hidden-by-filter');
       } else {
         item.classList.add('hidden-by-filter');
       }
     });
-    // Re-trigger visibility for newly shown items
     observeElements();
   }
 
-  // ---------- SCROLL ANIMATIONS ----------
+  /* ===========================================
+     STICKY NAV
+     =========================================== */
 
-  let observer;
+  function setupStickyNav() {
+    var nav = document.getElementById('sticky-nav');
+    var hero = document.getElementById('hero');
+    var navLinks = nav.querySelectorAll('.nav-link');
+    var sections = [];
+
+    navLinks.forEach(function(link) {
+      var targetId = link.getAttribute('data-target');
+      if (targetId) {
+        sections.push({ link: link, el: document.getElementById(targetId) });
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var target = document.getElementById(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+    });
+
+    // Show/hide nav based on scroll position
+    var lastScroll = 0;
+    function onScroll() {
+      var heroBottom = hero.getBoundingClientRect().bottom;
+      if (heroBottom < 0) {
+        nav.classList.add('visible');
+      } else {
+        nav.classList.remove('visible');
+      }
+
+      // Active section tracking
+      var scrollY = window.scrollY + 100;
+      var activeLink = null;
+      sections.forEach(function(s) {
+        if (s.el && s.el.offsetTop <= scrollY) {
+          activeLink = s.link;
+        }
+      });
+      navLinks.forEach(function(l) { l.classList.remove('active'); });
+      if (activeLink) activeLink.classList.add('active');
+
+      lastScroll = window.scrollY;
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* ===========================================
+     SCROLL ANIMATIONS
+     =========================================== */
+
+  var observer;
 
   function observeElements() {
     if (observer) observer.disconnect();
 
-    observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+    observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
         }
       });
     }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -40px 0px'
+      threshold: 0.08,
+      rootMargin: '0px 0px -60px 0px'
     });
 
-    document.querySelectorAll('.timeline-item:not(.hidden-by-filter), .fade-in').forEach(el => {
+    document.querySelectorAll('.reveal:not(.visible), .timeline-item:not(.hidden-by-filter):not(.visible)').forEach(function(el) {
       observer.observe(el);
     });
   }
 
-  // ---------- UTILITY ----------
-
-  function esc(str) {
-    if (str == null) return '';
-    const s = String(str);
-    const div = document.createElement('div');
-    div.textContent = s;
-    return div.innerHTML;
-  }
-
-  // ---------- INIT ----------
+  /* ===========================================
+     INIT
+     =========================================== */
 
   async function init() {
-    const overlay = document.getElementById('loading-overlay');
-    const errorBanner = document.getElementById('error-banner');
+    var overlay = document.getElementById('loading-overlay');
+    var errorBanner = document.getElementById('error-banner');
 
     try {
-      const [timeline, financials, kpis] = await Promise.all([
+      var results = await Promise.all([
         fetchSheet('Timeline'),
         fetchSheet('Financials'),
-        fetchSheet('KPIs')
+        fetchSheet('KPIs'),
+        fetchSheet('Agreement')
       ]);
 
-      renderHeroKPIs(kpis);
+      var timeline = results[0];
+      var financials = results[1];
+      var kpis = results[2];
+      var agreement = results[3];
+
+      renderKPIGrid(kpis);
       renderTimeline(timeline);
       renderFinancials(financials);
-      renderKPIGrid(kpis);
+      renderAgreement(agreement);
     } catch (err) {
       console.error('Failed to fetch sheet data:', err);
-      errorBanner.classList.add('show');
 
-      // Try cached data as fallback
+      // Try stale cache as fallback
       try {
-        const cachedTimeline = localStorage.getItem('openyap_Timeline');
-        const cachedFinancials = localStorage.getItem('openyap_Financials');
-        const cachedKPIs = localStorage.getItem('openyap_KPIs');
+        var cachedTimeline = getAnyCachedData('Timeline');
+        var cachedFinancials = getAnyCachedData('Financials');
+        var cachedKPIs = getAnyCachedData('KPIs');
+        var cachedAgreement = getAnyCachedData('Agreement');
 
-        if (cachedTimeline && cachedFinancials && cachedKPIs) {
-          renderHeroKPIs(JSON.parse(cachedKPIs).data);
-          renderTimeline(JSON.parse(cachedTimeline).data);
-          renderFinancials(JSON.parse(cachedFinancials).data);
-          renderKPIGrid(JSON.parse(cachedKPIs).data);
+        var hadAnyData = false;
+        if (cachedKPIs) { renderKPIGrid(cachedKPIs); hadAnyData = true; }
+        if (cachedTimeline) { renderTimeline(cachedTimeline); hadAnyData = true; }
+        if (cachedFinancials) { renderFinancials(cachedFinancials); hadAnyData = true; }
+        if (cachedAgreement) { renderAgreement(cachedAgreement); hadAnyData = true; }
+
+        if (hadAnyData) {
+          errorBanner.classList.add('show');
         }
       } catch (cacheErr) {
         console.error('Cache fallback also failed:', cacheErr);
+        errorBanner.textContent = 'Unable to load data. Please check your connection and refresh.';
+        errorBanner.classList.add('show');
       }
     }
 
-    setupPhaseFilter();
+    setupStickyNav();
     observeElements();
 
-    // Dismiss loading
-    requestAnimationFrame(() => {
+    // Dismiss loading overlay
+    requestAnimationFrame(function() {
       overlay.classList.add('hidden');
     });
   }
