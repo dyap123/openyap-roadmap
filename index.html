@@ -505,7 +505,7 @@ body::after {
 .rev-bar-value {
   font-size: 13px;
   font-weight: 700;
-  color: #FF7F7F;
+  color: #34D399;
 }
 .rev-bar-label {
   font-size: 10px;
@@ -531,8 +531,8 @@ body::after {
   font-weight: 700;
   margin-bottom: 4px;
 }
-.key-stat-value.gold { color: #FF7F7F; }
-.key-stat-value.red { color: #FF7F7F; }
+.key-stat-value.gold { color: #34D399; }
+.key-stat-value.red { color: #34D399; }
 .key-stat-label {
   font-size: 11px;
   color: var(--text-muted);
@@ -577,7 +577,7 @@ body::after {
   line-height: 1.2;
 }
 
-.kpi-value.gold { color: var(--gold); }
+.kpi-value.gold { color: #34D399; }
 .kpi-value.white { color: var(--text); }
 
 .kpi-desc {
@@ -651,9 +651,8 @@ body::after {
   position: relative;
   width: 50%;
   padding: 0 40px 56px;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 1;
+  transform: translateY(0);
   will-change: transform, opacity;
 }
 
@@ -782,10 +781,10 @@ body::after {
 .metric-box {
   margin-top: 14px;
   padding: 12px 16px;
-  background: rgba(255,127,127,0.06);
+  background: rgba(52,211,153,0.06);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,127,127,0.15);
+  border: 1px solid rgba(52,211,153,0.15);
   border-radius: 12px;
   display: flex;
   justify-content: space-between;
@@ -801,7 +800,7 @@ body::after {
 .metric-value {
   font-size: 18px;
   font-weight: 700;
-  color: #FF7F7F;
+  color: #34D399;
   letter-spacing: -0.3px;
 }
 
@@ -851,7 +850,7 @@ body::after {
 .fin-revenue {
   font-size: 32px;
   font-weight: 700;
-  color: var(--gold);
+  color: #34D399;
   letter-spacing: -1px;
   margin-bottom: 4px;
   line-height: 1.2;
@@ -933,7 +932,7 @@ body::after {
 
 .bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.6));
+  background: linear-gradient(90deg, #34D399, rgba(52,211,153,0.6));
   border-radius: 6px;
   transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
@@ -1482,7 +1481,7 @@ body::after {
             <svg class="donut-svg" viewBox="0 0 180 180">
               <circle class="donut-ring" cx="90" cy="90" r="70" stroke="rgba(255,255,255,0.04)"/>
               <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#3B82F6" stroke-dasharray="0 440" id="donut-founder"/>
-              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#FFFFFF" stroke-dasharray="0 440" id="donut-board"/>
+              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#8B95A5" stroke-dasharray="0 440" id="donut-board"/>
               <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#34D399" stroke-dasharray="0 440" id="donut-karo"/>
             </svg>
             <div class="donut-center">
@@ -1493,7 +1492,7 @@ body::after {
           <div class="equity-legend">
             <div class="equity-legend-item"><div class="equity-dot" style="background:#3B82F6"></div>Founder 50%</div>
             <div class="equity-legend-item"><div class="equity-dot" style="background:#34D399"></div>Karo 1%</div>
-            <div class="equity-legend-item"><div class="equity-dot" style="background:#FFFFFF"></div>Board 49%</div>
+            <div class="equity-legend-item"><div class="equity-dot" style="background:#8B95A5"></div>Board 49%</div>
           </div>
         </div>
 
@@ -1502,9 +1501,9 @@ body::after {
           <div class="revenue-chart-title">Revenue Projection</div>
           <div class="rev-bars" id="rev-bars">
             <div class="rev-bar-col"><div class="rev-bar-value">$0</div><div class="rev-bar" style="height:2px;background:rgba(255,255,255,0.1)" id="revbar-0"></div><div class="rev-bar-label">Y1<br>Build</div></div>
-            <div class="rev-bar-col"><div class="rev-bar-value">$25M</div><div class="rev-bar" style="height:2px;background:var(--gold)" id="revbar-1"></div><div class="rev-bar-label">Y2<br>Deploy</div></div>
-            <div class="rev-bar-col"><div class="rev-bar-value">$35M</div><div class="rev-bar" style="height:2px;background:var(--gold)" id="revbar-2"></div><div class="rev-bar-label">Y3<br>Scale</div></div>
-            <div class="rev-bar-col"><div class="rev-bar-value">$60M+</div><div class="rev-bar" style="height:2px;background:var(--gold)" id="revbar-3"></div><div class="rev-bar-label">Y5<br>Exit</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$25M</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-1"></div><div class="rev-bar-label">Y2<br>Deploy</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$35M</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-2"></div><div class="rev-bar-label">Y3<br>Scale</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$60M+</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-3"></div><div class="rev-bar-label">Y5<br>Exit</div></div>
           </div>
         </div>
 
@@ -1958,8 +1957,8 @@ body::after {
     accordion.innerHTML = groupOrder.map(function(section) {
       var terms = groups[section];
       var termsHTML = terms.map(function(term) {
-        var name = term.Term || term.Name || term.Item || '';
-        var detail = term.Detail || term.Description || term.Value || '';
+        var name = term.Title || term.Term || term.Name || term.Item || '';
+        var detail = term.Content || term.Detail || term.Description || term.Value || '';
         return '<div class="agreement-term">' +
           '<div class="agreement-term-name">' + esc(name) + '</div>' +
           '<div class="agreement-term-detail">' + esc(detail) + '</div>' +
