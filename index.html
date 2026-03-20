@@ -171,7 +171,7 @@ body::after {
   text-align: center;
   position: relative;
   overflow: hidden;
-  padding: 80px 24px;
+  padding: 60px 24px;
 }
 
 /* Red gradient orb */
@@ -215,7 +215,7 @@ body::after {
   font-weight: 400;
   color: var(--text-secondary);
   letter-spacing: 0;
-  margin-bottom: 48px;
+  margin-bottom: 36px;
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
@@ -365,7 +365,7 @@ body::after {
    SECTION 3: OVERVIEW
    ======================================== */
 .section {
-  padding: 140px 0;
+  padding: 100px 0;
   position: relative;
   z-index: 1;
 }
@@ -392,8 +392,8 @@ body::after {
 .overview-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  margin-top: 64px;
+  gap: 48px;
+  margin-top: 40px;
   align-items: start;
 }
 
@@ -590,7 +590,7 @@ body::after {
    SECTION 4: TIMELINE
    ======================================== */
 .timeline-section {
-  padding: 140px 0;
+  padding: 100px 0;
   position: relative;
   z-index: 1;
 }
@@ -599,8 +599,8 @@ body::after {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 48px;
-  margin-bottom: 64px;
+  margin-top: 32px;
+  margin-bottom: 40px;
 }
 
 .phase-pill {
@@ -808,7 +808,7 @@ body::after {
    SECTION 5: FINANCIALS
    ======================================== */
 .financials-section {
-  padding: 140px 0;
+  padding: 100px 0;
   position: relative;
   z-index: 1;
 }
@@ -817,7 +817,7 @@ body::after {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-  margin-top: 64px;
+  margin-top: 40px;
 }
 
 .financial-card {
@@ -889,8 +889,8 @@ body::after {
 
 /* Revenue bar chart */
 .revenue-bars {
-  margin-top: 64px;
-  padding: 40px;
+  margin-top: 40px;
+  padding: 32px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -953,7 +953,7 @@ body::after {
    SECTION 6: EQUITY & GOVERNANCE
    ======================================== */
 .equity-section {
-  padding: 140px 0;
+  padding: 100px 0;
   position: relative;
   z-index: 1;
 }
@@ -963,8 +963,8 @@ body::after {
   justify-content: center;
   align-items: flex-end;
   gap: 48px;
-  margin-top: 64px;
-  margin-bottom: 80px;
+  margin-top: 40px;
+  margin-bottom: 48px;
 }
 
 .equity-circle-wrap {
@@ -1068,13 +1068,13 @@ body::after {
    SECTION 7: AGREEMENT
    ======================================== */
 .agreement-section {
-  padding: 140px 0;
+  padding: 100px 0;
   position: relative;
   z-index: 1;
 }
 
 .accordion {
-  margin-top: 64px;
+  margin-top: 40px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
@@ -1207,7 +1207,7 @@ body::after {
    SECTION 8: FOOTER
    ======================================== */
 .footer {
-  padding: 80px 0 60px;
+  padding: 56px 0 40px;
   text-align: center;
   border-top: 1px solid var(--border);
   position: relative;
@@ -1284,11 +1284,11 @@ body::after {
 
   .stat-value { font-size: 17px; }
 
-  .section { padding: 100px 0; }
-  .timeline-section { padding: 100px 0; }
-  .financials-section { padding: 100px 0; }
-  .equity-section { padding: 100px 0; }
-  .agreement-section { padding: 100px 0; }
+  .section { padding: 72px 0; }
+  .timeline-section { padding: 72px 0; }
+  .financials-section { padding: 72px 0; }
+  .equity-section { padding: 72px 0; }
+  .agreement-section { padding: 72px 0; }
 
   .section-headline { font-size: 36px; }
 
@@ -2171,52 +2171,55 @@ body::after {
      INIT
      =========================================== */
 
+  async function fetchSheetSafe(sheetName) {
+    try {
+      return await fetchSheet(sheetName);
+    } catch (err) {
+      console.warn('Failed to fetch ' + sheetName + ':', err);
+      // Fall back to any cached version (even stale)
+      var cached = getAnyCachedData(sheetName);
+      if (cached) return { data: cached, stale: true };
+      return null;
+    }
+  }
+
   async function init() {
     var overlay = document.getElementById('loading-overlay');
     var errorBanner = document.getElementById('error-banner');
 
-    try {
-      var results = await Promise.all([
-        fetchSheet('Timeline'),
-        fetchSheet('Financials'),
-        fetchSheet('KPIs'),
-        fetchSheet('Agreement')
-      ]);
+    var results = await Promise.all([
+      fetchSheetSafe('Timeline'),
+      fetchSheetSafe('Financials'),
+      fetchSheetSafe('KPIs'),
+      fetchSheetSafe('Agreement')
+    ]);
 
-      var timeline = results[0];
-      var financials = results[1];
-      var kpis = results[2];
-      var agreement = results[3];
+    // Unwrap results — each is either raw array, {data, stale}, or null
+    var hadStale = false;
+    var hadAnyData = false;
+    function unwrap(result) {
+      if (!result) return null;
+      if (Array.isArray(result)) { hadAnyData = true; return result; }
+      if (result.stale) { hadStale = true; hadAnyData = true; return result.data; }
+      return null;
+    }
 
-      if (kpis) renderKPIGrid(kpis);
-      if (timeline) renderTimeline(timeline);
-      if (financials) renderFinancials(financials);
-      if (agreement) renderAgreement(agreement);
-      animateCharts();
-    } catch (err) {
-      console.error('Failed to fetch sheet data:', err);
+    var timeline = unwrap(results[0]);
+    var financials = unwrap(results[1]);
+    var kpis = unwrap(results[2]);
+    var agreement = unwrap(results[3]);
 
-      // Try stale cache as fallback
-      try {
-        var cachedTimeline = getAnyCachedData('Timeline');
-        var cachedFinancials = getAnyCachedData('Financials');
-        var cachedKPIs = getAnyCachedData('KPIs');
-        var cachedAgreement = getAnyCachedData('Agreement');
+    if (kpis) renderKPIGrid(kpis);
+    if (timeline) renderTimeline(timeline);
+    if (financials) renderFinancials(financials);
+    if (agreement) renderAgreement(agreement);
+    animateCharts();
 
-        var hadAnyData = false;
-        if (cachedKPIs) { renderKPIGrid(cachedKPIs); hadAnyData = true; }
-        if (cachedTimeline) { renderTimeline(cachedTimeline); hadAnyData = true; }
-        if (cachedFinancials) { renderFinancials(cachedFinancials); hadAnyData = true; }
-        if (cachedAgreement) { renderAgreement(cachedAgreement); hadAnyData = true; }
-
-        if (hadAnyData) {
-          errorBanner.classList.add('show');
-        }
-      } catch (cacheErr) {
-        console.error('Cache fallback also failed:', cacheErr);
-        errorBanner.textContent = 'Unable to load data. Please check your connection and refresh.';
-        errorBanner.classList.add('show');
-      }
+    if (!hadAnyData) {
+      errorBanner.textContent = 'Unable to load data. Please check your connection and refresh.';
+      errorBanner.classList.add('show');
+    } else if (hadStale) {
+      errorBanner.classList.add('show');
     }
 
     setupStickyNav();
