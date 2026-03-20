@@ -1931,7 +1931,6 @@ body::after {
 
   function renderAgreement(rows) {
     var accordion = document.getElementById('agreement-accordion');
-    var govGrid = document.getElementById('governance-grid');
 
     if (!rows || rows.length === 0) {
       accordion.innerHTML = '<p style="color:var(--text-muted);padding:24px;">No agreement data available.</p>';
@@ -1991,28 +1990,6 @@ body::after {
       });
     });
 
-    // Populate governance grid (pick key terms from Structure/Governance sections)
-    var govTerms = [];
-    ['Structure', 'Governance', 'IP', 'Funding'].forEach(function(sec) {
-      if (groups[sec]) {
-        groups[sec].forEach(function(t) {
-          govTerms.push(t);
-        });
-      }
-    });
-
-    // Show first 8 governance terms
-    var displayTerms = govTerms.slice(0, 8);
-    if (displayTerms.length > 0) {
-      govGrid.innerHTML = displayTerms.map(function(term) {
-        var name = term.Term || term.Name || term.Item || '';
-        var detail = term.Detail || term.Description || term.Value || '';
-        return '<div class="governance-row">' +
-          '<div class="governance-term">' + esc(name) + '</div>' +
-          '<div class="governance-desc">' + esc(detail) + '</div>' +
-        '</div>';
-      }).join('');
-    }
   }
 
   /* ===========================================
