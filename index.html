@@ -2186,11 +2186,15 @@ body::after {
     var kpis = unwrap(results[2]);
     var agreement = unwrap(results[3]);
 
-    if (kpis) renderKPIGrid(kpis);
-    if (timeline) renderTimeline(timeline);
-    if (financials) renderFinancials(financials);
-    if (agreement) renderAgreement(agreement);
-    animateCharts();
+    try {
+      if (kpis) renderKPIGrid(kpis);
+      if (timeline) renderTimeline(timeline);
+      if (financials) renderFinancials(financials);
+      if (agreement) renderAgreement(agreement);
+      animateCharts();
+    } catch (renderErr) {
+      console.error('Render error:', renderErr);
+    }
 
     if (!hadAnyData) {
       errorBanner.textContent = 'Unable to load data. Please check your connection and refresh.';
@@ -2202,10 +2206,8 @@ body::after {
     setupStickyNav();
     observeElements();
 
-    // Dismiss loading overlay
-    requestAnimationFrame(function() {
-      overlay.classList.add('hidden');
-    });
+    // Always dismiss loading overlay
+    overlay.classList.add('hidden');
   }
 
   if (document.readyState === 'loading') {
