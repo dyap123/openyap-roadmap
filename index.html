@@ -21,7 +21,7 @@
   --gold: #FFFFFF;
   --green: #34D399;
   --text: #FFFFFF;
-  --text-body: #999999;
+  --text-body: #b0b0b0;
   --text-muted: #555555;
   --border: rgba(255,255,255,0.06);
   --radius: 18px;
@@ -205,7 +205,7 @@ body::after {
   z-index: 1;
   max-width: 900px;
   text-align: center;
-  text-shadow: 0 4px 40px rgba(0,0,0,0.5);
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8), 0 0 80px rgba(0,0,0,0.5);
 }
 
 .hero-title {
@@ -401,7 +401,7 @@ body::after {
   letter-spacing: -1.5px;
   line-height: 1.15;
   margin-bottom: 16px;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.6);
+  text-shadow: 0 2px 30px rgba(0,0,0,0.8), 0 0 60px rgba(0,0,0,0.4);
 }
 
 .overview-grid {
@@ -417,7 +417,7 @@ body::after {
   line-height: 1.8;
   color: var(--text-body);
   margin-bottom: 24px;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.5);
 }
 
 .overview-narrative p:last-child {
@@ -433,7 +433,7 @@ body::after {
 
 /* Equity donut chart */
 .equity-chart {
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(59,130,246,0.08);
@@ -486,7 +486,7 @@ body::after {
 
 /* Revenue growth mini chart */
 .revenue-chart {
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(59,130,246,0.08);
@@ -540,7 +540,7 @@ body::after {
   gap: 12px;
 }
 .key-stat {
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(59,130,246,0.08);
@@ -569,7 +569,7 @@ body::after {
 }
 
 .kpi-card {
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(59,130,246,0.08);
@@ -736,7 +736,7 @@ body::after {
 
 /* Timeline card */
 .timeline-card {
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(59,130,246,0.08);
@@ -847,7 +847,7 @@ body::after {
 }
 
 .financial-card {
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(59,130,246,0.08);
@@ -917,7 +917,7 @@ body::after {
 .revenue-bars {
   margin-top: 40px;
   padding: 32px;
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(59,130,246,0.08);
@@ -1010,7 +1010,7 @@ body::after {
   font-weight: 700;
   letter-spacing: -1px;
   border: 1px solid rgba(59,130,246,0.08);
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
@@ -1057,7 +1057,7 @@ body::after {
   border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   overflow: hidden;
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -1111,7 +1111,7 @@ body::after {
   border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   overflow: hidden;
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -1126,7 +1126,7 @@ body::after {
 
 .accordion-header {
   width: 100%;
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
   border: none;
   padding: 20px 28px;
   display: flex;
@@ -1195,7 +1195,7 @@ body::after {
 
 .accordion-content {
   padding: 0 28px 20px;
-  background: rgba(8,8,16,0.65);
+  background: rgba(6,6,14,0.82);
 }
 
 .agreement-term {
@@ -1442,6 +1442,79 @@ body::after {
 
   .timeline-card { padding: 20px; }
   .timeline-title { font-size: 16px; }
+}
+
+/* ===== DYNAMIC EFFECTS ===== */
+
+/* Aurora gradient behind hero */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 50%, rgba(59,130,246,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 300px at 80% 30%, rgba(52,211,153,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 600px at 60% 80%, rgba(139,92,246,0.03) 0%, transparent 70%);
+  animation: aurora 15s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+@keyframes aurora {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(-3%, 2%) scale(1.1) rotate(1deg); }
+  100% { transform: translate(2%, -1%) scale(0.95) rotate(-1deg); }
+}
+
+/* Card glow on hover */
+.kpi-card:hover,
+.financial-card:hover,
+.timeline-card:hover,
+.key-stat:hover {
+  border-color: rgba(59,130,246,0.2) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 30px rgba(59,130,246,0.06) !important;
+}
+
+/* Stat pill sweep shimmer */
+.stat-pill {
+  position: relative;
+  overflow: hidden;
+}
+.stat-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.06) 50%, transparent 100%);
+  animation: stat-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes stat-sweep {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+/* Section top glow divider */
+.section::before,
+.timeline-section::before,
+.financials-section::before,
+.equity-section::before,
+.agreement-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,0.2), transparent);
+  pointer-events: none;
+}
+
+/* 3D tilt transition */
+.kpi-card, .financial-card, .timeline-card, .stat-pill, .key-stat, .equity-circle {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
 }
 </style>
 </head>
@@ -2269,11 +2342,11 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.015);
+scene.fog = new THREE.FogExp2(0x000000, 0.01);
 
 const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(24, 14, 28);
-camera.lookAt(-2, 8, 0);
+camera.position.set(30, 16, 34);
+camera.lookAt(0, 8, 0);
 
 // Lights — slightly warmer ambient
 const ambient = new THREE.AmbientLight(0x3d4466, 0.7);
@@ -2305,11 +2378,12 @@ const edgeMat = new THREE.MeshStandardMaterial({
   color: 0x3b82f6, metalness: 0.5, roughness: 0.3, emissive: 0x3b82f6, emissiveIntensity: 0.15,
 });
 const craneMat = new THREE.MeshStandardMaterial({
-  color: 0xf59e0b, metalness: 0.6, roughness: 0.3,
+  color: 0x4a5568, metalness: 0.8, roughness: 0.25,
 });
 const particleMat = new THREE.PointsMaterial({
-  color: 0x3b82f6, size: 0.08, transparent: true, opacity: 0.6,
+  color: 0x5ba8f6, size: 0.15, transparent: true, opacity: 0.8,
   blending: THREE.AdditiveBlending, depthWrite: false,
+  sizeAttenuation: true,
 });
 const stackMat = new THREE.MeshStandardMaterial({
   color: 0x222222, metalness: 0.4, roughness: 0.7,
@@ -2371,11 +2445,11 @@ function createBuilding(totalFloors, floorH, floorW, floorD, posX, posZ) {
 }
 
 // ---- Lattice crane helpers ----
-const crnLn = new THREE.LineBasicMaterial({ color: 0xf59e0b });
-const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending });
-const crnCb = new THREE.LineBasicMaterial({ color: 0x888888 });
-const crnSolid = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.7, roughness: 0.3, emissive: 0xf59e0b, emissiveIntensity: 0.03 });
-const crnDark = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.4 });
+const crnLn = new THREE.LineBasicMaterial({ color: 0x556677 });
+const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending });
+const crnCb = new THREE.LineBasicMaterial({ color: 0x667788 });
+const crnSolid = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.8, roughness: 0.25, emissive: 0x1a2030, emissiveIntensity: 0.02 });
+const crnDark = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.85, roughness: 0.3 });
 const crnWarnMat = new THREE.MeshBasicMaterial({ color: 0xff2222 });
 const crnLedMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5 });
 const crnGlass = new THREE.MeshPhysicalMaterial({ color: 0x0a1a2e, metalness: 0.1, roughness: 0.05, transmission: 0.7, transparent: true, opacity: 0.8 });
@@ -2504,6 +2578,14 @@ const THIRD_FLOORS = 8;
 const THIRD_H = 0.7;
 const thirdBldg = createBuilding(THIRD_FLOORS, THIRD_H, 2.5, 2, -14, 3);
 
+// Fourth Building (behind main, right): 18 floors
+const FOURTH_FLOORS = 18;
+const fourthBldg = createBuilding(FOURTH_FLOORS, 0.7, 3.5, 3, 9, -6);
+
+// Fifth Structure (far right): 10 floors, small
+const FIFTH_FLOORS = 10;
+const fifthBldg = createBuilding(FIFTH_FLOORS, 0.7, 2, 2, 14, 2);
+
 // ======== CRANES ========
 
 // Crane 1: on main tower
@@ -2517,14 +2599,14 @@ const crane2 = createCrane(crane2Group, 20, MAIN_H);
 
 // ======== GROUND ========
 
-const groundGeo = new THREE.PlaneGeometry(80, 80);
+const groundGeo = new THREE.PlaneGeometry(120, 120);
 const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, metalness: 0.5, roughness: 0.8 });
 const ground = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.01;
 scene.add(ground);
 
-const gridHelper = new THREE.GridHelper(60, 60, 0x111827, 0x111827);
+const gridHelper = new THREE.GridHelper(80, 80, 0x111827, 0x111827);
 gridHelper.position.y = 0;
 scene.add(gridHelper);
 
@@ -2534,6 +2616,11 @@ const stackPositions = [
   { x: -5, z: 6, sx: 0.8, sy: 0.4, sz: 1.0 },
   { x: -12, z: -2, sx: 1.0, sy: 0.6, sz: 0.7 },
   { x: 5, z: -4, sx: 0.9, sy: 0.5, sz: 1.1 },
+  { x: 12, z: 6, sx: 1.4, sy: 0.3, sz: 0.9 },
+  { x: -18, z: 1, sx: 0.7, sy: 0.5, sz: 1.3 },
+  { x: 15, z: -3, sx: 0.6, sy: 0.4, sz: 0.6 },
+  { x: -3, z: -5, sx: 1.1, sy: 0.35, sz: 0.8 },
+  { x: 10, z: -8, sx: 0.8, sy: 0.6, sz: 1.0 },
 ];
 stackPositions.forEach(s => {
   const geo = new THREE.BoxGeometry(s.sx, s.sy, s.sz);
@@ -2543,17 +2630,17 @@ stackPositions.forEach(s => {
 });
 
 // ======== PARTICLES ========
-const PARTICLE_COUNT = 400;
+const PARTICLE_COUNT = 600;
 const particleGeo = new THREE.BufferGeometry();
 const particlePos = new Float32Array(PARTICLE_COUNT * 3);
 const particleVel = new Float32Array(PARTICLE_COUNT * 3);
 for (let i = 0; i < PARTICLE_COUNT; i++) {
-  particlePos[i*3] = (Math.random() - 0.5) * 24;
-  particlePos[i*3+1] = Math.random() * 8;
-  particlePos[i*3+2] = (Math.random() - 0.5) * 14;
-  particleVel[i*3] = (Math.random() - 0.5) * 0.02;
-  particleVel[i*3+1] = Math.random() * 0.03 + 0.01;
-  particleVel[i*3+2] = (Math.random() - 0.5) * 0.02;
+  particlePos[i*3] = (Math.random() - 0.5) * 40;
+  particlePos[i*3+1] = Math.random() * 12;
+  particlePos[i*3+2] = (Math.random() - 0.5) * 24;
+  particleVel[i*3] = (Math.random() - 0.5) * 0.025;
+  particleVel[i*3+1] = Math.random() * 0.04 + 0.015;
+  particleVel[i*3+2] = (Math.random() - 0.5) * 0.025;
 }
 particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
 const particles = new THREE.Points(particleGeo, particleMat);
@@ -2561,9 +2648,7 @@ scene.add(particles);
 
 // ======== SCROLL STATE ========
 let scrollProgress = 0;
-let mainActive = 0;
-let secActive = 0;
-let thirdActive = 0;
+let mainActive = 0, secActive = 0, thirdActive = 0, fourthActive = 0, fifthActive = 0;
 const docHeight = () => document.documentElement.scrollHeight - window.innerHeight;
 
 window.addEventListener('scroll', () => {
@@ -2571,6 +2656,8 @@ window.addEventListener('scroll', () => {
   mainActive = Math.floor(scrollProgress * MAIN_FLOORS);
   secActive = Math.floor(Math.min(1, scrollProgress * 1.3) * SEC_FLOORS);
   thirdActive = Math.floor(Math.min(1, scrollProgress * 1.6) * THIRD_FLOORS);
+  fourthActive = Math.floor(Math.min(1, scrollProgress * 1.15) * FOURTH_FLOORS);
+  fifthActive = Math.floor(Math.min(1, scrollProgress * 1.45) * FIFTH_FLOORS);
 }, { passive: true });
 
 // Show canvas after load
@@ -2631,10 +2718,12 @@ function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
 
-  // Build all three structures
+  // Build all structures
   animateBuilding(mainBldg, mainActive);
   animateBuilding(secBldg, secActive);
   animateBuilding(thirdBldg, thirdActive);
+  animateBuilding(fourthBldg, fourthActive);
+  animateBuilding(fifthBldg, fifthActive);
 
   // Cranes
   animateCrane(crane1, mainActive, MAIN_H, t, 0.3);
@@ -2647,19 +2736,20 @@ function animate() {
     pos[i*3] += particleVel[i*3];
     pos[i*3+1] += particleVel[i*3+1];
     pos[i*3+2] += particleVel[i*3+2];
-    if (pos[i*3+1] > topY + 8 || Math.abs(pos[i*3]) > 18) {
-      pos[i*3] = (Math.random() - 0.5) * 22;
-      pos[i*3+1] = topY - 3 + Math.random() * 6;
-      pos[i*3+2] = (Math.random() - 0.5) * 12;
+    if (pos[i*3+1] > topY + 12 || Math.abs(pos[i*3]) > 25) {
+      pos[i*3] = (Math.random() - 0.5) * 36;
+      pos[i*3+1] = topY - 4 + Math.random() * 8;
+      pos[i*3+2] = (Math.random() - 0.5) * 20;
     }
   }
   particleGeo.attributes.position.needsUpdate = true;
-  particleMat.opacity = 0.3 + 0.3 * Math.sin(t * 2);
+  particleMat.opacity = 0.5 + 0.3 * Math.sin(t * 2);
 
   // Gentle camera sway — wider orbit, looking at center of site
-  camera.position.x = 24 + Math.sin(t * 0.15) * 2;
-  camera.position.y = 14 + scrollProgress * 8 + Math.sin(t * 0.2) * 0.5;
-  camera.lookAt(-2, 4 + scrollProgress * 10, 0);
+  camera.position.x = 30 + Math.sin(t * 0.12) * 3;
+  camera.position.z = 34 + Math.cos(t * 0.1) * 2;
+  camera.position.y = 16 + scrollProgress * 10 + Math.sin(t * 0.18) * 0.5;
+  camera.lookAt(0, 4 + scrollProgress * 12, 0);
 
   // Fade building opacity based on scroll
   const buildingOpacity = scrollProgress > 0.85 ? 1 - (scrollProgress - 0.85) / 0.15 : 1;
@@ -2668,6 +2758,32 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+</script>
+
+<script>
+// 3D Card Tilt on hover
+(function() {
+  var S = '.kpi-card,.financial-card,.timeline-card,.stat-pill,.key-stat,.equity-circle';
+  document.addEventListener('mousemove', function(e) {
+    var c = e.target.closest ? e.target.closest(S) : null;
+    if (!c || !c._tilt) return;
+    var r = c.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width - 0.5;
+    var y = (e.clientY - r.top) / r.height - 0.5;
+    c.style.transform = 'translateY(-4px) perspective(600px) rotateX(' + (-y*6) + 'deg) rotateY(' + (x*6) + 'deg)';
+  });
+  document.addEventListener('mouseover', function(e) {
+    var c = e.target.closest ? e.target.closest(S) : null;
+    if (c) c._tilt = true;
+  });
+  document.addEventListener('mouseout', function(e) {
+    var c = e.target.closest ? e.target.closest(S) : null;
+    if (c && (!e.relatedTarget || !c.contains(e.relatedTarget))) {
+      c._tilt = false;
+      c.style.transform = '';
+    }
+  });
+})();
 </script>
 </body>
 </html>
