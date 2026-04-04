@@ -174,6 +174,19 @@ body::after {
   padding: 60px 24px;
 }
 
+#building-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+#building-canvas.visible { opacity: 1; }
+
 /* Red gradient orb */
 .hero::before {
   content: '';
@@ -1411,6 +1424,8 @@ body::after {
 </head>
 <body>
 
+<canvas id="building-canvas"></canvas>
+
 <!-- Loading Overlay -->
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
@@ -2216,6 +2231,248 @@ body::after {
     init();
   }
 })();
+</script>
+
+<!-- Three.js 3D Building -->
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('building-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(18, 12, 22);
+camera.lookAt(0, 8, 0);
+
+// Lights
+const ambient = new THREE.AmbientLight(0x334466, 0.6);
+scene.add(ambient);
+const dir = new THREE.DirectionalLight(0xaaccff, 1.8);
+dir.position.set(10, 20, 15);
+scene.add(dir);
+const rim = new THREE.DirectionalLight(0x3b82f6, 0.6);
+rim.position.set(-10, 5, -10);
+scene.add(rim);
+const point = new THREE.PointLight(0x3b82f6, 2, 40);
+point.position.set(0, 25, 5);
+scene.add(point);
+
+// Materials
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color: 0x1a2a44, metalness: 0.1, roughness: 0.05,
+  transmission: 0.6, thickness: 0.5, ior: 1.5,
+  transparent: true, opacity: 0.85,
+  envMapIntensity: 0.5,
+});
+const frameMat = new THREE.MeshStandardMaterial({
+  color: 0x1c2e54, metalness: 0.8, roughness: 0.2,
+});
+const edgeMat = new THREE.MeshStandardMaterial({
+  color: 0x3b82f6, metalness: 0.5, roughness: 0.3, emissive: 0x3b82f6, emissiveIntensity: 0.15,
+});
+const craneMat = new THREE.MeshStandardMaterial({
+  color: 0xf59e0b, metalness: 0.6, roughness: 0.3,
+});
+const particleMat = new THREE.PointsMaterial({
+  color: 0x3b82f6, size: 0.08, transparent: true, opacity: 0.6,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+});
+
+// Building config
+const TOTAL_FLOORS = 24;
+const FLOOR_H = 0.7;
+const FLOOR_W = 4;
+const FLOOR_D = 3;
+const building = new THREE.Group();
+scene.add(building);
+
+// Ground plane
+const groundGeo = new THREE.PlaneGeometry(60, 60);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, metalness: 0.5, roughness: 0.8 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.01;
+scene.add(ground);
+
+// Grid lines on ground
+const gridHelper = new THREE.GridHelper(40, 40, 0x111827, 0x111827);
+gridHelper.position.y = 0;
+scene.add(gridHelper);
+
+// Create floors
+const floors = [];
+for (let i = 0; i < TOTAL_FLOORS; i++) {
+  const group = new THREE.Group();
+  const y = i * FLOOR_H;
+
+  // Glass panel
+  const glassGeo = new THREE.BoxGeometry(FLOOR_W, FLOOR_H - 0.06, FLOOR_D);
+  const glass = new THREE.Mesh(glassGeo, glassMat.clone());
+  glass.position.y = y + FLOOR_H / 2;
+  group.add(glass);
+
+  // Floor slab (thin edge)
+  const slabGeo = new THREE.BoxGeometry(FLOOR_W + 0.1, 0.06, FLOOR_D + 0.1);
+  const slab = new THREE.Mesh(slabGeo, edgeMat);
+  slab.position.y = y;
+  group.add(slab);
+
+  // Frame columns at corners
+  const colGeo = new THREE.BoxGeometry(0.08, FLOOR_H, 0.08);
+  for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
+    for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
+      const col = new THREE.Mesh(colGeo, frameMat);
+      col.position.set(cx, y + FLOOR_H / 2, cz);
+      group.add(col);
+    }
+  }
+
+  // Window dividers
+  const divGeo = new THREE.BoxGeometry(0.03, FLOOR_H - 0.06, 0.03);
+  for (let d = -1; d <= 1; d++) {
+    const divZ = new THREE.Mesh(divGeo, frameMat);
+    divZ.position.set(d * (FLOOR_W / 3), y + FLOOR_H / 2, FLOOR_D / 2 + 0.01);
+    group.add(divZ);
+    const divZ2 = divZ.clone();
+    divZ2.position.z = -FLOOR_D / 2 - 0.01;
+    group.add(divZ2);
+  }
+
+  group.scale.set(1, 0, 1);
+  group.visible = false;
+  building.add(group);
+  floors.push({ group, targetScale: 0, currentScale: 0, built: false });
+}
+
+// Crane
+const crane = new THREE.Group();
+const mast = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4, 0.15), craneMat);
+mast.position.y = TOTAL_FLOORS * FLOOR_H + 2;
+crane.add(mast);
+const boom = new THREE.Mesh(new THREE.BoxGeometry(8, 0.12, 0.12), craneMat);
+boom.position.set(2, TOTAL_FLOORS * FLOOR_H + 4, 0);
+crane.add(boom);
+const counter = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.12, 0.12), craneMat);
+counter.position.set(-2, TOTAL_FLOORS * FLOOR_H + 4, 0);
+crane.add(counter);
+const cableGeo = new THREE.BufferGeometry().setFromPoints([
+  new THREE.Vector3(4, TOTAL_FLOORS * FLOOR_H + 3.94, 0),
+  new THREE.Vector3(4, TOTAL_FLOORS * FLOOR_H + 1, 0),
+]);
+const cable = new THREE.Line(cableGeo, new THREE.LineBasicMaterial({ color: 0x888888 }));
+crane.add(cable);
+crane.visible = false;
+building.add(crane);
+
+// Particles
+const PARTICLE_COUNT = 200;
+const particleGeo = new THREE.BufferGeometry();
+const particlePos = new Float32Array(PARTICLE_COUNT * 3);
+const particleVel = new Float32Array(PARTICLE_COUNT * 3);
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particlePos[i*3] = (Math.random() - 0.5) * 8;
+  particlePos[i*3+1] = Math.random() * 5;
+  particlePos[i*3+2] = (Math.random() - 0.5) * 6;
+  particleVel[i*3] = (Math.random() - 0.5) * 0.02;
+  particleVel[i*3+1] = Math.random() * 0.03 + 0.01;
+  particleVel[i*3+2] = (Math.random() - 0.5) * 0.02;
+}
+particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+const particles = new THREE.Points(particleGeo, particleMat);
+scene.add(particles);
+
+// Scroll state
+let scrollProgress = 0;
+let activeFloors = 0;
+const docHeight = () => document.documentElement.scrollHeight - window.innerHeight;
+
+window.addEventListener('scroll', () => {
+  scrollProgress = Math.min(1, window.scrollY / docHeight());
+  activeFloors = Math.floor(scrollProgress * TOTAL_FLOORS);
+}, { passive: true });
+
+// Show canvas after load
+setTimeout(() => canvas.classList.add('visible'), 500);
+
+// Resize
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+// Animate
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Build floors based on scroll
+  for (let i = 0; i < floors.length; i++) {
+    const f = floors[i];
+    f.targetScale = i <= activeFloors ? 1 : 0;
+    f.currentScale += (f.targetScale - f.currentScale) * 0.08;
+
+    if (f.currentScale > 0.01) {
+      f.group.visible = true;
+      f.group.scale.y = f.currentScale;
+      // Glow effect on newest floor
+      if (i === activeFloors && f.currentScale < 0.95) {
+        f.group.children[0].material.emissive = new THREE.Color(0x3b82f6);
+        f.group.children[0].material.emissiveIntensity = 0.3 * (1 - f.currentScale);
+      } else {
+        f.group.children[0].material.emissiveIntensity = 0;
+      }
+    } else {
+      f.group.visible = false;
+    }
+  }
+
+  // Crane — appears after a few floors, tracks the top
+  if (activeFloors > 2) {
+    crane.visible = true;
+    const craneTarget = activeFloors * FLOOR_H;
+    mast.position.y += (craneTarget + 2 - mast.position.y) * 0.05;
+    boom.position.y += (craneTarget + 4 - boom.position.y) * 0.05;
+    counter.position.y += (craneTarget + 4 - counter.position.y) * 0.05;
+    crane.rotation.y = t * 0.3;
+  }
+
+  // Particles — float up around construction zone
+  const pos = particleGeo.attributes.position.array;
+  const topY = activeFloors * FLOOR_H;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    pos[i*3] += particleVel[i*3];
+    pos[i*3+1] += particleVel[i*3+1];
+    pos[i*3+2] += particleVel[i*3+2];
+    // Reset particles that go too high or too far
+    if (pos[i*3+1] > topY + 6 || Math.abs(pos[i*3]) > 6) {
+      pos[i*3] = (Math.random() - 0.5) * 6;
+      pos[i*3+1] = topY - 2 + Math.random() * 4;
+      pos[i*3+2] = (Math.random() - 0.5) * 5;
+    }
+  }
+  particleGeo.attributes.position.needsUpdate = true;
+  particleMat.opacity = 0.3 + 0.3 * Math.sin(t * 2);
+
+  // Gentle camera sway
+  camera.position.x = 18 + Math.sin(t * 0.15) * 1.5;
+  camera.position.y = 12 + scrollProgress * 8 + Math.sin(t * 0.2) * 0.5;
+  camera.lookAt(0, 4 + scrollProgress * 10, 0);
+
+  // Fade building opacity based on scroll — dimmer at very bottom
+  const buildingOpacity = scrollProgress > 0.85 ? 1 - (scrollProgress - 0.85) / 0.15 : 1;
+  canvas.style.opacity = buildingOpacity;
+
+  renderer.render(scene, camera);
+}
+animate();
 </script>
 </body>
 </html>
