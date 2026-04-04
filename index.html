@@ -205,6 +205,7 @@ body::after {
   z-index: 1;
   max-width: 900px;
   text-align: center;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.5);
 }
 
 .hero-title {
@@ -244,7 +245,7 @@ body::after {
 }
 
 .stat-pill {
-  background: rgba(255,255,255,0.04);
+  background: rgba(8,8,16,0.5);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
@@ -400,6 +401,7 @@ body::after {
   letter-spacing: -1.5px;
   line-height: 1.15;
   margin-bottom: 16px;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.6);
 }
 
 .overview-grid {
@@ -415,6 +417,7 @@ body::after {
   line-height: 1.8;
   color: var(--text-body);
   margin-bottom: 24px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
 }
 
 .overview-narrative p:last-child {
@@ -430,8 +433,10 @@ body::after {
 
 /* Equity donut chart */
 .equity-chart {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   padding: 32px;
   text-align: center;
@@ -481,8 +486,10 @@ body::after {
 
 /* Revenue growth mini chart */
 .revenue-chart {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   padding: 32px;
 }
@@ -533,8 +540,10 @@ body::after {
   gap: 12px;
 }
 .key-stat {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   padding: 20px;
   text-align: center;
@@ -560,8 +569,10 @@ body::after {
 }
 
 .kpi-card {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   padding: 28px 24px;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
@@ -725,8 +736,10 @@ body::after {
 
 /* Timeline card */
 .timeline-card {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   padding: 28px;
   display: inline-block;
@@ -834,12 +847,12 @@ body::after {
 }
 
 .financial-card {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   padding: 32px 28px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
   will-change: transform;
 }
@@ -904,8 +917,10 @@ body::after {
 .revenue-bars {
   margin-top: 40px;
   padding: 32px;
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
 }
 
@@ -994,8 +1009,10 @@ body::after {
   justify-content: center;
   font-weight: 700;
   letter-spacing: -1px;
-  border: 1px solid var(--border);
-  background: var(--card);
+  border: 1px solid rgba(59,130,246,0.08);
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 
@@ -1037,9 +1054,12 @@ body::after {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   overflow: hidden;
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .governance-row {
@@ -1064,12 +1084,12 @@ body::after {
 
 .governance-row:nth-child(odd) .governance-term,
 .governance-row:nth-child(odd) .governance-desc {
-  background: var(--card);
+  background: rgba(8,8,16,0.4);
 }
 
 .governance-row:nth-child(even) .governance-term,
 .governance-row:nth-child(even) .governance-desc {
-  background: rgba(17,17,17,0.5);
+  background: rgba(8,8,16,0.2);
 }
 
 .governance-row:last-child .governance-term,
@@ -1088,9 +1108,12 @@ body::after {
 
 .accordion {
   margin-top: 40px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(59,130,246,0.08);
   border-radius: var(--radius);
   overflow: hidden;
+  background: rgba(8,8,16,0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .accordion-group {
@@ -1103,7 +1126,7 @@ body::after {
 
 .accordion-header {
   width: 100%;
-  background: var(--card);
+  background: rgba(8,8,16,0.65);
   border: none;
   padding: 20px 28px;
   display: flex;
@@ -1172,7 +1195,7 @@ body::after {
 
 .accordion-content {
   padding: 0 28px 20px;
-  background: var(--card);
+  background: rgba(8,8,16,0.65);
 }
 
 .agreement-term {
@@ -1452,8 +1475,8 @@ body::after {
     <div class="hero-tagline">Machine learning infrastructure for construction.<br>Built in-house. Running in production. Ready to scale.</div>
     <div class="hero-stats" id="hero-stats">
       <div class="stat-pill">
-        <span class="stat-value">$5M</span>
-        <span class="stat-label">Investment</span>
+        <span class="stat-value">$1.2M</span>
+        <span class="stat-label">Seed Ask</span>
       </div>
       <div class="stat-pill">
         <span class="stat-value">50/1/49</span>
@@ -1464,7 +1487,7 @@ body::after {
         <span class="stat-label">Year 2</span>
       </div>
       <div class="stat-pill">
-        <span class="stat-value">196%</span>
+        <span class="stat-value">1,000%+</span>
         <span class="stat-label">Board ROI</span>
       </div>
     </div>
@@ -1518,14 +1541,14 @@ body::after {
             <div class="rev-bar-col"><div class="rev-bar-value">$0</div><div class="rev-bar" style="height:2px;background:rgba(255,255,255,0.1)" id="revbar-0"></div><div class="rev-bar-label">Y1<br>Build</div></div>
             <div class="rev-bar-col"><div class="rev-bar-value">$25M</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-1"></div><div class="rev-bar-label">Y2<br>Deploy</div></div>
             <div class="rev-bar-col"><div class="rev-bar-value">$35M</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-2"></div><div class="rev-bar-label">Y3<br>Scale</div></div>
-            <div class="rev-bar-col"><div class="rev-bar-value">$60M+</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-3"></div><div class="rev-bar-label">Y5<br>Exit</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$432M+</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-3"></div><div class="rev-bar-label">Y5<br>Scale</div></div>
           </div>
         </div>
 
         <!-- Key stats -->
         <div class="key-stats">
-          <div class="key-stat reveal"><div class="key-stat-value gold">196%</div><div class="key-stat-label">Board ROI Year 2</div></div>
-          <div class="key-stat reveal"><div class="key-stat-value red">$9.8M</div><div class="key-stat-label">Board Return Year 2</div></div>
+          <div class="key-stat reveal"><div class="key-stat-value gold">1,000%+</div><div class="key-stat-label">Board ROI Year 2</div></div>
+          <div class="key-stat reveal"><div class="key-stat-value red">$12.25M</div><div class="key-stat-label">Board Return Year 2</div></div>
         </div>
       </div>
     </div>
@@ -1551,7 +1574,7 @@ body::after {
 <section class="financials-section" id="financials-section">
   <div class="container">
     <div class="section-label reveal">THE NUMBERS</div>
-    <h2 class="section-headline reveal">Built to return 166%+ in Year 2.</h2>
+    <h2 class="section-headline reveal">Built to return 1,000%+ in Year 2.</h2>
     <div class="financial-cards" id="financial-cards">
       <!-- Populated by JS -->
     </div>
@@ -2246,12 +2269,14 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(18, 12, 22);
-camera.lookAt(0, 8, 0);
+scene.fog = new THREE.FogExp2(0x000000, 0.015);
 
-// Lights
-const ambient = new THREE.AmbientLight(0x334466, 0.6);
+const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(24, 14, 28);
+camera.lookAt(-2, 8, 0);
+
+// Lights — slightly warmer ambient
+const ambient = new THREE.AmbientLight(0x3d4466, 0.7);
 scene.add(ambient);
 const dir = new THREE.DirectionalLight(0xaaccff, 1.8);
 dir.position.set(10, 20, 15);
@@ -2259,9 +2284,12 @@ scene.add(dir);
 const rim = new THREE.DirectionalLight(0x3b82f6, 0.6);
 rim.position.set(-10, 5, -10);
 scene.add(rim);
-const point = new THREE.PointLight(0x3b82f6, 2, 40);
+const point = new THREE.PointLight(0x3b82f6, 2, 50);
 point.position.set(0, 25, 5);
 scene.add(point);
+const point2 = new THREE.PointLight(0x3b82f6, 1.2, 35);
+point2.position.set(-10, 15, 3);
+scene.add(point2);
 
 // Materials
 const glassMat = new THREE.MeshPhysicalMaterial({
@@ -2283,102 +2311,153 @@ const particleMat = new THREE.PointsMaterial({
   color: 0x3b82f6, size: 0.08, transparent: true, opacity: 0.6,
   blending: THREE.AdditiveBlending, depthWrite: false,
 });
+const stackMat = new THREE.MeshStandardMaterial({
+  color: 0x222222, metalness: 0.4, roughness: 0.7,
+});
 
-// Building config
-const TOTAL_FLOORS = 24;
-const FLOOR_H = 0.7;
-const FLOOR_W = 4;
-const FLOOR_D = 3;
-const building = new THREE.Group();
-scene.add(building);
+// ---- Helper: create a building group with floors ----
+function createBuilding(totalFloors, floorH, floorW, floorD, posX, posZ) {
+  const bldg = new THREE.Group();
+  bldg.position.set(posX, 0, posZ);
+  const floorData = [];
 
-// Ground plane
-const groundGeo = new THREE.PlaneGeometry(60, 60);
+  for (let i = 0; i < totalFloors; i++) {
+    const group = new THREE.Group();
+    const y = i * floorH;
+
+    // Glass panel
+    const glassGeo = new THREE.BoxGeometry(floorW, floorH - 0.06, floorD);
+    const glass = new THREE.Mesh(glassGeo, glassMat.clone());
+    glass.position.y = y + floorH / 2;
+    group.add(glass);
+
+    // Floor slab (thin edge)
+    const slabGeo = new THREE.BoxGeometry(floorW + 0.1, 0.06, floorD + 0.1);
+    const slab = new THREE.Mesh(slabGeo, edgeMat);
+    slab.position.y = y;
+    group.add(slab);
+
+    // Frame columns at corners
+    const colGeo = new THREE.BoxGeometry(0.08, floorH, 0.08);
+    for (const cx of [-floorW/2, floorW/2]) {
+      for (const cz of [-floorD/2, floorD/2]) {
+        const col = new THREE.Mesh(colGeo, frameMat);
+        col.position.set(cx, y + floorH / 2, cz);
+        group.add(col);
+      }
+    }
+
+    // Window dividers
+    const divGeo = new THREE.BoxGeometry(0.03, floorH - 0.06, 0.03);
+    const divCount = Math.max(1, Math.round(floorW / 1.5));
+    for (let d = 1; d < divCount; d++) {
+      const xPos = -floorW/2 + d * (floorW / divCount);
+      const divZ = new THREE.Mesh(divGeo, frameMat);
+      divZ.position.set(xPos, y + floorH / 2, floorD / 2 + 0.01);
+      group.add(divZ);
+      const divZ2 = divZ.clone();
+      divZ2.position.z = -floorD / 2 - 0.01;
+      group.add(divZ2);
+    }
+
+    group.scale.set(1, 0, 1);
+    group.visible = false;
+    bldg.add(group);
+    floorData.push({ group, targetScale: 0, currentScale: 0 });
+  }
+
+  scene.add(bldg);
+  return { group: bldg, floors: floorData, totalFloors, floorH };
+}
+
+// ---- Helper: create a crane ----
+function createCrane(parentGroup, totalFloors, floorH) {
+  const crane = new THREE.Group();
+  const baseY = totalFloors * floorH;
+  const mast = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4, 0.15), craneMat);
+  mast.position.y = baseY + 2;
+  crane.add(mast);
+  const boom = new THREE.Mesh(new THREE.BoxGeometry(8, 0.12, 0.12), craneMat);
+  boom.position.set(2, baseY + 4, 0);
+  crane.add(boom);
+  const counter = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.12, 0.12), craneMat);
+  counter.position.set(-2, baseY + 4, 0);
+  crane.add(counter);
+  const cableGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(4, baseY + 3.94, 0),
+    new THREE.Vector3(4, baseY + 1, 0),
+  ]);
+  const cable = new THREE.Line(cableGeo, new THREE.LineBasicMaterial({ color: 0x888888 }));
+  crane.add(cable);
+  crane.visible = false;
+  parentGroup.add(crane);
+  return { crane, mast, boom, counter };
+}
+
+// ======== BUILDINGS ========
+
+// Main Tower (center-right): 30 floors, 5 wide, 3.5 deep
+const MAIN_FLOORS = 30;
+const MAIN_H = 0.7;
+const mainBldg = createBuilding(MAIN_FLOORS, MAIN_H, 5, 3.5, 2, 0);
+
+// Secondary Building (left): 15 floors, 3 wide, 2.5 deep
+const SEC_FLOORS = 15;
+const SEC_H = 0.7;
+const secBldg = createBuilding(SEC_FLOORS, SEC_H, 3, 2.5, -8, 0);
+
+// Third Structure (far left): 8 floors, 2.5 wide, 2 deep
+const THIRD_FLOORS = 8;
+const THIRD_H = 0.7;
+const thirdBldg = createBuilding(THIRD_FLOORS, THIRD_H, 2.5, 2, -14, 3);
+
+// ======== CRANES ========
+
+// Crane 1: on main tower
+const crane1 = createCrane(mainBldg.group, MAIN_FLOORS, MAIN_H);
+
+// Crane 2: between buildings (standalone in scene)
+const crane2Group = new THREE.Group();
+crane2Group.position.set(-4, 0, 1);
+scene.add(crane2Group);
+const crane2 = createCrane(crane2Group, 20, MAIN_H);
+
+// ======== GROUND ========
+
+const groundGeo = new THREE.PlaneGeometry(80, 80);
 const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, metalness: 0.5, roughness: 0.8 });
 const ground = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.01;
 scene.add(ground);
 
-// Grid lines on ground
-const gridHelper = new THREE.GridHelper(40, 40, 0x111827, 0x111827);
+const gridHelper = new THREE.GridHelper(60, 60, 0x111827, 0x111827);
 gridHelper.position.y = 0;
 scene.add(gridHelper);
 
-// Create floors
-const floors = [];
-for (let i = 0; i < TOTAL_FLOORS; i++) {
-  const group = new THREE.Group();
-  const y = i * FLOOR_H;
+// ======== MATERIAL STACKS (ground objects) ========
+const stackPositions = [
+  { x: 7, z: 5, sx: 1.2, sy: 0.5, sz: 0.8 },
+  { x: -5, z: 6, sx: 0.8, sy: 0.4, sz: 1.0 },
+  { x: -12, z: -2, sx: 1.0, sy: 0.6, sz: 0.7 },
+  { x: 5, z: -4, sx: 0.9, sy: 0.5, sz: 1.1 },
+];
+stackPositions.forEach(s => {
+  const geo = new THREE.BoxGeometry(s.sx, s.sy, s.sz);
+  const mesh = new THREE.Mesh(geo, stackMat);
+  mesh.position.set(s.x, s.sy / 2, s.z);
+  scene.add(mesh);
+});
 
-  // Glass panel
-  const glassGeo = new THREE.BoxGeometry(FLOOR_W, FLOOR_H - 0.06, FLOOR_D);
-  const glass = new THREE.Mesh(glassGeo, glassMat.clone());
-  glass.position.y = y + FLOOR_H / 2;
-  group.add(glass);
-
-  // Floor slab (thin edge)
-  const slabGeo = new THREE.BoxGeometry(FLOOR_W + 0.1, 0.06, FLOOR_D + 0.1);
-  const slab = new THREE.Mesh(slabGeo, edgeMat);
-  slab.position.y = y;
-  group.add(slab);
-
-  // Frame columns at corners
-  const colGeo = new THREE.BoxGeometry(0.08, FLOOR_H, 0.08);
-  for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
-    for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
-      const col = new THREE.Mesh(colGeo, frameMat);
-      col.position.set(cx, y + FLOOR_H / 2, cz);
-      group.add(col);
-    }
-  }
-
-  // Window dividers
-  const divGeo = new THREE.BoxGeometry(0.03, FLOOR_H - 0.06, 0.03);
-  for (let d = -1; d <= 1; d++) {
-    const divZ = new THREE.Mesh(divGeo, frameMat);
-    divZ.position.set(d * (FLOOR_W / 3), y + FLOOR_H / 2, FLOOR_D / 2 + 0.01);
-    group.add(divZ);
-    const divZ2 = divZ.clone();
-    divZ2.position.z = -FLOOR_D / 2 - 0.01;
-    group.add(divZ2);
-  }
-
-  group.scale.set(1, 0, 1);
-  group.visible = false;
-  building.add(group);
-  floors.push({ group, targetScale: 0, currentScale: 0, built: false });
-}
-
-// Crane
-const crane = new THREE.Group();
-const mast = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4, 0.15), craneMat);
-mast.position.y = TOTAL_FLOORS * FLOOR_H + 2;
-crane.add(mast);
-const boom = new THREE.Mesh(new THREE.BoxGeometry(8, 0.12, 0.12), craneMat);
-boom.position.set(2, TOTAL_FLOORS * FLOOR_H + 4, 0);
-crane.add(boom);
-const counter = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.12, 0.12), craneMat);
-counter.position.set(-2, TOTAL_FLOORS * FLOOR_H + 4, 0);
-crane.add(counter);
-const cableGeo = new THREE.BufferGeometry().setFromPoints([
-  new THREE.Vector3(4, TOTAL_FLOORS * FLOOR_H + 3.94, 0),
-  new THREE.Vector3(4, TOTAL_FLOORS * FLOOR_H + 1, 0),
-]);
-const cable = new THREE.Line(cableGeo, new THREE.LineBasicMaterial({ color: 0x888888 }));
-crane.add(cable);
-crane.visible = false;
-building.add(crane);
-
-// Particles
-const PARTICLE_COUNT = 200;
+// ======== PARTICLES ========
+const PARTICLE_COUNT = 400;
 const particleGeo = new THREE.BufferGeometry();
 const particlePos = new Float32Array(PARTICLE_COUNT * 3);
 const particleVel = new Float32Array(PARTICLE_COUNT * 3);
 for (let i = 0; i < PARTICLE_COUNT; i++) {
-  particlePos[i*3] = (Math.random() - 0.5) * 8;
-  particlePos[i*3+1] = Math.random() * 5;
-  particlePos[i*3+2] = (Math.random() - 0.5) * 6;
+  particlePos[i*3] = (Math.random() - 0.5) * 24;
+  particlePos[i*3+1] = Math.random() * 8;
+  particlePos[i*3+2] = (Math.random() - 0.5) * 14;
   particleVel[i*3] = (Math.random() - 0.5) * 0.02;
   particleVel[i*3+1] = Math.random() * 0.03 + 0.01;
   particleVel[i*3+2] = (Math.random() - 0.5) * 0.02;
@@ -2387,14 +2466,18 @@ particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
 const particles = new THREE.Points(particleGeo, particleMat);
 scene.add(particles);
 
-// Scroll state
+// ======== SCROLL STATE ========
 let scrollProgress = 0;
-let activeFloors = 0;
+let mainActive = 0;
+let secActive = 0;
+let thirdActive = 0;
 const docHeight = () => document.documentElement.scrollHeight - window.innerHeight;
 
 window.addEventListener('scroll', () => {
   scrollProgress = Math.min(1, window.scrollY / docHeight());
-  activeFloors = Math.floor(scrollProgress * TOTAL_FLOORS);
+  mainActive = Math.floor(scrollProgress * MAIN_FLOORS);
+  secActive = Math.floor(Math.min(1, scrollProgress * 1.3) * SEC_FLOORS);
+  thirdActive = Math.floor(Math.min(1, scrollProgress * 1.6) * THIRD_FLOORS);
 }, { passive: true });
 
 // Show canvas after load
@@ -2407,23 +2490,17 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
 });
 
-// Animate
-const clock = new THREE.Clock();
-function animate() {
-  requestAnimationFrame(animate);
-  const t = clock.getElapsedTime();
-
-  // Build floors based on scroll
-  for (let i = 0; i < floors.length; i++) {
-    const f = floors[i];
-    f.targetScale = i <= activeFloors ? 1 : 0;
+// ======== ANIMATE ========
+function animateBuilding(bldgData, activeCount) {
+  for (let i = 0; i < bldgData.floors.length; i++) {
+    const f = bldgData.floors[i];
+    f.targetScale = i <= activeCount ? 1 : 0;
     f.currentScale += (f.targetScale - f.currentScale) * 0.08;
 
     if (f.currentScale > 0.01) {
       f.group.visible = true;
       f.group.scale.y = f.currentScale;
-      // Glow effect on newest floor
-      if (i === activeFloors && f.currentScale < 0.95) {
+      if (i === activeCount && f.currentScale < 0.95) {
         f.group.children[0].material.emissive = new THREE.Color(0x3b82f6);
         f.group.children[0].material.emissiveIntensity = 0.3 * (1 - f.currentScale);
       } else {
@@ -2433,40 +2510,55 @@ function animate() {
       f.group.visible = false;
     }
   }
+}
 
-  // Crane — appears after a few floors, tracks the top
-  if (activeFloors > 2) {
-    crane.visible = true;
-    const craneTarget = activeFloors * FLOOR_H;
-    mast.position.y += (craneTarget + 2 - mast.position.y) * 0.05;
-    boom.position.y += (craneTarget + 4 - boom.position.y) * 0.05;
-    counter.position.y += (craneTarget + 4 - counter.position.y) * 0.05;
-    crane.rotation.y = t * 0.3;
+function animateCrane(craneData, activeCount, floorH, t, rotSpeed) {
+  if (activeCount > 2) {
+    craneData.crane.visible = true;
+    const craneTarget = activeCount * floorH;
+    craneData.mast.position.y += (craneTarget + 2 - craneData.mast.position.y) * 0.05;
+    craneData.boom.position.y += (craneTarget + 4 - craneData.boom.position.y) * 0.05;
+    craneData.counter.position.y += (craneTarget + 4 - craneData.counter.position.y) * 0.05;
+    craneData.crane.rotation.y = t * rotSpeed;
   }
+}
 
-  // Particles — float up around construction zone
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Build all three structures
+  animateBuilding(mainBldg, mainActive);
+  animateBuilding(secBldg, secActive);
+  animateBuilding(thirdBldg, thirdActive);
+
+  // Cranes
+  animateCrane(crane1, mainActive, MAIN_H, t, 0.3);
+  animateCrane(crane2, Math.max(mainActive, secActive), MAIN_H, t, -0.2);
+
+  // Particles — float up across the wider construction site
   const pos = particleGeo.attributes.position.array;
-  const topY = activeFloors * FLOOR_H;
+  const topY = mainActive * MAIN_H;
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     pos[i*3] += particleVel[i*3];
     pos[i*3+1] += particleVel[i*3+1];
     pos[i*3+2] += particleVel[i*3+2];
-    // Reset particles that go too high or too far
-    if (pos[i*3+1] > topY + 6 || Math.abs(pos[i*3]) > 6) {
-      pos[i*3] = (Math.random() - 0.5) * 6;
-      pos[i*3+1] = topY - 2 + Math.random() * 4;
-      pos[i*3+2] = (Math.random() - 0.5) * 5;
+    if (pos[i*3+1] > topY + 8 || Math.abs(pos[i*3]) > 18) {
+      pos[i*3] = (Math.random() - 0.5) * 22;
+      pos[i*3+1] = topY - 3 + Math.random() * 6;
+      pos[i*3+2] = (Math.random() - 0.5) * 12;
     }
   }
   particleGeo.attributes.position.needsUpdate = true;
   particleMat.opacity = 0.3 + 0.3 * Math.sin(t * 2);
 
-  // Gentle camera sway
-  camera.position.x = 18 + Math.sin(t * 0.15) * 1.5;
-  camera.position.y = 12 + scrollProgress * 8 + Math.sin(t * 0.2) * 0.5;
-  camera.lookAt(0, 4 + scrollProgress * 10, 0);
+  // Gentle camera sway — wider orbit, looking at center of site
+  camera.position.x = 24 + Math.sin(t * 0.15) * 2;
+  camera.position.y = 14 + scrollProgress * 8 + Math.sin(t * 0.2) * 0.5;
+  camera.lookAt(-2, 4 + scrollProgress * 10, 0);
 
-  // Fade building opacity based on scroll — dimmer at very bottom
+  // Fade building opacity based on scroll
   const buildingOpacity = scrollProgress > 0.85 ? 1 - (scrollProgress - 0.85) / 0.15 : 1;
   canvas.style.opacity = buildingOpacity;
 
