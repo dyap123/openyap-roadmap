@@ -2370,28 +2370,121 @@ function createBuilding(totalFloors, floorH, floorW, floorD, posX, posZ) {
   return { group: bldg, floors: floorData, totalFloors, floorH };
 }
 
-// ---- Helper: create a crane ----
+// ---- Lattice crane helpers ----
+const crnLn = new THREE.LineBasicMaterial({ color: 0xf59e0b });
+const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending });
+const crnCb = new THREE.LineBasicMaterial({ color: 0x888888 });
+const crnSolid = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.7, roughness: 0.3, emissive: 0xf59e0b, emissiveIntensity: 0.03 });
+const crnDark = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.4 });
+const crnWarnMat = new THREE.MeshBasicMaterial({ color: 0xff2222 });
+const crnLedMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5 });
+const crnGlass = new THREE.MeshPhysicalMaterial({ color: 0x0a1a2e, metalness: 0.1, roughness: 0.05, transmission: 0.7, transparent: true, opacity: 0.8 });
+
+function mkLn(pts, m) { return new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), m); }
+
+function sqLat(w, h, n) {
+  const p = [], hw = w/2, dh = h/n;
+  const c = [[-hw,-hw],[hw,-hw],[hw,hw],[-hw,hw]];
+  for (let i = 0; i < n; i++) {
+    const y0 = i*dh, y1 = y0+dh;
+    c.forEach(([x,z]) => { p.push(new THREE.Vector3(x,y0,z), new THREE.Vector3(x,y1,z)); });
+    [y0,y1].forEach(y => { for(let j=0;j<4;j++) p.push(new THREE.Vector3(c[j][0],y,c[j][1]), new THREE.Vector3(c[(j+1)%4][0],y,c[(j+1)%4][1])); });
+    for(let j=0;j<4;j++) { const k=(j+1)%4; p.push(new THREE.Vector3(c[j][0],y0,c[j][1]), new THREE.Vector3(c[k][0],y1,c[k][1])); }
+  }
+  return p;
+}
+
+function hzLat(len, w, n, dir) {
+  const p = [], hw = w/2, dl = len/n;
+  const c = [[-hw,-hw],[hw,-hw],[0,hw]];
+  for (let i = 0; i < n; i++) {
+    const x0 = i*dl*dir, x1 = x0+dl*dir;
+    c.forEach(([y,z]) => { p.push(new THREE.Vector3(x0,y,z), new THREE.Vector3(x1,y,z)); });
+    [x0,x1].forEach(x => { for(let j=0;j<3;j++) p.push(new THREE.Vector3(x,c[j][0],c[j][1]), new THREE.Vector3(x,c[(j+1)%3][0],c[(j+1)%3][1])); });
+    for(let j=0;j<3;j++) { const k=(j+1)%3; p.push(new THREE.Vector3(x0,c[j][0],c[j][1]), new THREE.Vector3(x1,c[k][0],c[k][1])); }
+  }
+  return p;
+}
+
 function createCrane(parentGroup, totalFloors, floorH) {
   const crane = new THREE.Group();
-  const baseY = totalFloors * floorH;
-  const mast = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4, 0.15), craneMat);
-  mast.position.y = baseY + 2;
-  crane.add(mast);
-  const boom = new THREE.Mesh(new THREE.BoxGeometry(8, 0.12, 0.12), craneMat);
-  boom.position.set(2, baseY + 4, 0);
-  crane.add(boom);
-  const counter = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.12, 0.12), craneMat);
-  counter.position.set(-2, baseY + 4, 0);
-  crane.add(counter);
-  const cableGeo = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(4, baseY + 3.94, 0),
-    new THREE.Vector3(4, baseY + 1, 0),
-  ]);
-  const cable = new THREE.Line(cableGeo, new THREE.LineBasicMaterial({ color: 0x888888 }));
-  crane.add(cable);
+  const slew = new THREE.Group();
+  const MH = totalFloors * floorH + 2;
+  const MW = 0.4, JL = 8, CJL = 3, TY = MH;
+
+  // Mast (fixed lattice tower)
+  crane.add(mkLn(sqLat(MW, MH, Math.round(MH / 0.7)), crnLn));
+  crane.add(mkLn(sqLat(MW, MH, Math.round(MH / 0.7)), crnGl));
+  // Base cross
+  [0, Math.PI/2].forEach(r => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.07, 0.1), crnSolid);
+    b.rotation.y = r; b.position.y = 0.035; crane.add(b);
+  });
+
+  // --- Slewing unit ---
+  // Cat head
+  const ch = mkLn(sqLat(0.25, 2, 3), crnLn);
+  ch.position.y = TY; slew.add(ch);
+
+  // Operator cab
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.4, 0.5), crnSolid);
+  cab.position.set(0.12, TY + 0.2, 0); slew.add(cab);
+  const cabWin = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.16, 0.52), crnGlass);
+  cabWin.position.set(0.12, TY + 0.34, 0); slew.add(cabWin);
+
+  // Main jib
+  const jibG = new THREE.Group(); jibG.position.y = TY + 0.5;
+  jibG.add(mkLn(hzLat(JL, 0.2, 14, 1), crnLn));
+  jibG.add(mkLn(hzLat(JL, 0.2, 14, 1), crnGl));
+  slew.add(jibG);
+
+  // Counter-jib
+  const cjG = new THREE.Group(); cjG.position.y = TY + 0.5;
+  cjG.add(mkLn(hzLat(CJL, 0.2, 5, -1), crnLn));
+  slew.add(cjG);
+
+  // Counterweight
+  const cw = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.4), crnDark);
+  cw.position.set(-CJL + 0.15, TY + 0.35, 0); slew.add(cw);
+
+  // Pendant lines
+  const catTop = TY + 2;
+  [[0,catTop,0, JL,TY+0.5,0], [0,catTop,0, JL*0.6,TY+0.5,0], [0,catTop,0, -CJL,TY+0.5,0]].forEach(([a,b,c,d,e,f]) => {
+    slew.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(a,b,c), new THREE.Vector3(d,e,f)
+    ]), crnCb));
+  });
+
+  // Trolley
+  const trolley = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.08, 0.24), crnSolid);
+  trolley.position.set(JL * 0.5, TY + 0.42, 0); slew.add(trolley);
+
+  // Hook cable + hook
+  const hookBaseY = TY + 0.4, hookLen = 3;
+  const hookCable = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,-hookLen,0)]), crnCb
+  );
+  hookCable.position.set(JL * 0.5, hookBaseY, 0); slew.add(hookCable);
+  const hook = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.02, 6, 12, Math.PI * 1.5), crnSolid);
+  hook.position.set(JL * 0.5, hookBaseY - hookLen - 0.06, 0);
+  hook.rotation.z = Math.PI; slew.add(hook);
+
+  // Warning lights
+  const wG = new THREE.SphereGeometry(0.05, 8, 8);
+  const wMat1 = crnWarnMat.clone(), wMat2 = crnWarnMat.clone();
+  const wl1 = new THREE.Mesh(wG, wMat1); wl1.position.set(0, catTop + 0.1, 0); slew.add(wl1);
+  const wl2 = new THREE.Mesh(wG, wMat2); wl2.position.set(JL, TY + 0.7, 0); slew.add(wl2);
+
+  // LED strips along jib
+  const ledG = new THREE.BoxGeometry(JL, 0.01, 0.01);
+  const ledMat = crnLedMat.clone();
+  const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(JL/2, TY + 0.62, 0.11); slew.add(ls1);
+  const ls2 = ls1.clone(); ls2.position.z = -0.11; slew.add(ls2);
+
+  crane.add(slew);
   crane.visible = false;
   parentGroup.add(crane);
-  return { crane, mast, boom, counter };
+  return { crane, slew, trolley, hookCable, hook, wMat1, wMat2, ledMat, JL };
 }
 
 // ======== BUILDINGS ========
@@ -2515,11 +2608,21 @@ function animateBuilding(bldgData, activeCount) {
 function animateCrane(craneData, activeCount, floorH, t, rotSpeed) {
   if (activeCount > 2) {
     craneData.crane.visible = true;
-    const craneTarget = activeCount * floorH;
-    craneData.mast.position.y += (craneTarget + 2 - craneData.mast.position.y) * 0.05;
-    craneData.boom.position.y += (craneTarget + 4 - craneData.boom.position.y) * 0.05;
-    craneData.counter.position.y += (craneTarget + 4 - craneData.counter.position.y) * 0.05;
-    craneData.crane.rotation.y = t * rotSpeed;
+    // Slewing rotation
+    craneData.slew.rotation.y = t * rotSpeed;
+    // Trolley slides back and forth along jib
+    const tx = craneData.JL * (0.3 + 0.35 * Math.sin(t * 0.4 + rotSpeed));
+    craneData.trolley.position.x = tx;
+    craneData.hookCable.position.x = tx;
+    craneData.hook.position.x = tx;
+    // Hook sway
+    craneData.hook.position.z = Math.sin(t * 0.7 + rotSpeed * 2) * 0.12;
+    // Warning lights pulse
+    const wp = 0.3 + 0.7 * Math.sin(t * 4);
+    craneData.wMat1.color.setRGB(wp, 0, 0);
+    craneData.wMat2.color.setRGB(wp * 0.8, 0, 0);
+    // LED glow pulse
+    craneData.ledMat.opacity = 0.25 + 0.45 * Math.sin(t * 2 + rotSpeed);
   }
 }
 
