@@ -43,17 +43,14 @@ body {
   position: relative;
 }
 
-/* ===== NOISE TEXTURE ===== */
-body::before {
-  content: '';
+/* ===== SHADER BACKGROUND ===== */
+#shader-bg {
   position: fixed;
   inset: 0;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
   z-index: 0;
+  pointer-events: none;
 }
 
 /* ===== DOT GRID BACKGROUND ===== */
@@ -187,18 +184,7 @@ body::after {
 }
 #building-canvas.visible { opacity: 1; }
 
-/* Red gradient orb */
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 900px;
-  height: 900px;
-  background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.02) 40%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
+/* Gradient orb removed — shader background handles this */
 
 .hero-content {
   position: relative;
@@ -1520,6 +1506,7 @@ body::after {
 </head>
 <body>
 
+<canvas id="shader-bg"></canvas>
 <canvas id="building-canvas"></canvas>
 
 <!-- Loading Overlay -->
@@ -2566,41 +2553,44 @@ function createCrane(parentGroup, totalFloors, floorH) {
   return { crane, slew, trolley, hookCable, hook, wMat1, wMat2, ledMat, JL };
 }
 
-// ======== BUILDINGS ========
+// ======== BUILDINGS — spread across a wide city block ========
+const FH = 0.7;
+const buildings = [
+  // Main cluster (center)
+  { floors: 30, w: 5,   d: 3.5, x: 0,   z: 0,   speed: 1.0  },  // hero tower
+  { floors: 22, w: 3.5, d: 3,   x: -8,  z: 1,   speed: 1.2  },  // mid-left
+  { floors: 15, w: 3,   d: 2.5, x: 7,   z: -5,  speed: 1.15 },  // mid-right behind
 
-// Main Tower (center-right): 30 floors, 5 wide, 3.5 deep
-const MAIN_FLOORS = 30;
-const MAIN_H = 0.7;
-const mainBldg = createBuilding(MAIN_FLOORS, MAIN_H, 5, 3.5, 2, 0);
+  // Left wing
+  { floors: 12, w: 2.5, d: 2,   x: -16, z: 4,   speed: 1.5  },  // far left front
+  { floors: 18, w: 3,   d: 2.5, x: -20, z: -2,  speed: 1.3  },  // far left back
+  { floors: 6,  w: 2,   d: 2,   x: -13, z: -6,  speed: 1.7  },  // small left back
 
-// Secondary Building (left): 15 floors, 3 wide, 2.5 deep
-const SEC_FLOORS = 15;
-const SEC_H = 0.7;
-const secBldg = createBuilding(SEC_FLOORS, SEC_H, 3, 2.5, -8, 0);
+  // Right wing
+  { floors: 20, w: 4,   d: 3,   x: 14,  z: 2,   speed: 1.1  },  // tall right
+  { floors: 10, w: 2.5, d: 2,   x: 20,  z: -3,  speed: 1.4  },  // far right
+  { floors: 8,  w: 2,   d: 1.8, x: 18,  z: 7,   speed: 1.6  },  // small right front
 
-// Third Structure (far left): 8 floors, 2.5 wide, 2 deep
-const THIRD_FLOORS = 8;
-const THIRD_H = 0.7;
-const thirdBldg = createBuilding(THIRD_FLOORS, THIRD_H, 2.5, 2, -14, 3);
+  // Background row (distant)
+  { floors: 14, w: 3,   d: 2.5, x: -5,  z: -12, speed: 1.25 },
+  { floors: 10, w: 2.5, d: 2,   x: 5,   z: -14, speed: 1.45 },
+  { floors: 16, w: 3.5, d: 2.5, x: -18, z: -10, speed: 1.35 },
+];
 
-// Fourth Building (behind main, right): 18 floors
-const FOURTH_FLOORS = 18;
-const fourthBldg = createBuilding(FOURTH_FLOORS, 0.7, 3.5, 3, 9, -6);
+const bldgData = buildings.map(b => ({
+  ...createBuilding(b.floors, FH, b.w, b.d, b.x, b.z),
+  speed: b.speed,
+}));
 
-// Fifth Structure (far right): 10 floors, small
-const FIFTH_FLOORS = 10;
-const fifthBldg = createBuilding(FIFTH_FLOORS, 0.7, 2, 2, 14, 2);
-
-// ======== CRANES ========
-
+// ======== CRANES — 3 cranes across the site ========
 // Crane 1: on main tower
-const crane1 = createCrane(mainBldg.group, MAIN_FLOORS, MAIN_H);
-
-// Crane 2: between buildings (standalone in scene)
-const crane2Group = new THREE.Group();
-crane2Group.position.set(-4, 0, 1);
-scene.add(crane2Group);
-const crane2 = createCrane(crane2Group, 20, MAIN_H);
+const crane1 = createCrane(bldgData[0].group, 30, FH);
+// Crane 2: left cluster
+const crane2G = new THREE.Group(); crane2G.position.set(-12, 0, 2); scene.add(crane2G);
+const crane2 = createCrane(crane2G, 18, FH);
+// Crane 3: right wing
+const crane3G = new THREE.Group(); crane3G.position.set(16, 0, 0); scene.add(crane3G);
+const crane3 = createCrane(crane3G, 22, FH);
 
 // ======== GROUND ========
 
@@ -2615,17 +2605,25 @@ const gridHelper = new THREE.GridHelper(80, 80, 0x111827, 0x111827);
 gridHelper.position.y = 0;
 scene.add(gridHelper);
 
-// ======== MATERIAL STACKS (ground objects) ========
+// ======== MATERIAL STACKS (ground objects) — spread across site ========
 const stackPositions = [
-  { x: 7, z: 5, sx: 1.2, sy: 0.5, sz: 0.8 },
-  { x: -5, z: 6, sx: 0.8, sy: 0.4, sz: 1.0 },
-  { x: -12, z: -2, sx: 1.0, sy: 0.6, sz: 0.7 },
-  { x: 5, z: -4, sx: 0.9, sy: 0.5, sz: 1.1 },
-  { x: 12, z: 6, sx: 1.4, sy: 0.3, sz: 0.9 },
-  { x: -18, z: 1, sx: 0.7, sy: 0.5, sz: 1.3 },
-  { x: 15, z: -3, sx: 0.6, sy: 0.4, sz: 0.6 },
-  { x: -3, z: -5, sx: 1.1, sy: 0.35, sz: 0.8 },
-  { x: 10, z: -8, sx: 0.8, sy: 0.6, sz: 1.0 },
+  // Center
+  { x: 4,   z: 5,   sx: 1.2, sy: 0.5, sz: 0.8 },
+  { x: -4,  z: 5,   sx: 0.8, sy: 0.4, sz: 1.0 },
+  { x: 3,   z: -3,  sx: 0.9, sy: 0.5, sz: 1.1 },
+  // Left wing
+  { x: -10, z: 7,   sx: 1.0, sy: 0.6, sz: 0.7 },
+  { x: -22, z: 3,   sx: 1.4, sy: 0.3, sz: 0.9 },
+  { x: -17, z: -7,  sx: 0.7, sy: 0.5, sz: 1.3 },
+  { x: -24, z: -4,  sx: 0.9, sy: 0.4, sz: 0.8 },
+  // Right wing
+  { x: 12,  z: 6,   sx: 0.6, sy: 0.4, sz: 0.6 },
+  { x: 22,  z: 1,   sx: 1.1, sy: 0.35, sz: 0.8 },
+  { x: 17,  z: -6,  sx: 0.8, sy: 0.6, sz: 1.0 },
+  { x: 24,  z: 5,   sx: 1.0, sy: 0.3, sz: 1.2 },
+  // Background
+  { x: -8,  z: -10, sx: 1.3, sy: 0.4, sz: 0.7 },
+  { x: 8,   z: -12, sx: 0.9, sy: 0.5, sz: 0.9 },
 ];
 stackPositions.forEach(s => {
   const geo = new THREE.BoxGeometry(s.sx, s.sy, s.sz);
@@ -2634,18 +2632,18 @@ stackPositions.forEach(s => {
   scene.add(mesh);
 });
 
-// ======== PARTICLES ========
-const PARTICLE_COUNT = 600;
+// ======== PARTICLES — spread across entire visible area ========
+const PARTICLE_COUNT = 800;
 const particleGeo = new THREE.BufferGeometry();
 const particlePos = new Float32Array(PARTICLE_COUNT * 3);
 const particleVel = new Float32Array(PARTICLE_COUNT * 3);
 for (let i = 0; i < PARTICLE_COUNT; i++) {
-  particlePos[i*3] = (Math.random() - 0.5) * 40;
-  particlePos[i*3+1] = Math.random() * 12;
-  particlePos[i*3+2] = (Math.random() - 0.5) * 24;
-  particleVel[i*3] = (Math.random() - 0.5) * 0.025;
-  particleVel[i*3+1] = Math.random() * 0.04 + 0.015;
-  particleVel[i*3+2] = (Math.random() - 0.5) * 0.025;
+  particlePos[i*3] = (Math.random() - 0.5) * 70;
+  particlePos[i*3+1] = Math.random() * 20;
+  particlePos[i*3+2] = (Math.random() - 0.5) * 50;
+  particleVel[i*3] = (Math.random() - 0.5) * 0.03;
+  particleVel[i*3+1] = Math.random() * 0.04 + 0.01;
+  particleVel[i*3+2] = (Math.random() - 0.5) * 0.03;
 }
 particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
 const particles = new THREE.Points(particleGeo, particleMat);
@@ -2653,16 +2651,13 @@ scene.add(particles);
 
 // ======== SCROLL STATE ========
 let scrollProgress = 0;
-let mainActive = 0, secActive = 0, thirdActive = 0, fourthActive = 0, fifthActive = 0;
 const docHeight = () => document.documentElement.scrollHeight - window.innerHeight;
 
 window.addEventListener('scroll', () => {
   scrollProgress = Math.min(1, window.scrollY / docHeight());
-  mainActive = Math.floor(scrollProgress * MAIN_FLOORS);
-  secActive = Math.floor(Math.min(1, scrollProgress * 1.3) * SEC_FLOORS);
-  thirdActive = Math.floor(Math.min(1, scrollProgress * 1.6) * THIRD_FLOORS);
-  fourthActive = Math.floor(Math.min(1, scrollProgress * 1.15) * FOURTH_FLOORS);
-  fifthActive = Math.floor(Math.min(1, scrollProgress * 1.45) * FIFTH_FLOORS);
+  bldgData.forEach(b => {
+    b.activeFloors = Math.floor(Math.min(1, scrollProgress * b.speed) * b.totalFloors);
+  });
 }, { passive: true });
 
 // Show canvas after load
@@ -2788,6 +2783,200 @@ animate();
       c.style.transform = '';
     }
   });
+})();
+</script>
+
+<!-- ===== SHADER BACKGROUND ===== -->
+<script>
+(function() {
+  var canvas = document.getElementById('shader-bg');
+  var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+
+  // --- Vertex shader (fullscreen quad) ---
+  var vsSource = `
+    attribute vec2 a_position;
+    void main() {
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }
+  `;
+
+  // --- Fragment shader (gradient mesh + aurora + noise) ---
+  var fsSource = `
+    precision mediump float;
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform float u_scroll;
+
+    // Simplex-style noise helpers
+    vec3 mod289(vec3 x) { return x - floor(x / 289.0) * 289.0; }
+    vec2 mod289v2(vec2 x) { return x - floor(x / 289.0) * 289.0; }
+    vec3 permute(vec3 x) { return mod289((x * 34.0 + 1.0) * x); }
+
+    float snoise(vec2 v) {
+      const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                         -0.577350269189626, 0.024390243902439);
+      vec2 i  = floor(v + dot(v, C.yy));
+      vec2 x0 = v - i + dot(i, C.xx);
+      vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec4 x12 = x0.xyxy + C.xxzz;
+      x12.xy -= i1;
+      i = mod289v2(i);
+      vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+      m = m * m;
+      m = m * m;
+      vec3 x = 2.0 * fract(p * C.www) - 1.0;
+      vec3 h = abs(x) - 0.5;
+      vec3 ox = floor(x + 0.5);
+      vec3 a0 = x - ox;
+      m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+      vec3 g;
+      g.x = a0.x * x0.x + h.x * x0.y;
+      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+
+    // Fractional Brownian Motion (layered noise)
+    float fbm(vec2 p) {
+      float f = 0.0;
+      f += 0.5000 * snoise(p); p *= 2.01;
+      f += 0.2500 * snoise(p); p *= 2.02;
+      f += 0.1250 * snoise(p); p *= 2.03;
+      f += 0.0625 * snoise(p);
+      return f / 0.9375;
+    }
+
+    // Hash for film grain
+    float hash(vec2 p) {
+      vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+      p3 += dot(p3, p3.yzx + 33.33);
+      return fract((p3.x + p3.y) * p3.z);
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / u_resolution;
+      float aspect = u_resolution.x / u_resolution.y;
+      vec2 p = vec2(uv.x * aspect, uv.y);
+      float t = u_time;
+
+      // === 1. GRADIENT MESH (organic flowing color blobs) ===
+      float n1 = fbm(p * 1.2 + vec2(t * 0.08, t * 0.06));
+      float n2 = fbm(p * 0.8 + vec2(-t * 0.05, t * 0.09) + 5.0);
+      float n3 = fbm(p * 1.5 + vec2(t * 0.07, -t * 0.04) + 10.0);
+
+      // Color palette: blue, teal, purple, dark
+      vec3 blue   = vec3(0.231, 0.510, 0.965);  // #3B82F6
+      vec3 teal   = vec3(0.204, 0.827, 0.600);  // #34D399
+      vec3 purple = vec3(0.380, 0.200, 0.700);
+      vec3 dark   = vec3(0.020, 0.020, 0.040);
+
+      vec3 mesh = mix(dark, blue, smoothstep(-0.2, 0.6, n1) * 0.5);
+      mesh = mix(mesh, teal, smoothstep(0.0, 0.8, n2) * 0.35);
+      mesh = mix(mesh, purple, smoothstep(0.1, 0.7, n3) * 0.25);
+
+      // Scroll shifts the mesh colors vertically
+      float scrollShift = u_scroll * 0.3;
+      mesh *= 1.0 - scrollShift * 0.5;
+
+      float meshAlpha = 0.35;
+
+      // === 2. AURORA / LIGHT STREAKS ===
+      float auroraY = uv.y + snoise(vec2(uv.x * 3.0, t * 0.15)) * 0.15;
+      float band1 = smoothstep(0.02, 0.0, abs(auroraY - 0.3 - sin(t * 0.1 + uv.x * 4.0) * 0.08));
+      float band2 = smoothstep(0.03, 0.0, abs(auroraY - 0.6 - cos(t * 0.08 + uv.x * 3.0) * 0.06));
+      float band3 = smoothstep(0.015, 0.0, abs(auroraY - 0.8 - sin(t * 0.12 + uv.x * 5.0) * 0.04));
+
+      vec3 aurora = band1 * blue * 1.5 + band2 * teal * 1.2 + band3 * purple * 1.0;
+      float auroraAlpha = 0.20;
+
+      // === 3. FILM GRAIN ===
+      float grain = hash(gl_FragCoord.xy + fract(t * 100.0)) * 2.0 - 1.0;
+      float grainAlpha = 0.04;
+
+      // === COMPOSITE ===
+      vec3 color = mesh * meshAlpha + aurora * auroraAlpha;
+      color += grain * grainAlpha;
+
+      // Vignette — darken edges
+      float vig = 1.0 - smoothstep(0.4, 1.4, length(uv - 0.5) * 1.5);
+      color *= vig;
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+
+  // --- Compile shaders ---
+  function createShader(type, source) {
+    var shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader error:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  var vs = createShader(gl.VERTEX_SHADER, vsSource);
+  var fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  if (!vs || !fs) return;
+
+  var program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program error:', gl.getProgramInfoLog(program));
+    return;
+  }
+  gl.useProgram(program);
+
+  // --- Fullscreen quad ---
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+  var posLoc = gl.getAttribLocation(program, 'a_position');
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+  // --- Uniforms ---
+  var uRes = gl.getUniformLocation(program, 'u_resolution');
+  var uTime = gl.getUniformLocation(program, 'u_time');
+  var uScroll = gl.getUniformLocation(program, 'u_scroll');
+
+  // --- Resize ---
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // --- Scroll tracking ---
+  var scrollY = 0;
+  var maxScroll = 1;
+  function updateScroll() {
+    scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  }
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  updateScroll();
+
+  // --- Animation loop ---
+  var startTime = performance.now();
+  function render() {
+    var t = (performance.now() - startTime) * 0.001;
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uTime, t);
+    gl.uniform1f(uScroll, scrollY / maxScroll);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(render);
+  }
+  render();
 })();
 </script>
 </body>
