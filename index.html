@@ -1506,6 +1506,80 @@ body::after {
 </head>
 <body>
 
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  EDITABLE SITE TEXT — change values below to update     ║
+  ║  all text on the site. No need to hunt through HTML.    ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
+<script id="site-config">
+window.SITE_TEXT = {
+  // ---- HERO SECTION ----
+  heroTitle: 'OpenYap',
+  heroTagline: 'Machine learning infrastructure for construction.<br>Built in-house. Running in production. Ready to scale.',
+  heroStats: [
+    { value: '$1.2M',   label: 'Seed Ask' },
+    { value: '50/1/49', label: 'Equity' },
+    { value: '$25M',    label: 'Year 2' },
+    { value: '1,000%+', label: 'Board ROI' },
+  ],
+
+  // ---- OVERVIEW SECTION ----
+  overviewLabel: 'THE OPPORTUNITY',
+  overviewHeadline: 'From one engineer<br>to industry platform.',
+  overviewParagraphs: [
+    'OpenYap started at a desk inside Clune Construction. One project engineer saw the gap between what AI could do and what the industry was willing to try. When the idea was taken and rebuilt without him, he spent 18 months learning to build it himself.',
+    'Now it runs on a live Webcor project -- processing plans, tracking RFIs, managing submittals, and generating takeoffs with a purpose-built AI agent. Not a demo. Not a prototype. A working system used by a real construction team.',
+    'The pitch is simple: partner with a builder who already has the technology running, scale it across the portfolio, and own the platform that becomes the industry standard.',
+  ],
+  equityLegend: [
+    { color: '#3B82F6', text: 'Founder 50%' },
+    { color: '#34D399', text: 'Karo 1%' },
+    { color: '#8B95A5', text: 'Board 49%' },
+  ],
+  revenueChart: [
+    { value: '$0',    label: 'Y1<br>Build',  color: 'rgba(255,255,255,0.1)' },
+    { value: '$25M',  label: 'Y2<br>Deploy', color: '#34D399' },
+    { value: '$35M',  label: 'Y3<br>Scale',  color: '#34D399' },
+    { value: '$432M+',label: 'Y5<br>Scale',  color: '#34D399' },
+  ],
+  keyStats: [
+    { value: '1,000%+',  label: 'Board ROI Year 2', style: 'gold' },
+    { value: '$12.25M',  label: 'Board Return Year 2', style: 'red' },
+  ],
+
+  // ---- FINANCIALS SECTION ----
+  financialsLabel: 'THE NUMBERS',
+  financialsHeadline: 'Built to return 1,000%+ in Year 2.',
+
+  // ---- EQUITY SECTION ----
+  equityLabel: 'THE STRUCTURE',
+  equityHeadline: 'Equal partnership.<br>Independent tiebreaker.',
+  equityCircles: [
+    { pct: '50%', name: 'Danzel Yap', role: 'Founder / CTO', size: 'large' },
+    { pct: '1%',  name: 'Tiebreaker', role: 'Independent Board', size: 'small' },
+    { pct: '49%', name: 'Webcor',     role: 'Strategic Partner', size: 'large' },
+  ],
+
+  // ---- AGREEMENT SECTION ----
+  agreementLabel: 'THE AGREEMENT',
+  agreementHeadline: 'Terms, structured for trust.',
+  agreementDocUrl: 'https://docs.google.com/document/d/1bFhSGH3J4tZjT6DWi-JPBthC5I6UJ2SrA7EaIRSf-sk/edit',
+
+  // ---- TIMELINE SECTION ----
+  timelineLabel: 'MILESTONES',
+  timelineHeadline: 'Timeline',
+
+  // ---- FOOTER ----
+  footerLines: [
+    'Confidential — OpenYap',
+    'Prepared by Danzel Yap  |  Q2 2026',
+    'Not for distribution outside Webcor leadership',
+    'This site updates live from the source data',
+  ],
+};
+</script>
+
 <canvas id="shader-bg"></canvas>
 <canvas id="building-canvas"></canvas>
 
@@ -1686,13 +1760,99 @@ body::after {
 
 <!-- SECTION 8: FOOTER -->
 <footer class="footer">
-  <div class="container">
-    <div class="footer-line">Confidential &mdash; OpenYap</div>
-    <div class="footer-line">Prepared by Danzel Yap &ensp;|&ensp; Q2 2026</div>
-    <div class="footer-line">Not for distribution outside Webcor leadership</div>
-    <div class="footer-line">This site updates live from the source data</div>
-  </div>
+  <div class="container" id="footer-content"></div>
 </footer>
+
+<!-- Populate HTML from SITE_TEXT config -->
+<script>
+(function() {
+  var T = window.SITE_TEXT;
+  if (!T) return;
+
+  // Hero
+  var ht = document.querySelector('.hero-title span');
+  if (ht) ht.innerHTML = T.heroTitle;
+  var htag = document.querySelector('.hero-tagline');
+  if (htag) htag.innerHTML = T.heroTagline;
+  var hs = document.getElementById('hero-stats');
+  if (hs && T.heroStats) {
+    hs.innerHTML = T.heroStats.map(function(s) {
+      return '<div class="stat-pill"><span class="stat-value">' + s.value + '</span><span class="stat-label">' + s.label + '</span></div>';
+    }).join('');
+  }
+
+  // Overview
+  var ol = document.querySelector('#overview-section .section-label');
+  if (ol) ol.textContent = T.overviewLabel;
+  var oh = document.querySelector('#overview-section .section-headline');
+  if (oh) oh.innerHTML = T.overviewHeadline;
+  var on = document.querySelector('.overview-narrative');
+  if (on && T.overviewParagraphs) {
+    on.innerHTML = T.overviewParagraphs.map(function(p) { return '<p>' + p + '</p>'; }).join('');
+  }
+  // Equity legend
+  var el = document.querySelector('.equity-legend');
+  if (el && T.equityLegend) {
+    el.innerHTML = T.equityLegend.map(function(e) {
+      return '<div class="equity-legend-item"><div class="equity-dot" style="background:' + e.color + '"></div>' + e.text + '</div>';
+    }).join('');
+  }
+  // Revenue chart
+  var rb = document.getElementById('rev-bars');
+  if (rb && T.revenueChart) {
+    rb.innerHTML = T.revenueChart.map(function(r, i) {
+      return '<div class="rev-bar-col"><div class="rev-bar-value">' + r.value + '</div><div class="rev-bar" style="height:2px;background:' + r.color + '" id="revbar-' + i + '"></div><div class="rev-bar-label">' + r.label + '</div></div>';
+    }).join('');
+  }
+  // Key stats
+  var ks = document.querySelector('.key-stats');
+  if (ks && T.keyStats) {
+    ks.innerHTML = T.keyStats.map(function(s) {
+      return '<div class="key-stat reveal"><div class="key-stat-value ' + s.style + '">' + s.value + '</div><div class="key-stat-label">' + s.label + '</div></div>';
+    }).join('');
+  }
+
+  // Financials
+  var fl = document.querySelector('#financials-section .section-label');
+  if (fl) fl.textContent = T.financialsLabel;
+  var fh = document.querySelector('#financials-section .section-headline');
+  if (fh) fh.innerHTML = T.financialsHeadline;
+
+  // Timeline
+  var tl = document.querySelector('#timeline-section .section-label');
+  if (tl) tl.textContent = T.timelineLabel;
+  var th = document.querySelector('#timeline-section .section-headline');
+  if (th) th.innerHTML = T.timelineHeadline;
+
+  // Equity section
+  var eql = document.querySelector('#equity-section .section-label');
+  if (eql) eql.textContent = T.equityLabel;
+  var eqh = document.querySelector('#equity-section .section-headline');
+  if (eqh) eqh.innerHTML = T.equityHeadline;
+  var eqv = document.querySelector('.equity-visual');
+  if (eqv && T.equityCircles) {
+    eqv.innerHTML = T.equityCircles.map(function(c) {
+      return '<div class="equity-circle-wrap"><div class="equity-circle ' + c.size + '">' + c.pct + '</div><div class="equity-label">' + c.name + '</div><div class="equity-sublabel">' + c.role + '</div></div>';
+    }).join('');
+  }
+
+  // Agreement
+  var al = document.querySelector('#agreement-section .section-label');
+  if (al) al.textContent = T.agreementLabel;
+  var ah = document.querySelector('#agreement-section .section-headline');
+  if (ah) ah.innerHTML = T.agreementHeadline;
+  var adl = document.querySelector('.agreement-doc-link');
+  if (adl && T.agreementDocUrl) adl.href = T.agreementDocUrl;
+
+  // Footer
+  var fc = document.getElementById('footer-content');
+  if (fc && T.footerLines) {
+    fc.innerHTML = T.footerLines.map(function(l) {
+      return '<div class="footer-line">' + l + '</div>';
+    }).join('');
+  }
+})();
+</script>
 
 <script>
 (function() {
@@ -2468,55 +2628,47 @@ function hzLat(len, w, n, dir) {
   return p;
 }
 
-// ---- Single crane — proportional to 40-floor tower ----
+// ---- Single crane — climbs with building ----
 const craneGroup = new THREE.Group();
 const craneSlew = new THREE.Group();
 const CRANE_JL = 14, CRANE_CJL = 5;
-const craneMastH = TOTAL_FLOORS * FLOOR_H + 4;
-const MW = 0.8; // mast width — proportional to building
+const craneMastVisibleH = 10; // only show ~14 floors of mast (rest hidden behind building)
+const MW = 0.8;
 
-// Mast lattice tower
-craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnLn));
-craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnGl));
+// Short mast section — repositioned dynamically in animate loop
+craneGroup.add(mkLn(sqLat(MW, craneMastVisibleH, Math.round(craneMastVisibleH / 0.8)), crnLn));
+craneGroup.add(mkLn(sqLat(MW, craneMastVisibleH, Math.round(craneMastVisibleH / 0.8)), crnGl));
 // Base cross
 [0, Math.PI/2].forEach(r => {
   const b = new THREE.Mesh(new THREE.BoxGeometry(4, 0.12, 0.2), crnSolid);
   b.rotation.y = r; b.position.y = 0.06; craneGroup.add(b);
 });
 
-// Slewing unit
-const craneTY = craneMastH;
-// Cat head (tower top section)
+// Slewing unit — positioned relative to mast top (Y=craneMastVisibleH)
+const SY = craneMastVisibleH; // slew base Y (local to craneGroup)
 const ch = mkLn(sqLat(0.5, 3.5, 4), crnLn);
-ch.position.y = craneTY; craneSlew.add(ch);
-// Operator cab
+ch.position.y = SY; craneSlew.add(ch);
 const cab = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.0), crnSolid);
-cab.position.set(0.2, craneTY + 0.4, 0); craneSlew.add(cab);
+cab.position.set(0.2, SY + 0.4, 0); craneSlew.add(cab);
 const cabWin = new THREE.Mesh(new THREE.BoxGeometry(1.22, 0.35, 1.02), crnGlass);
-cabWin.position.set(0.2, craneTY + 0.65, 0); craneSlew.add(cabWin);
-// Main jib
-const JW = 0.4; // jib lattice width
-const jibG = new THREE.Group(); jibG.position.y = craneTY + 1.0;
+cabWin.position.set(0.2, SY + 0.65, 0); craneSlew.add(cabWin);
+const JW = 0.4;
+const jibG = new THREE.Group(); jibG.position.y = SY + 1.0;
 jibG.add(mkLn(hzLat(CRANE_JL, JW, 20, 1), crnLn));
 jibG.add(mkLn(hzLat(CRANE_JL, JW, 20, 1), crnGl));
 craneSlew.add(jibG);
-// Counter-jib
-const cjG = new THREE.Group(); cjG.position.y = craneTY + 1.0;
+const cjG = new THREE.Group(); cjG.position.y = SY + 1.0;
 cjG.add(mkLn(hzLat(CRANE_CJL, JW, 7, -1), crnLn));
 craneSlew.add(cjG);
-// Counterweight
 const cw = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 0.8), crnDark);
-cw.position.set(-CRANE_CJL + 0.4, craneTY + 0.7, 0); craneSlew.add(cw);
-// Pendant lines (guy wires)
-const catTop = craneTY + 3.5;
-[[0,catTop,0, CRANE_JL,craneTY+1.0,0], [0,catTop,0, CRANE_JL*0.6,craneTY+1.0,0], [0,catTop,0, -CRANE_CJL,craneTY+1.0,0]].forEach(([a,b,c,d,e,f]) => {
+cw.position.set(-CRANE_CJL + 0.4, SY + 0.7, 0); craneSlew.add(cw);
+const catTop = SY + 3.5;
+[[0,catTop,0, CRANE_JL,SY+1.0,0], [0,catTop,0, CRANE_JL*0.6,SY+1.0,0], [0,catTop,0, -CRANE_CJL,SY+1.0,0]].forEach(([a,b,c,d,e,f]) => {
   craneSlew.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a,b,c), new THREE.Vector3(d,e,f)]), crnCb));
 });
-// Trolley
 const trolley = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.5), crnSolid);
-trolley.position.set(CRANE_JL * 0.5, craneTY + 0.85, 0); craneSlew.add(trolley);
-// Hook cable + hook
-const hookBaseY = craneTY + 0.8, hookLen = 6;
+trolley.position.set(CRANE_JL * 0.5, SY + 0.85, 0); craneSlew.add(trolley);
+const hookBaseY = SY + 0.8, hookLen = 6;
 const hookCable = new THREE.Line(
   new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,-hookLen,0)]), crnCb
 );
@@ -2524,19 +2676,17 @@ hookCable.position.set(CRANE_JL * 0.5, hookBaseY, 0); craneSlew.add(hookCable);
 const hook = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.04, 6, 12, Math.PI * 1.5), crnSolid);
 hook.position.set(CRANE_JL * 0.5, hookBaseY - hookLen - 0.1, 0);
 hook.rotation.z = Math.PI; craneSlew.add(hook);
-// Warning lights
 const wG = new THREE.SphereGeometry(0.1, 8, 8);
 const wMat1 = crnWarnMat.clone(), wMat2 = crnWarnMat.clone();
 const wl1 = new THREE.Mesh(wG, wMat1); wl1.position.set(0, catTop + 0.15, 0); craneSlew.add(wl1);
-const wl2 = new THREE.Mesh(wG, wMat2); wl2.position.set(CRANE_JL, craneTY + 1.2, 0); craneSlew.add(wl2);
-// LED strips along jib
+const wl2 = new THREE.Mesh(wG, wMat2); wl2.position.set(CRANE_JL, SY + 1.2, 0); craneSlew.add(wl2);
 const ledG = new THREE.BoxGeometry(CRANE_JL, 0.02, 0.02);
 const ledMat = crnLedMat.clone();
-const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(CRANE_JL/2, craneTY + 1.15, JW/2 + 0.02); craneSlew.add(ls1);
+const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(CRANE_JL/2, SY + 1.15, JW/2 + 0.02); craneSlew.add(ls1);
 const ls2 = ls1.clone(); ls2.position.z = -(JW/2 + 0.02); craneSlew.add(ls2);
 
 craneGroup.add(craneSlew);
-craneGroup.position.set(FLOOR_W / 2 + 1.0, 0, 0);
+craneGroup.position.set(FLOOR_W / 2 + 1.0, 0, 0); // X offset from building; Y set dynamically
 craneGroup.visible = false;
 scene.add(craneGroup);
 
@@ -2544,22 +2694,25 @@ scene.add(craneGroup);
 const logoGroup = new THREE.Group();
 // Create text texture via Canvas2D
 const logoCanvas = document.createElement('canvas');
-logoCanvas.width = 512; logoCanvas.height = 128;
+logoCanvas.width = 1024; logoCanvas.height = 256;
 const ctx = logoCanvas.getContext('2d');
-ctx.fillStyle = 'transparent';
-ctx.clearRect(0, 0, 512, 128);
-ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+ctx.clearRect(0, 0, 1024, 256);
+// Outer glow
+ctx.shadowColor = '#3B82F6';
+ctx.shadowBlur = 40;
+ctx.font = 'bold 140px -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
 ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
-// Glow
-ctx.shadowColor = '#3B82F6';
-ctx.shadowBlur = 20;
 ctx.fillStyle = '#3B82F6';
-ctx.fillText('OpenYap', 256, 64);
+ctx.fillText('OpenYap', 512, 128);
+// Mid glow
+ctx.shadowBlur = 15;
+ctx.fillStyle = '#7BB8FF';
+ctx.fillText('OpenYap', 512, 128);
 // Bright core
-ctx.shadowBlur = 8;
+ctx.shadowBlur = 4;
 ctx.fillStyle = '#FFFFFF';
-ctx.fillText('OpenYap', 256, 64);
+ctx.fillText('OpenYap', 512, 128);
 
 const logoTexture = new THREE.CanvasTexture(logoCanvas);
 logoTexture.needsUpdate = true;
@@ -2567,7 +2720,7 @@ const logoMat = new THREE.MeshBasicMaterial({
   map: logoTexture, transparent: true, side: THREE.DoubleSide,
   blending: THREE.AdditiveBlending, depthWrite: false,
 });
-const logoPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), logoMat);
+const logoPlane = new THREE.Mesh(new THREE.PlaneGeometry(7, 1.75), logoMat);
 const BLDG_TOP = TOTAL_FLOORS * FLOOR_H;
 logoPlane.position.set(0, BLDG_TOP + 2.2, 0);
 logoGroup.add(logoPlane);
@@ -2769,11 +2922,15 @@ function animate() {
     }
   }
 
-  // Crane: active during construction, disassembles near end
+  // Crane: climbs with building, disassembles near end
   const topY = activeFloors * FLOOR_H;
-  const craneDisassemble = Math.max(0, (scrollProgress - 0.78) / 0.12); // 0-1 over scroll 0.78-0.90
+  const craneDisassemble = Math.max(0, (scrollProgress - 0.78) / 0.12);
   if (activeFloors > 2 && craneDisassemble < 1) {
     craneGroup.visible = true;
+    // Crane Y tracks the top of construction — mast extends down behind building
+    const craneTargetY = Math.max(0, topY - craneMastVisibleH + 2);
+    craneGroup.position.y += (craneTargetY - craneGroup.position.y) * 0.06;
+
     // Normal crane operation
     craneSlew.rotation.y = t * 0.25;
     const tx = CRANE_JL * (0.3 + 0.3 * Math.sin(t * 0.35));
@@ -2786,17 +2943,14 @@ function animate() {
     wMat2.color.setRGB(wp * 0.8, 0, 0);
     ledMat.opacity = 0.25 + 0.45 * Math.sin(t * 2);
 
-    // Disassembly: crane shrinks down and slides out
+    // Disassembly: crane shrinks and slides out
     if (craneDisassemble > 0) {
-      const ease = craneDisassemble * craneDisassemble; // ease-in
-      craneGroup.scale.y = 1 - ease;
-      craneGroup.position.x = FLOOR_W / 2 + 0.5 + ease * 8;
-      craneGroup.children.forEach(c => {
-        if (c.material) c.material.opacity = Math.max(0, 1 - ease * 1.5);
-      });
+      const ease = craneDisassemble * craneDisassemble;
+      craneGroup.scale.set(1 - ease * 0.5, 1 - ease, 1 - ease * 0.5);
+      craneGroup.position.x = FLOOR_W / 2 + 1.0 + ease * 12;
     } else {
-      craneGroup.scale.y = 1;
-      craneGroup.position.x = FLOOR_W / 2 + 0.5;
+      craneGroup.scale.set(1, 1, 1);
+      craneGroup.position.x = FLOOR_W / 2 + 1.0;
     }
   } else if (craneDisassemble >= 1) {
     craneGroup.visible = false;
