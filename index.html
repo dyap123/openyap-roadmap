@@ -2545,6 +2545,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
+renderer.localClippingEnabled = true;
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x000000, 0.008);
@@ -2598,8 +2599,10 @@ const stackMat = new THREE.MeshStandardMaterial({
 });
 const crnSolid = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.8, roughness: 0.25, emissive: 0x1a2030, emissiveIntensity: 0.02 });
 const crnDark = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.85, roughness: 0.3 });
-const crnLn = new THREE.LineBasicMaterial({ color: 0x556677 });
-const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending });
+// Clipping plane to hide mast above current construction level
+const mastClip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 2); // constant updated in animate
+const crnLn = new THREE.LineBasicMaterial({ color: 0x556677, clippingPlanes: [mastClip] });
+const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, clippingPlanes: [mastClip] });
 const crnCb = new THREE.LineBasicMaterial({ color: 0x667788 });
 const crnWarnMat = new THREE.MeshBasicMaterial({ color: 0xff2222 });
 const crnLedMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5 });
@@ -2983,9 +2986,12 @@ function animate() {
   // Crane: climbs with building, disassembles near end
   const topY = activeFloors * FLOOR_H;
   const craneDisassemble = Math.max(0, (scrollProgress - 0.78) / 0.12);
+  // Clip mast to current construction height (+ crane X offset for world space)
+  mastClip.constant = topY + 2;
+
   if (activeFloors > 2 && craneDisassemble < 1) {
     craneGroup.visible = true;
-    // Mast stays grounded — only slew rides up to track construction
+    // Mast stays grounded, clipped to topY — slew rides up
     const slewTargetY = topY + 1;
     craneSlew.position.y += (slewTargetY - craneSlew.position.y) * 0.06;
 
@@ -3302,7 +3308,7 @@ animate();
   var save = document.getElementById('edit-save');
   var editing = false;
 
-  // All editable selectors
+  // All editable selectors (includes dynamically rendered elements)
   var editables = [
     '.hero-title span',
     '.hero-tagline',
@@ -3320,6 +3326,19 @@ animate();
     '.equity-label',
     '.equity-sublabel',
     '.footer-line',
+    // Timeline (dynamically rendered from Google Sheets)
+    '.timeline-date',
+    '.timeline-title',
+    '.timeline-desc',
+    // Financial cards (dynamically rendered)
+    '.financial-card',
+    // Agreement accordion (dynamically rendered)
+    '.accordion-title',
+    '.accordion-body',
+    // KPI cards (dynamically rendered)
+    '.kpi-value',
+    '.kpi-title',
+    '.kpi-desc',
   ];
 
   function toggleEdit() {
