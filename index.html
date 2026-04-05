@@ -2520,8 +2520,8 @@ hook.rotation.z = Math.PI; craneSlew.add(hook);
 // Warning lights
 const wG = new THREE.SphereGeometry(0.06, 8, 8);
 const wMat1 = crnWarnMat.clone(), wMat2 = crnWarnMat.clone();
-craneSlew.add(Object.assign(new THREE.Mesh(wG, wMat1), { position: new THREE.Vector3(0, catTop + 0.12, 0) }));
-craneSlew.add(Object.assign(new THREE.Mesh(wG, wMat2), { position: new THREE.Vector3(CRANE_JL, craneTY + 0.8, 0) }));
+const wl1 = new THREE.Mesh(wG, wMat1); wl1.position.set(0, catTop + 0.12, 0); craneSlew.add(wl1);
+const wl2 = new THREE.Mesh(wG, wMat2); wl2.position.set(CRANE_JL, craneTY + 0.8, 0); craneSlew.add(wl2);
 // LED strips
 const ledG = new THREE.BoxGeometry(CRANE_JL, 0.012, 0.012);
 const ledMat = crnLedMat.clone();
