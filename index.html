@@ -2731,9 +2731,9 @@ const MW = 0.8;
 // Full-height mast lattice — stays grounded, slew rides up
 craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnLn));
 craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnGl));
-// Base cross (compact so it doesn't clip through building)
+// Base cross (inside building, compact)
 [0, Math.PI/2].forEach(r => {
-  const b = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.12, 0.2), crnSolid);
+  const b = new THREE.Mesh(new THREE.BoxGeometry(2, 0.12, 0.2), crnSolid);
   b.rotation.y = r; b.position.y = 0.06; craneGroup.add(b);
 });
 
@@ -2779,7 +2779,7 @@ const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(CRANE_JL/2, SY + 1.15
 const ls2 = ls1.clone(); ls2.position.z = -(JW/2 + 0.02); craneSlew.add(ls2);
 
 craneGroup.add(craneSlew);
-craneGroup.position.set(FLOOR_W / 2 + 2.5, 0, 0); // X offset — clear of building
+craneGroup.position.set(0, 0, 0); // centered in building
 craneGroup.visible = false;
 scene.add(craneGroup);
 
@@ -2993,6 +2993,10 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
 });
 
+// ======== FLOOR HIGHLIGHT (driven by agreement hover) ========
+// Set window.highlightFloors = {from, to} to glow a range, null to clear
+window.highlightFloors = null;
+
 // ======== ANIMATE ========
 const clock = new THREE.Clock();
 let logoAlpha = 0;
@@ -3010,8 +3014,18 @@ function animate() {
     if (f.currentScale > 0.01) {
       f.group.visible = true;
       f.group.scale.y = f.currentScale;
+
+      // Check if this floor is highlighted by agreement hover
+      const hl = window.highlightFloors;
+      const isHighlighted = hl && i >= hl.from && i <= hl.to;
+
+      if (isHighlighted) {
+        // Bright highlight — selected level
+        f.glass.material.emissive.setHex(0x60a0ff);
+        f.glass.material.emissiveIntensity = 0.9 + 0.3 * Math.sin(t * 4 + i * 0.15);
+      }
       // Active floor: bright pulsing glow
-      if (i === activeFloors - 1 && f.currentScale < 0.95) {
+      else if (i === activeFloors - 1 && f.currentScale < 0.95) {
         f.glass.material.emissive.setHex(0x5ba8f6);
         f.glass.material.emissiveIntensity = 1.2 * (1 - f.currentScale) + 0.3 * Math.sin(t * 6);
       }
@@ -3055,14 +3069,18 @@ function animate() {
     wMat2.color.setRGB(wp * 0.8, 0, 0);
     ledMat.opacity = 0.25 + 0.45 * Math.sin(t * 2);
 
-    // Disassembly: crane shrinks and slides out
+    // Disassembly: crane fades and lifts up (logo replaces it)
     if (craneDisassemble > 0) {
       const ease = craneDisassemble * craneDisassemble;
-      craneGroup.scale.set(1 - ease * 0.5, 1 - ease, 1 - ease * 0.5);
-      craneGroup.position.x = FLOOR_W / 2 + 2.5 + ease * 12;
+      craneGroup.scale.set(1 - ease * 0.6, 1 - ease * 0.3, 1 - ease * 0.6);
+      craneGroup.position.y = ease * 5; // lifts up
+      // Fade mast lines
+      crnLn.opacity = 1 - ease;
+      crnLn.transparent = true;
+      crnGl.opacity = 0.15 * (1 - ease);
     } else {
       craneGroup.scale.set(1, 1, 1);
-      craneGroup.position.x = FLOOR_W / 2 + 2.5;
+      craneGroup.position.set(0, 0, 0);
     }
   } else if (craneDisassemble >= 1) {
     craneGroup.visible = false;
@@ -3141,6 +3159,37 @@ animate();
       c.style.transform = '';
     }
   });
+})();
+</script>
+
+<!-- Agreement hover → building floor highlight -->
+<script>
+(function() {
+  var TOTAL = 45; // must match TOTAL_FLOORS in Three.js
+
+  // Use event delegation since accordion is dynamically rendered
+  document.addEventListener('mouseenter', function(e) {
+    var group = e.target.closest ? e.target.closest('.accordion-group') : null;
+    if (!group) return;
+    var accordion = document.getElementById('agreement-accordion');
+    if (!accordion) return;
+    var groups = Array.from(accordion.querySelectorAll('.accordion-group'));
+    var idx = groups.indexOf(group);
+    if (idx === -1) return;
+    var count = groups.length || 1;
+    var floorsPerGroup = Math.ceil(TOTAL / count);
+    window.highlightFloors = {
+      from: idx * floorsPerGroup,
+      to: Math.min(TOTAL - 1, (idx + 1) * floorsPerGroup - 1),
+    };
+  }, true);
+
+  document.addEventListener('mouseleave', function(e) {
+    var group = e.target.closest ? e.target.closest('.accordion-group') : null;
+    if (group) {
+      window.highlightFloors = null;
+    }
+  }, true);
 })();
 </script>
 
