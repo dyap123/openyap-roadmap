@@ -2570,8 +2570,8 @@ const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x000000, 0.008);
 
 const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(34, 20, 40);
-camera.lookAt(0, 16, 0);
+camera.position.set(24, 14, 28);
+camera.lookAt(0, 12, 0);
 
 // Lights
 const ambient = new THREE.AmbientLight(0x556688, 1.0);
@@ -3009,7 +3009,7 @@ function animate() {
   for (let i = 0; i < floorData.length; i++) {
     const f = floorData[i];
     f.targetScale = i < activeFloors ? 1 : 0;
-    f.currentScale += (f.targetScale - f.currentScale) * 0.08;
+    f.currentScale += (f.targetScale - f.currentScale) * 0.18;
 
     if (f.currentScale > 0.01) {
       f.group.visible = true;
@@ -3055,7 +3055,7 @@ function animate() {
     craneGroup.visible = true;
     // Mast stays grounded, clipped to topY — slew rides up
     const slewTargetY = topY + 1;
-    craneSlew.position.y += (slewTargetY - craneSlew.position.y) * 0.06;
+    craneSlew.position.y += (slewTargetY - craneSlew.position.y) * 0.15;
 
     // Normal crane operation
     craneSlew.rotation.y = t * 0.25;
@@ -3122,12 +3122,12 @@ function animate() {
     }
   });
 
-  // Camera: starts high enough to see full building, rises with construction
-  const camTargetY = 20 + topY * 0.4;
-  const lookY = 12 + topY * 0.5;
-  camera.position.x = 34 + Math.sin(t * 0.1) * 3;
-  camera.position.z = 40 + Math.cos(t * 0.08) * 2;
-  camera.position.y += (camTargetY - camera.position.y) * 0.03;
+  // Camera: closer, follows construction responsively
+  const camTargetY = 14 + topY * 0.4;
+  const lookY = 8 + topY * 0.5;
+  camera.position.x = 24 + Math.sin(t * 0.1) * 2;
+  camera.position.z = 28 + Math.cos(t * 0.08) * 1.5;
+  camera.position.y += (camTargetY - camera.position.y) * 0.1;
   camera.lookAt(0, lookY, 0);
 
   // No fade-out — building stays visible at end
