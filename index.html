@@ -2699,9 +2699,9 @@ const MW = 0.8;
 // Full-height mast lattice — stays grounded, slew rides up
 craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnLn));
 craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnGl));
-// Base cross
+// Base cross (compact so it doesn't clip through building)
 [0, Math.PI/2].forEach(r => {
-  const b = new THREE.Mesh(new THREE.BoxGeometry(4, 0.12, 0.2), crnSolid);
+  const b = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.12, 0.2), crnSolid);
   b.rotation.y = r; b.position.y = 0.06; craneGroup.add(b);
 });
 
@@ -2747,7 +2747,7 @@ const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(CRANE_JL/2, SY + 1.15
 const ls2 = ls1.clone(); ls2.position.z = -(JW/2 + 0.02); craneSlew.add(ls2);
 
 craneGroup.add(craneSlew);
-craneGroup.position.set(FLOOR_W / 2 + 1.0, 0, 0); // X offset from building; Y set dynamically
+craneGroup.position.set(FLOOR_W / 2 + 2.5, 0, 0); // X offset — clear of building
 craneGroup.visible = false;
 scene.add(craneGroup);
 
@@ -2887,29 +2887,56 @@ logoGroup.add(warmLight2);
 logoGroup.visible = false;
 scene.add(logoGroup);
 
-// ======== GROUND ========
-const groundGeo = new THREE.PlaneGeometry(80, 80);
-const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, metalness: 0.5, roughness: 0.8 });
+// ======== GROUND (minimal) ========
+const groundGeo = new THREE.PlaneGeometry(100, 100);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x050508, metalness: 0.6, roughness: 0.9 });
 const ground = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.01;
 scene.add(ground);
-const gridHelper = new THREE.GridHelper(60, 60, 0x080c14, 0x080c14);
-scene.add(gridHelper);
 
-// Material stacks around the base
-[
-  { x: 5, z: 5, sx: 1.5, sy: 0.6, sz: 1.0 },
-  { x: -5, z: 4, sx: 1.0, sy: 0.4, sz: 1.2 },
-  { x: 4, z: -4, sx: 1.2, sy: 0.5, sz: 0.8 },
-  { x: -4, z: -5, sx: 0.8, sy: 0.5, sz: 1.4 },
-  { x: 7, z: -1, sx: 0.6, sy: 0.3, sz: 0.6 },
-  { x: -7, z: 0, sx: 1.0, sy: 0.5, sz: 0.7 },
-].forEach(s => {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(s.sx, s.sy, s.sz), stackMat);
-  mesh.position.set(s.x, s.sy / 2, s.z);
-  scene.add(mesh);
+// ======== FLOATING NODE NETWORK (OpenYap brain aesthetic) ========
+const NODE_COUNT = 80;
+const nodePositions = [];
+const nodeGeo = new THREE.SphereGeometry(0.12, 8, 8);
+const nodeMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.6 });
+const nodeGroup = new THREE.Group();
+
+for (let i = 0; i < NODE_COUNT; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 12 + Math.random() * 30;
+  const y = Math.random() * 35;
+  const pos = new THREE.Vector3(
+    Math.cos(angle) * radius,
+    y,
+    Math.sin(angle) * radius
+  );
+  nodePositions.push(pos);
+  const node = new THREE.Mesh(nodeGeo, nodeMat.clone());
+  node.position.copy(pos);
+  // Vary node size by "importance"
+  const s = 0.5 + Math.random() * 1.0;
+  node.scale.set(s, s, s);
+  node.material.opacity = 0.2 + Math.random() * 0.4;
+  nodeGroup.add(node);
+}
+
+// Connect nearby nodes with lines (wikilink-style connections)
+const connectionMat = new THREE.LineBasicMaterial({
+  color: 0x3b82f6, transparent: true, opacity: 0.08
 });
+const CONNECTION_DIST = 10;
+for (let i = 0; i < NODE_COUNT; i++) {
+  for (let j = i + 1; j < NODE_COUNT; j++) {
+    const d = nodePositions[i].distanceTo(nodePositions[j]);
+    if (d < CONNECTION_DIST) {
+      const lineGeo = new THREE.BufferGeometry().setFromPoints([nodePositions[i], nodePositions[j]]);
+      const line = new THREE.Line(lineGeo, connectionMat);
+      nodeGroup.add(line);
+    }
+  }
+}
+scene.add(nodeGroup);
 
 // ======== PARTICLES — ring around the edges ========
 const PARTICLE_COUNT = 400;
@@ -3011,10 +3038,10 @@ function animate() {
     if (craneDisassemble > 0) {
       const ease = craneDisassemble * craneDisassemble;
       craneGroup.scale.set(1 - ease * 0.5, 1 - ease, 1 - ease * 0.5);
-      craneGroup.position.x = FLOOR_W / 2 + 1.0 + ease * 12;
+      craneGroup.position.x = FLOOR_W / 2 + 2.5 + ease * 12;
     } else {
       craneGroup.scale.set(1, 1, 1);
-      craneGroup.position.x = FLOOR_W / 2 + 1.0;
+      craneGroup.position.x = FLOOR_W / 2 + 2.5;
     }
   } else if (craneDisassemble >= 1) {
     craneGroup.visible = false;
@@ -3045,6 +3072,15 @@ function animate() {
     logoGroup.visible = false;
     logoAlpha = 0;
   }
+
+  // Node network slowly rotates around the building
+  nodeGroup.rotation.y = t * 0.02;
+  // Pulse node brightness
+  nodeGroup.children.forEach((child, i) => {
+    if (child.isMesh && child.material) {
+      child.material.opacity = (0.2 + Math.random() * 0.05) + 0.15 * Math.sin(t * 0.5 + i * 0.3);
+    }
+  });
 
   // Particles orbit around edges of the scene
   const pos = particleGeo.attributes.position.array;
