@@ -2329,29 +2329,30 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.01);
+scene.fog = new THREE.FogExp2(0x000000, 0.008);
 
 const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(30, 16, 34);
-camera.lookAt(0, 8, 0);
+camera.position.set(28, 8, 32);
+camera.lookAt(0, 6, 0);
 
 // Lights
 const ambient = new THREE.AmbientLight(0x556688, 1.0);
 scene.add(ambient);
 const dir = new THREE.DirectionalLight(0xccddff, 2.5);
-dir.position.set(10, 20, 15);
+dir.position.set(10, 30, 15);
 scene.add(dir);
 const rim = new THREE.DirectionalLight(0x3b82f6, 1.0);
 rim.position.set(-10, 5, -10);
 scene.add(rim);
-const point = new THREE.PointLight(0x5ba8f6, 3, 60);
-point.position.set(0, 25, 5);
-scene.add(point);
-const point2 = new THREE.PointLight(0x5ba8f6, 2, 45);
-point2.position.set(-10, 15, 3);
+// Dynamic point light that follows construction
+const followLight = new THREE.PointLight(0x5ba8f6, 4, 40);
+followLight.position.set(0, 10, 5);
+scene.add(followLight);
+const point2 = new THREE.PointLight(0x5ba8f6, 2, 50);
+point2.position.set(-8, 15, 3);
 scene.add(point2);
-const point3 = new THREE.PointLight(0x3b82f6, 1.5, 40);
-point3.position.set(12, 10, -4);
+const point3 = new THREE.PointLight(0x3b82f6, 1.5, 50);
+point3.position.set(10, 10, -6);
 scene.add(point3);
 
 // Materials
@@ -2369,9 +2370,6 @@ const frameMat = new THREE.MeshStandardMaterial({
 const edgeMat = new THREE.MeshStandardMaterial({
   color: 0x5ba8f6, metalness: 0.4, roughness: 0.3, emissive: 0x3b82f6, emissiveIntensity: 0.35,
 });
-const craneMat = new THREE.MeshStandardMaterial({
-  color: 0x4a5568, metalness: 0.8, roughness: 0.25,
-});
 const particleMat = new THREE.PointsMaterial({
   color: 0x5ba8f6, size: 0.15, transparent: true, opacity: 0.8,
   blending: THREE.AdditiveBlending, depthWrite: false,
@@ -2380,72 +2378,70 @@ const particleMat = new THREE.PointsMaterial({
 const stackMat = new THREE.MeshStandardMaterial({
   color: 0x222222, metalness: 0.4, roughness: 0.7,
 });
-
-// ---- Helper: create a building group with floors ----
-function createBuilding(totalFloors, floorH, floorW, floorD, posX, posZ) {
-  const bldg = new THREE.Group();
-  bldg.position.set(posX, 0, posZ);
-  const floorData = [];
-
-  for (let i = 0; i < totalFloors; i++) {
-    const group = new THREE.Group();
-    const y = i * floorH;
-
-    // Glass panel
-    const glassGeo = new THREE.BoxGeometry(floorW, floorH - 0.06, floorD);
-    const glass = new THREE.Mesh(glassGeo, glassMat.clone());
-    glass.position.y = y + floorH / 2;
-    group.add(glass);
-
-    // Floor slab (thin edge)
-    const slabGeo = new THREE.BoxGeometry(floorW + 0.1, 0.06, floorD + 0.1);
-    const slab = new THREE.Mesh(slabGeo, edgeMat);
-    slab.position.y = y;
-    group.add(slab);
-
-    // Frame columns at corners
-    const colGeo = new THREE.BoxGeometry(0.08, floorH, 0.08);
-    for (const cx of [-floorW/2, floorW/2]) {
-      for (const cz of [-floorD/2, floorD/2]) {
-        const col = new THREE.Mesh(colGeo, frameMat);
-        col.position.set(cx, y + floorH / 2, cz);
-        group.add(col);
-      }
-    }
-
-    // Window dividers
-    const divGeo = new THREE.BoxGeometry(0.03, floorH - 0.06, 0.03);
-    const divCount = Math.max(1, Math.round(floorW / 1.5));
-    for (let d = 1; d < divCount; d++) {
-      const xPos = -floorW/2 + d * (floorW / divCount);
-      const divZ = new THREE.Mesh(divGeo, frameMat);
-      divZ.position.set(xPos, y + floorH / 2, floorD / 2 + 0.01);
-      group.add(divZ);
-      const divZ2 = divZ.clone();
-      divZ2.position.z = -floorD / 2 - 0.01;
-      group.add(divZ2);
-    }
-
-    group.scale.set(1, 0, 1);
-    group.visible = false;
-    bldg.add(group);
-    floorData.push({ group, targetScale: 0, currentScale: 0 });
-  }
-
-  scene.add(bldg);
-  return { group: bldg, floors: floorData, totalFloors, floorH };
-}
-
-// ---- Lattice crane helpers ----
+const crnSolid = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.8, roughness: 0.25, emissive: 0x1a2030, emissiveIntensity: 0.02 });
+const crnDark = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.85, roughness: 0.3 });
 const crnLn = new THREE.LineBasicMaterial({ color: 0x556677 });
 const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending });
 const crnCb = new THREE.LineBasicMaterial({ color: 0x667788 });
-const crnSolid = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.8, roughness: 0.25, emissive: 0x1a2030, emissiveIntensity: 0.02 });
-const crnDark = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.85, roughness: 0.3 });
 const crnWarnMat = new THREE.MeshBasicMaterial({ color: 0xff2222 });
 const crnLedMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5 });
 const crnGlass = new THREE.MeshPhysicalMaterial({ color: 0x0a1a2e, metalness: 0.1, roughness: 0.05, transmission: 0.7, transparent: true, opacity: 0.8 });
 
+// ---- Helper: create a single building with floors that reveal on scroll ----
+const TOTAL_FLOORS = 40;
+const FLOOR_H = 0.7;
+const FLOOR_W = 6;
+const FLOOR_D = 4;
+
+const bldg = new THREE.Group();
+const floorData = [];
+
+for (let i = 0; i < TOTAL_FLOORS; i++) {
+  const group = new THREE.Group();
+  const y = i * FLOOR_H;
+
+  // Glass panel
+  const glassGeo = new THREE.BoxGeometry(FLOOR_W, FLOOR_H - 0.06, FLOOR_D);
+  const glass = new THREE.Mesh(glassGeo, glassMat.clone());
+  glass.position.y = y + FLOOR_H / 2;
+  group.add(glass);
+
+  // Floor slab (thin edge)
+  const slabGeo = new THREE.BoxGeometry(FLOOR_W + 0.12, 0.06, FLOOR_D + 0.12);
+  const slab = new THREE.Mesh(slabGeo, edgeMat);
+  slab.position.y = y;
+  group.add(slab);
+
+  // Frame columns at corners
+  const colGeo = new THREE.BoxGeometry(0.1, FLOOR_H, 0.1);
+  for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
+    for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
+      const col = new THREE.Mesh(colGeo, frameMat);
+      col.position.set(cx, y + FLOOR_H / 2, cz);
+      group.add(col);
+    }
+  }
+
+  // Window dividers
+  const divGeo = new THREE.BoxGeometry(0.03, FLOOR_H - 0.06, 0.03);
+  const divCount = Math.max(1, Math.round(FLOOR_W / 1.5));
+  for (let d = 1; d < divCount; d++) {
+    const xPos = -FLOOR_W/2 + d * (FLOOR_W / divCount);
+    for (const zSide of [FLOOR_D / 2 + 0.01, -FLOOR_D / 2 - 0.01]) {
+      const div = new THREE.Mesh(divGeo, frameMat);
+      div.position.set(xPos, y + FLOOR_H / 2, zSide);
+      group.add(div);
+    }
+  }
+
+  group.scale.set(1, 0, 1);
+  group.visible = false;
+  bldg.add(group);
+  floorData.push({ group, glass, targetScale: 0, currentScale: 0 });
+}
+scene.add(bldg);
+
+// ---- Crane helper functions ----
 function mkLn(pts, m) { return new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), m); }
 
 function sqLat(w, h, n) {
@@ -2472,178 +2468,164 @@ function hzLat(len, w, n, dir) {
   return p;
 }
 
-function createCrane(parentGroup, totalFloors, floorH) {
-  const crane = new THREE.Group();
-  const slew = new THREE.Group();
-  const MH = totalFloors * floorH + 2;
-  const MW = 0.4, JL = 8, CJL = 3, TY = MH;
+// ---- Single crane attached to building ----
+const craneGroup = new THREE.Group();
+const craneSlew = new THREE.Group();
+const CRANE_JL = 10, CRANE_CJL = 3.5;
+// Mast — will be repositioned dynamically based on active floor
+const craneMastH = TOTAL_FLOORS * FLOOR_H + 3;
+craneGroup.add(mkLn(sqLat(0.45, craneMastH, Math.round(craneMastH / 0.7)), crnLn));
+craneGroup.add(mkLn(sqLat(0.45, craneMastH, Math.round(craneMastH / 0.7)), crnGl));
+// Base cross
+[0, Math.PI/2].forEach(r => {
+  const b = new THREE.Mesh(new THREE.BoxGeometry(3, 0.07, 0.12), crnSolid);
+  b.rotation.y = r; b.position.y = 0.035; craneGroup.add(b);
+});
+// Slew unit
+const craneTY = craneMastH;
+const ch = mkLn(sqLat(0.28, 2.5, 3), crnLn);
+ch.position.y = craneTY; craneSlew.add(ch);
+const cab = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.45, 0.55), crnSolid);
+cab.position.set(0.14, craneTY + 0.22, 0); craneSlew.add(cab);
+const cabWin = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.18, 0.57), crnGlass);
+cabWin.position.set(0.14, craneTY + 0.38, 0); craneSlew.add(cabWin);
+// Main jib
+const jibG = new THREE.Group(); jibG.position.y = craneTY + 0.6;
+jibG.add(mkLn(hzLat(CRANE_JL, 0.22, 16, 1), crnLn));
+jibG.add(mkLn(hzLat(CRANE_JL, 0.22, 16, 1), crnGl));
+craneSlew.add(jibG);
+// Counter-jib
+const cjG = new THREE.Group(); cjG.position.y = craneTY + 0.6;
+cjG.add(mkLn(hzLat(CRANE_CJL, 0.22, 5, -1), crnLn));
+craneSlew.add(cjG);
+// Counterweight
+const cw = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.45, 0.45), crnDark);
+cw.position.set(-CRANE_CJL + 0.2, craneTY + 0.4, 0); craneSlew.add(cw);
+// Pendant lines
+const catTop = craneTY + 2.5;
+[[0,catTop,0, CRANE_JL,craneTY+0.6,0], [0,catTop,0, CRANE_JL*0.6,craneTY+0.6,0], [0,catTop,0, -CRANE_CJL,craneTY+0.6,0]].forEach(([a,b,c,d,e,f]) => {
+  craneSlew.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a,b,c), new THREE.Vector3(d,e,f)]), crnCb));
+});
+// Trolley + hook
+const trolley = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.09, 0.26), crnSolid);
+trolley.position.set(CRANE_JL * 0.5, craneTY + 0.5, 0); craneSlew.add(trolley);
+const hookBaseY = craneTY + 0.48, hookLen = 4;
+const hookCable = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,-hookLen,0)]), crnCb
+);
+hookCable.position.set(CRANE_JL * 0.5, hookBaseY, 0); craneSlew.add(hookCable);
+const hook = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.025, 6, 12, Math.PI * 1.5), crnSolid);
+hook.position.set(CRANE_JL * 0.5, hookBaseY - hookLen - 0.07, 0);
+hook.rotation.z = Math.PI; craneSlew.add(hook);
+// Warning lights
+const wG = new THREE.SphereGeometry(0.06, 8, 8);
+const wMat1 = crnWarnMat.clone(), wMat2 = crnWarnMat.clone();
+craneSlew.add(Object.assign(new THREE.Mesh(wG, wMat1), { position: new THREE.Vector3(0, catTop + 0.12, 0) }));
+craneSlew.add(Object.assign(new THREE.Mesh(wG, wMat2), { position: new THREE.Vector3(CRANE_JL, craneTY + 0.8, 0) }));
+// LED strips
+const ledG = new THREE.BoxGeometry(CRANE_JL, 0.012, 0.012);
+const ledMat = crnLedMat.clone();
+const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(CRANE_JL/2, craneTY + 0.72, 0.12); craneSlew.add(ls1);
+const ls2 = ls1.clone(); ls2.position.z = -0.12; craneSlew.add(ls2);
 
-  // Mast (fixed lattice tower)
-  crane.add(mkLn(sqLat(MW, MH, Math.round(MH / 0.7)), crnLn));
-  crane.add(mkLn(sqLat(MW, MH, Math.round(MH / 0.7)), crnGl));
-  // Base cross
-  [0, Math.PI/2].forEach(r => {
-    const b = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.07, 0.1), crnSolid);
-    b.rotation.y = r; b.position.y = 0.035; crane.add(b);
-  });
+craneGroup.add(craneSlew);
+craneGroup.position.set(FLOOR_W / 2 + 0.5, 0, 0);
+craneGroup.visible = false;
+scene.add(craneGroup);
 
-  // --- Slewing unit ---
-  // Cat head
-  const ch = mkLn(sqLat(0.25, 2, 3), crnLn);
-  ch.position.y = TY; slew.add(ch);
+// ======== OPENYAP LOGO (on rooftop) ========
+const logoGroup = new THREE.Group();
+// Create text texture via Canvas2D
+const logoCanvas = document.createElement('canvas');
+logoCanvas.width = 512; logoCanvas.height = 128;
+const ctx = logoCanvas.getContext('2d');
+ctx.fillStyle = 'transparent';
+ctx.clearRect(0, 0, 512, 128);
+ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+// Glow
+ctx.shadowColor = '#3B82F6';
+ctx.shadowBlur = 20;
+ctx.fillStyle = '#3B82F6';
+ctx.fillText('OpenYap', 256, 64);
+// Bright core
+ctx.shadowBlur = 8;
+ctx.fillStyle = '#FFFFFF';
+ctx.fillText('OpenYap', 256, 64);
 
-  // Operator cab
-  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.4, 0.5), crnSolid);
-  cab.position.set(0.12, TY + 0.2, 0); slew.add(cab);
-  const cabWin = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.16, 0.52), crnGlass);
-  cabWin.position.set(0.12, TY + 0.34, 0); slew.add(cabWin);
+const logoTexture = new THREE.CanvasTexture(logoCanvas);
+logoTexture.needsUpdate = true;
+const logoMat = new THREE.MeshBasicMaterial({
+  map: logoTexture, transparent: true, side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+});
+const logoPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), logoMat);
+const BLDG_TOP = TOTAL_FLOORS * FLOOR_H;
+logoPlane.position.set(0, BLDG_TOP + 2.2, 0);
+logoGroup.add(logoPlane);
 
-  // Main jib
-  const jibG = new THREE.Group(); jibG.position.y = TY + 0.5;
-  jibG.add(mkLn(hzLat(JL, 0.2, 14, 1), crnLn));
-  jibG.add(mkLn(hzLat(JL, 0.2, 14, 1), crnGl));
-  slew.add(jibG);
+// Rooftop structure (helipad / mechanical penthouse)
+const roofBase = new THREE.Mesh(
+  new THREE.BoxGeometry(FLOOR_W + 0.3, 0.15, FLOOR_D + 0.3),
+  edgeMat
+);
+roofBase.position.y = BLDG_TOP;
+logoGroup.add(roofBase);
+const penthouse = new THREE.Mesh(
+  new THREE.BoxGeometry(FLOOR_W * 0.4, 1.2, FLOOR_D * 0.4),
+  frameMat
+);
+penthouse.position.y = BLDG_TOP + 0.6;
+logoGroup.add(penthouse);
+// Logo pole
+const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5, 8), frameMat);
+pole.position.y = BLDG_TOP + 1.5;
+logoGroup.add(pole);
+// Point light for logo glow
+const logoLight = new THREE.PointLight(0x3b82f6, 0, 15);
+logoLight.position.set(0, BLDG_TOP + 2.5, 2);
+logoGroup.add(logoLight);
 
-  // Counter-jib
-  const cjG = new THREE.Group(); cjG.position.y = TY + 0.5;
-  cjG.add(mkLn(hzLat(CJL, 0.2, 5, -1), crnLn));
-  slew.add(cjG);
-
-  // Counterweight
-  const cw = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.4), crnDark);
-  cw.position.set(-CJL + 0.15, TY + 0.35, 0); slew.add(cw);
-
-  // Pendant lines
-  const catTop = TY + 2;
-  [[0,catTop,0, JL,TY+0.5,0], [0,catTop,0, JL*0.6,TY+0.5,0], [0,catTop,0, -CJL,TY+0.5,0]].forEach(([a,b,c,d,e,f]) => {
-    slew.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(a,b,c), new THREE.Vector3(d,e,f)
-    ]), crnCb));
-  });
-
-  // Trolley
-  const trolley = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.08, 0.24), crnSolid);
-  trolley.position.set(JL * 0.5, TY + 0.42, 0); slew.add(trolley);
-
-  // Hook cable + hook
-  const hookBaseY = TY + 0.4, hookLen = 3;
-  const hookCable = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,-hookLen,0)]), crnCb
-  );
-  hookCable.position.set(JL * 0.5, hookBaseY, 0); slew.add(hookCable);
-  const hook = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.02, 6, 12, Math.PI * 1.5), crnSolid);
-  hook.position.set(JL * 0.5, hookBaseY - hookLen - 0.06, 0);
-  hook.rotation.z = Math.PI; slew.add(hook);
-
-  // Warning lights
-  const wG = new THREE.SphereGeometry(0.05, 8, 8);
-  const wMat1 = crnWarnMat.clone(), wMat2 = crnWarnMat.clone();
-  const wl1 = new THREE.Mesh(wG, wMat1); wl1.position.set(0, catTop + 0.1, 0); slew.add(wl1);
-  const wl2 = new THREE.Mesh(wG, wMat2); wl2.position.set(JL, TY + 0.7, 0); slew.add(wl2);
-
-  // LED strips along jib
-  const ledG = new THREE.BoxGeometry(JL, 0.01, 0.01);
-  const ledMat = crnLedMat.clone();
-  const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(JL/2, TY + 0.62, 0.11); slew.add(ls1);
-  const ls2 = ls1.clone(); ls2.position.z = -0.11; slew.add(ls2);
-
-  crane.add(slew);
-  crane.visible = false;
-  parentGroup.add(crane);
-  return { crane, slew, trolley, hookCable, hook, wMat1, wMat2, ledMat, JL };
-}
-
-// ======== BUILDINGS — spread across a wide city block ========
-const FH = 0.7;
-const buildings = [
-  // Main cluster (center)
-  { floors: 30, w: 5,   d: 3.5, x: 0,   z: 0,   speed: 1.0  },  // hero tower
-  { floors: 22, w: 3.5, d: 3,   x: -8,  z: 1,   speed: 1.2  },  // mid-left
-  { floors: 15, w: 3,   d: 2.5, x: 7,   z: -5,  speed: 1.15 },  // mid-right behind
-
-  // Left wing
-  { floors: 12, w: 2.5, d: 2,   x: -16, z: 4,   speed: 1.5  },  // far left front
-  { floors: 18, w: 3,   d: 2.5, x: -20, z: -2,  speed: 1.3  },  // far left back
-  { floors: 6,  w: 2,   d: 2,   x: -13, z: -6,  speed: 1.7  },  // small left back
-
-  // Right wing
-  { floors: 20, w: 4,   d: 3,   x: 14,  z: 2,   speed: 1.1  },  // tall right
-  { floors: 10, w: 2.5, d: 2,   x: 20,  z: -3,  speed: 1.4  },  // far right
-  { floors: 8,  w: 2,   d: 1.8, x: 18,  z: 7,   speed: 1.6  },  // small right front
-
-  // Background row (distant)
-  { floors: 14, w: 3,   d: 2.5, x: -5,  z: -12, speed: 1.25 },
-  { floors: 10, w: 2.5, d: 2,   x: 5,   z: -14, speed: 1.45 },
-  { floors: 16, w: 3.5, d: 2.5, x: -18, z: -10, speed: 1.35 },
-];
-
-const bldgData = buildings.map(b => ({
-  ...createBuilding(b.floors, FH, b.w, b.d, b.x, b.z),
-  speed: b.speed,
-}));
-
-// ======== CRANES — 3 cranes across the site ========
-// Crane 1: on main tower
-const crane1 = createCrane(bldgData[0].group, 30, FH);
-// Crane 2: left cluster
-const crane2G = new THREE.Group(); crane2G.position.set(-12, 0, 2); scene.add(crane2G);
-const crane2 = createCrane(crane2G, 18, FH);
-// Crane 3: right wing
-const crane3G = new THREE.Group(); crane3G.position.set(16, 0, 0); scene.add(crane3G);
-const crane3 = createCrane(crane3G, 22, FH);
+logoGroup.visible = false;
+scene.add(logoGroup);
 
 // ======== GROUND ========
-
-const groundGeo = new THREE.PlaneGeometry(120, 120);
+const groundGeo = new THREE.PlaneGeometry(80, 80);
 const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, metalness: 0.5, roughness: 0.8 });
 const ground = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.01;
 scene.add(ground);
-
-const gridHelper = new THREE.GridHelper(80, 80, 0x111827, 0x111827);
-gridHelper.position.y = 0;
+const gridHelper = new THREE.GridHelper(60, 60, 0x111827, 0x111827);
 scene.add(gridHelper);
 
-// ======== MATERIAL STACKS (ground objects) — spread across site ========
-const stackPositions = [
-  // Center
-  { x: 4,   z: 5,   sx: 1.2, sy: 0.5, sz: 0.8 },
-  { x: -4,  z: 5,   sx: 0.8, sy: 0.4, sz: 1.0 },
-  { x: 3,   z: -3,  sx: 0.9, sy: 0.5, sz: 1.1 },
-  // Left wing
-  { x: -10, z: 7,   sx: 1.0, sy: 0.6, sz: 0.7 },
-  { x: -22, z: 3,   sx: 1.4, sy: 0.3, sz: 0.9 },
-  { x: -17, z: -7,  sx: 0.7, sy: 0.5, sz: 1.3 },
-  { x: -24, z: -4,  sx: 0.9, sy: 0.4, sz: 0.8 },
-  // Right wing
-  { x: 12,  z: 6,   sx: 0.6, sy: 0.4, sz: 0.6 },
-  { x: 22,  z: 1,   sx: 1.1, sy: 0.35, sz: 0.8 },
-  { x: 17,  z: -6,  sx: 0.8, sy: 0.6, sz: 1.0 },
-  { x: 24,  z: 5,   sx: 1.0, sy: 0.3, sz: 1.2 },
-  // Background
-  { x: -8,  z: -10, sx: 1.3, sy: 0.4, sz: 0.7 },
-  { x: 8,   z: -12, sx: 0.9, sy: 0.5, sz: 0.9 },
-];
-stackPositions.forEach(s => {
-  const geo = new THREE.BoxGeometry(s.sx, s.sy, s.sz);
-  const mesh = new THREE.Mesh(geo, stackMat);
+// Material stacks around the base
+[
+  { x: 5, z: 5, sx: 1.5, sy: 0.6, sz: 1.0 },
+  { x: -5, z: 4, sx: 1.0, sy: 0.4, sz: 1.2 },
+  { x: 4, z: -4, sx: 1.2, sy: 0.5, sz: 0.8 },
+  { x: -4, z: -5, sx: 0.8, sy: 0.5, sz: 1.4 },
+  { x: 7, z: -1, sx: 0.6, sy: 0.3, sz: 0.6 },
+  { x: -7, z: 0, sx: 1.0, sy: 0.5, sz: 0.7 },
+].forEach(s => {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(s.sx, s.sy, s.sz), stackMat);
   mesh.position.set(s.x, s.sy / 2, s.z);
   scene.add(mesh);
 });
 
-// ======== PARTICLES — spread across entire visible area ========
-const PARTICLE_COUNT = 800;
+// ======== PARTICLES ========
+const PARTICLE_COUNT = 600;
 const particleGeo = new THREE.BufferGeometry();
 const particlePos = new Float32Array(PARTICLE_COUNT * 3);
 const particleVel = new Float32Array(PARTICLE_COUNT * 3);
 for (let i = 0; i < PARTICLE_COUNT; i++) {
-  particlePos[i*3] = (Math.random() - 0.5) * 70;
-  particlePos[i*3+1] = Math.random() * 20;
-  particlePos[i*3+2] = (Math.random() - 0.5) * 50;
-  particleVel[i*3] = (Math.random() - 0.5) * 0.03;
+  particlePos[i*3] = (Math.random() - 0.5) * 20;
+  particlePos[i*3+1] = Math.random() * 15;
+  particlePos[i*3+2] = (Math.random() - 0.5) * 15;
+  particleVel[i*3] = (Math.random() - 0.5) * 0.02;
   particleVel[i*3+1] = Math.random() * 0.04 + 0.01;
-  particleVel[i*3+2] = (Math.random() - 0.5) * 0.03;
+  particleVel[i*3+2] = (Math.random() - 0.5) * 0.02;
 }
 particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
 const particles = new THREE.Points(particleGeo, particleMat);
@@ -2651,13 +2633,14 @@ scene.add(particles);
 
 // ======== SCROLL STATE ========
 let scrollProgress = 0;
-const docHeight = () => document.documentElement.scrollHeight - window.innerHeight;
+let activeFloors = 0;
+const docHeight = () => Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
 
 window.addEventListener('scroll', () => {
   scrollProgress = Math.min(1, window.scrollY / docHeight());
-  bldgData.forEach(b => {
-    b.activeFloors = Math.floor(Math.min(1, scrollProgress * b.speed) * b.totalFloors);
-  });
+  // Map scroll 0-0.9 to building floors, 0.9-1.0 for logo reveal
+  const buildProgress = Math.min(1, scrollProgress / 0.9);
+  activeFloors = Math.floor(buildProgress * TOTAL_FLOORS);
 }, { passive: true });
 
 // Show canvas after load
@@ -2671,90 +2654,94 @@ window.addEventListener('resize', () => {
 });
 
 // ======== ANIMATE ========
-function animateBuilding(bldgData, activeCount) {
-  for (let i = 0; i < bldgData.floors.length; i++) {
-    const f = bldgData.floors[i];
-    f.targetScale = i <= activeCount ? 1 : 0;
+const clock = new THREE.Clock();
+let logoAlpha = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Build floors based on scroll
+  for (let i = 0; i < floorData.length; i++) {
+    const f = floorData[i];
+    f.targetScale = i < activeFloors ? 1 : 0;
     f.currentScale += (f.targetScale - f.currentScale) * 0.08;
 
     if (f.currentScale > 0.01) {
       f.group.visible = true;
       f.group.scale.y = f.currentScale;
-      if (i === activeCount && f.currentScale < 0.95) {
-        f.group.children[0].material.emissive = new THREE.Color(0x5ba8f6);
-        f.group.children[0].material.emissiveIntensity = 0.6 * (1 - f.currentScale);
+      // Glow on the floor being built
+      if (i === activeFloors - 1 && f.currentScale < 0.95) {
+        f.glass.material.emissive.setHex(0x5ba8f6);
+        f.glass.material.emissiveIntensity = 0.8 * (1 - f.currentScale);
       } else {
-        f.group.children[0].material.emissiveIntensity = 0;
+        f.glass.material.emissiveIntensity = 0.15;
       }
     } else {
       f.group.visible = false;
     }
   }
-}
 
-function animateCrane(craneData, activeCount, floorH, t, rotSpeed) {
-  if (activeCount > 2) {
-    craneData.crane.visible = true;
-    // Slewing rotation
-    craneData.slew.rotation.y = t * rotSpeed;
-    // Trolley slides back and forth along jib
-    const tx = craneData.JL * (0.3 + 0.35 * Math.sin(t * 0.4 + rotSpeed));
-    craneData.trolley.position.x = tx;
-    craneData.hookCable.position.x = tx;
-    craneData.hook.position.x = tx;
-    // Hook sway
-    craneData.hook.position.z = Math.sin(t * 0.7 + rotSpeed * 2) * 0.12;
+  // Show crane once construction starts
+  const topY = activeFloors * FLOOR_H;
+  if (activeFloors > 2) {
+    craneGroup.visible = true;
+    craneSlew.rotation.y = t * 0.25;
+    const tx = CRANE_JL * (0.3 + 0.3 * Math.sin(t * 0.35));
+    trolley.position.x = tx;
+    hookCable.position.x = tx;
+    hook.position.x = tx;
+    hook.position.z = Math.sin(t * 0.6) * 0.1;
     // Warning lights pulse
     const wp = 0.3 + 0.7 * Math.sin(t * 4);
-    craneData.wMat1.color.setRGB(wp, 0, 0);
-    craneData.wMat2.color.setRGB(wp * 0.8, 0, 0);
-    // LED glow pulse
-    craneData.ledMat.opacity = 0.25 + 0.45 * Math.sin(t * 2 + rotSpeed);
+    wMat1.color.setRGB(wp, 0, 0);
+    wMat2.color.setRGB(wp * 0.8, 0, 0);
+    ledMat.opacity = 0.25 + 0.45 * Math.sin(t * 2);
   }
-}
 
-const clock = new THREE.Clock();
-function animate() {
-  requestAnimationFrame(animate);
-  const t = clock.getElapsedTime();
+  // Follow light tracks construction
+  followLight.position.y = topY + 3;
 
-  // Build all structures
-  animateBuilding(mainBldg, mainActive);
-  animateBuilding(secBldg, secActive);
-  animateBuilding(thirdBldg, thirdActive);
-  animateBuilding(fourthBldg, fourthActive);
-  animateBuilding(fifthBldg, fifthActive);
+  // Logo reveal when building is complete (scroll > 0.9)
+  const logoProgress = Math.max(0, (scrollProgress - 0.88) / 0.12);
+  if (logoProgress > 0) {
+    logoGroup.visible = true;
+    logoAlpha += (logoProgress - logoAlpha) * 0.05;
+    logoMat.opacity = logoAlpha;
+    logoLight.intensity = logoAlpha * 8;
+    // Logo gently bobs
+    logoPlane.position.y = BLDG_TOP + 2.2 + Math.sin(t * 0.8) * 0.15;
+    // Logo always faces camera
+    logoPlane.lookAt(camera.position);
+  } else {
+    logoGroup.visible = false;
+    logoAlpha = 0;
+  }
 
-  // Cranes
-  animateCrane(crane1, mainActive, MAIN_H, t, 0.3);
-  animateCrane(crane2, Math.max(mainActive, secActive), MAIN_H, t, -0.2);
-
-  // Particles — float up across the wider construction site
+  // Particles float up around construction zone
   const pos = particleGeo.attributes.position.array;
-  const topY = mainActive * MAIN_H;
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     pos[i*3] += particleVel[i*3];
     pos[i*3+1] += particleVel[i*3+1];
     pos[i*3+2] += particleVel[i*3+2];
-    if (pos[i*3+1] > topY + 12 || Math.abs(pos[i*3]) > 25) {
-      pos[i*3] = (Math.random() - 0.5) * 36;
-      pos[i*3+1] = topY - 4 + Math.random() * 8;
-      pos[i*3+2] = (Math.random() - 0.5) * 20;
+    if (pos[i*3+1] > topY + 10 || Math.abs(pos[i*3]) > 15) {
+      pos[i*3] = (Math.random() - 0.5) * 16;
+      pos[i*3+1] = Math.max(0, topY - 5) + Math.random() * 8;
+      pos[i*3+2] = (Math.random() - 0.5) * 12;
     }
   }
   particleGeo.attributes.position.needsUpdate = true;
-  particleMat.opacity = 0.5 + 0.3 * Math.sin(t * 2);
+  particleMat.opacity = 0.4 + 0.3 * Math.sin(t * 2);
 
-  // Gentle camera sway — wider orbit, looking at center of site
-  camera.position.x = 30 + Math.sin(t * 0.12) * 3;
-  camera.position.z = 34 + Math.cos(t * 0.1) * 2;
-  camera.position.y = 16 + scrollProgress * 10 + Math.sin(t * 0.18) * 0.5;
-  camera.lookAt(0, 4 + scrollProgress * 12, 0);
+  // Camera: rises with the building, orbits gently
+  const camTargetY = 6 + topY * 0.45;
+  const lookY = 3 + topY * 0.55;
+  camera.position.x = 26 + Math.sin(t * 0.1) * 3;
+  camera.position.z = 30 + Math.cos(t * 0.08) * 2;
+  camera.position.y += (camTargetY - camera.position.y) * 0.03;
+  camera.lookAt(0, lookY, 0);
 
-  // Fade building opacity based on scroll
-  const buildingOpacity = scrollProgress > 0.85 ? 1 - (scrollProgress - 0.85) / 0.15 : 1;
-  canvas.style.opacity = buildingOpacity;
-
+  // No fade-out — building stays visible at end
   renderer.render(scene, camera);
 }
 animate();
