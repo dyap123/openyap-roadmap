@@ -2563,15 +2563,15 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true 
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.4;
 renderer.localClippingEnabled = true;
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x000000, 0.008);
 
 const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(32, 18, 38);
-camera.lookAt(0, 12, 0);
+camera.position.set(34, 20, 40);
+camera.lookAt(0, 16, 0);
 
 // Lights
 const ambient = new THREE.AmbientLight(0x556688, 1.0);
@@ -2583,30 +2583,34 @@ const rim = new THREE.DirectionalLight(0x3b82f6, 1.0);
 rim.position.set(-10, 5, -10);
 scene.add(rim);
 // Dynamic point light that follows construction
-const followLight = new THREE.PointLight(0x5ba8f6, 4, 40);
-followLight.position.set(0, 10, 5);
+const followLight = new THREE.PointLight(0x5ba8f6, 6, 50);
+followLight.position.set(0, 10, 6);
 scene.add(followLight);
-const point2 = new THREE.PointLight(0x5ba8f6, 2, 50);
-point2.position.set(-8, 15, 3);
+const point2 = new THREE.PointLight(0x5ba8f6, 3, 60);
+point2.position.set(-10, 20, 4);
 scene.add(point2);
-const point3 = new THREE.PointLight(0x3b82f6, 1.5, 50);
-point3.position.set(10, 10, -6);
+const point3 = new THREE.PointLight(0x3b82f6, 2.5, 60);
+point3.position.set(12, 15, -8);
 scene.add(point3);
+// Uplight from ground — dramatic blue wash
+const upLight = new THREE.PointLight(0x2060c0, 3, 50);
+upLight.position.set(0, -2, 0);
+scene.add(upLight);
 
 // Materials
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0x152540, metalness: 0.2, roughness: 0.05,
-  transmission: 0.4, thickness: 0.5, ior: 1.5,
-  transparent: true, opacity: 0.92,
-  emissive: 0x1a3a6a, emissiveIntensity: 0.25,
-  envMapIntensity: 0.6,
+  color: 0x0e1e38, metalness: 0.2, roughness: 0.05,
+  transmission: 0.35, thickness: 0.5, ior: 1.5,
+  transparent: true, opacity: 0.93,
+  emissive: 0x2050a0, emissiveIntensity: 0.35,
+  envMapIntensity: 0.8,
 });
 const frameMat = new THREE.MeshStandardMaterial({
-  color: 0x1e3450, metalness: 0.75, roughness: 0.2,
-  emissive: 0x1a3050, emissiveIntensity: 0.15,
+  color: 0x1a2e4a, metalness: 0.8, roughness: 0.15,
+  emissive: 0x1a3a6a, emissiveIntensity: 0.2,
 });
 const edgeMat = new THREE.MeshStandardMaterial({
-  color: 0x4a90e6, metalness: 0.4, roughness: 0.3, emissive: 0x3b82f6, emissiveIntensity: 0.5,
+  color: 0x5a9ef6, metalness: 0.35, roughness: 0.25, emissive: 0x3b82f6, emissiveIntensity: 0.7,
 });
 const stackMat = new THREE.MeshStandardMaterial({
   color: 0x222222, metalness: 0.4, roughness: 0.7,
@@ -2623,10 +2627,10 @@ const crnLedMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: tr
 const crnGlass = new THREE.MeshPhysicalMaterial({ color: 0x0a1a2e, metalness: 0.1, roughness: 0.05, transmission: 0.7, transparent: true, opacity: 0.8 });
 
 // ---- Helper: create a single building with floors that reveal on scroll ----
-const TOTAL_FLOORS = 40;
-const FLOOR_H = 0.7;
-const FLOOR_W = 6;
-const FLOOR_D = 4;
+const TOTAL_FLOORS = 45;
+const FLOOR_H = 0.9;
+const FLOOR_W = 8;
+const FLOOR_D = 5.5;
 
 const bldg = new THREE.Group();
 const floorData = [];
@@ -2666,6 +2670,20 @@ for (let i = 0; i < TOTAL_FLOORS; i++) {
       const div = new THREE.Mesh(divGeo, frameMat);
       div.position.set(xPos, y + FLOOR_H / 2, zSide);
       group.add(div);
+    }
+  }
+
+  // Glowing vertical edge strips at corners
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0x3b82f6, transparent: true, opacity: 0.3,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const stripGeo = new THREE.BoxGeometry(0.04, FLOOR_H, 0.04);
+  for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
+    for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
+      const strip = new THREE.Mesh(stripGeo, glowMat);
+      strip.position.set(cx, y + FLOOR_H / 2, cz);
+      group.add(strip);
     }
   }
 
@@ -2992,12 +3010,21 @@ function animate() {
     if (f.currentScale > 0.01) {
       f.group.visible = true;
       f.group.scale.y = f.currentScale;
-      // Glow on the floor being built
+      // Active floor: bright pulsing glow
       if (i === activeFloors - 1 && f.currentScale < 0.95) {
         f.glass.material.emissive.setHex(0x5ba8f6);
-        f.glass.material.emissiveIntensity = 0.8 * (1 - f.currentScale);
-      } else {
-        f.glass.material.emissiveIntensity = 0.15;
+        f.glass.material.emissiveIntensity = 1.2 * (1 - f.currentScale) + 0.3 * Math.sin(t * 6);
+      }
+      // Recently built floors: fade glow
+      else if (i >= activeFloors - 4 && i < activeFloors - 1) {
+        const fadeGlow = 0.15 + 0.2 * ((activeFloors - 1 - i) < 3 ? (3 - (activeFloors - 1 - i)) / 3 : 0);
+        f.glass.material.emissive.setHex(0x3060b0);
+        f.glass.material.emissiveIntensity = fadeGlow;
+      }
+      // Rest: subtle ambient glow
+      else {
+        f.glass.material.emissive.setHex(0x2050a0);
+        f.glass.material.emissiveIntensity = 0.2 + 0.05 * Math.sin(t * 0.5 + i * 0.2);
       }
     } else {
       f.group.visible = false;
@@ -3041,8 +3068,9 @@ function animate() {
     craneGroup.visible = false;
   }
 
-  // Follow light tracks construction
-  followLight.position.y = topY + 3;
+  // Follow light tracks construction — pulses near active floor
+  followLight.position.y = topY + 4;
+  followLight.intensity = 6 + 2 * Math.sin(t * 3);
 
   // Logo + rooftop reveal when building is complete (scroll > 0.88)
   const logoProgress = Math.max(0, (scrollProgress - 0.88) / 0.12);
@@ -3077,10 +3105,10 @@ function animate() {
   });
 
   // Camera: starts high enough to see full building, rises with construction
-  const camTargetY = 18 + topY * 0.35;
-  const lookY = 10 + topY * 0.45;
-  camera.position.x = 32 + Math.sin(t * 0.1) * 3;
-  camera.position.z = 38 + Math.cos(t * 0.08) * 2;
+  const camTargetY = 20 + topY * 0.4;
+  const lookY = 12 + topY * 0.5;
+  camera.position.x = 34 + Math.sin(t * 0.1) * 3;
+  camera.position.z = 40 + Math.cos(t * 0.08) * 2;
   camera.position.y += (camTargetY - camera.position.y) * 0.03;
   camera.lookAt(0, lookY, 0);
 
