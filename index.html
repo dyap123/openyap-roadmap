@@ -1502,6 +1502,63 @@ body::after {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
   will-change: transform;
 }
+
+/* ===== INLINE EDITOR ===== */
+#edit-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(17,17,17,0.7);
+  backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+#edit-toggle:hover { background: rgba(30,30,30,0.9); color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.15); }
+#edit-toggle.active { background: rgba(59,130,246,0.2); color: #3B82F6; border-color: rgba(59,130,246,0.4); }
+
+#edit-save {
+  position: fixed;
+  top: 12px;
+  right: 52px;
+  z-index: 9999;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(59,130,246,0.4);
+  background: rgba(59,130,246,0.15);
+  backdrop-filter: blur(8px);
+  color: #3B82F6;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+#edit-save:hover { background: rgba(59,130,246,0.3); }
+#edit-save.visible { display: flex; }
+
+[contenteditable="true"] {
+  outline: 1px dashed rgba(59,130,246,0.3);
+  outline-offset: 4px;
+  border-radius: 4px;
+  min-width: 20px;
+}
+[contenteditable="true"]:focus {
+  outline-color: rgba(59,130,246,0.6);
+}
 </style>
 </head>
 <body>
@@ -1513,7 +1570,8 @@ body::after {
   ╚══════════════════════════════════════════════════════════╝
 -->
 <script id="site-config">
-window.SITE_TEXT = {
+// Load saved edits from localStorage, or use defaults
+window.SITE_TEXT = JSON.parse(localStorage.getItem('openyap_site_text')) || {
   // ---- HERO SECTION ----
   heroTitle: 'OpenYap',
   heroTagline: 'Machine learning infrastructure for construction.<br>Built in-house. Running in production. Ready to scale.',
@@ -2632,20 +2690,20 @@ function hzLat(len, w, n, dir) {
 const craneGroup = new THREE.Group();
 const craneSlew = new THREE.Group();
 const CRANE_JL = 14, CRANE_CJL = 5;
-const craneMastVisibleH = 10; // only show ~14 floors of mast (rest hidden behind building)
+const craneMastH = TOTAL_FLOORS * FLOOR_H + 5; // full height mast — base always at ground
 const MW = 0.8;
 
-// Short mast section — repositioned dynamically in animate loop
-craneGroup.add(mkLn(sqLat(MW, craneMastVisibleH, Math.round(craneMastVisibleH / 0.8)), crnLn));
-craneGroup.add(mkLn(sqLat(MW, craneMastVisibleH, Math.round(craneMastVisibleH / 0.8)), crnGl));
+// Full-height mast lattice — stays grounded, slew rides up
+craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnLn));
+craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnGl));
 // Base cross
 [0, Math.PI/2].forEach(r => {
   const b = new THREE.Mesh(new THREE.BoxGeometry(4, 0.12, 0.2), crnSolid);
   b.rotation.y = r; b.position.y = 0.06; craneGroup.add(b);
 });
 
-// Slewing unit — positioned relative to mast top (Y=craneMastVisibleH)
-const SY = craneMastVisibleH; // slew base Y (local to craneGroup)
+// Slewing unit — starts at SY, moved dynamically via craneSlew.position.y
+const SY = 0; // base offset within slew group (slew.position.y moves it)
 const ch = mkLn(sqLat(0.5, 3.5, 4), crnLn);
 ch.position.y = SY; craneSlew.add(ch);
 const cab = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.0), crnSolid);
@@ -2927,9 +2985,9 @@ function animate() {
   const craneDisassemble = Math.max(0, (scrollProgress - 0.78) / 0.12);
   if (activeFloors > 2 && craneDisassemble < 1) {
     craneGroup.visible = true;
-    // Crane Y tracks the top of construction — mast extends down behind building
-    const craneTargetY = Math.max(0, topY - craneMastVisibleH + 2);
-    craneGroup.position.y += (craneTargetY - craneGroup.position.y) * 0.06;
+    // Mast stays grounded — only slew rides up to track construction
+    const slewTargetY = topY + 1;
+    craneSlew.position.y += (slewTargetY - craneSlew.position.y) * 0.06;
 
     // Normal crane operation
     craneSlew.rotation.y = t * 0.25;
@@ -3232,6 +3290,165 @@ animate();
     requestAnimationFrame(render);
   }
   render();
+})();
+</script>
+
+<!-- ===== INLINE EDITOR ===== -->
+<button id="edit-toggle" title="Edit text">&#9998;</button>
+<button id="edit-save" title="Save changes">SAVE</button>
+<script>
+(function() {
+  var btn = document.getElementById('edit-toggle');
+  var save = document.getElementById('edit-save');
+  var editing = false;
+
+  // All editable selectors
+  var editables = [
+    '.hero-title span',
+    '.hero-tagline',
+    '.stat-value',
+    '.stat-label',
+    '.section-label',
+    '.section-headline',
+    '.overview-narrative p',
+    '.equity-legend-item',
+    '.rev-bar-value',
+    '.rev-bar-label',
+    '.key-stat-value',
+    '.key-stat-label',
+    '.equity-circle',
+    '.equity-label',
+    '.equity-sublabel',
+    '.footer-line',
+  ];
+
+  function toggleEdit() {
+    editing = !editing;
+    btn.classList.toggle('active', editing);
+    save.classList.toggle('visible', editing);
+
+    var sel = editables.join(',');
+    document.querySelectorAll(sel).forEach(function(el) {
+      if (editing) {
+        el.contentEditable = 'true';
+      } else {
+        el.removeAttribute('contenteditable');
+      }
+    });
+  }
+
+  function saveEdits() {
+    // Read current DOM text back into SITE_TEXT
+    var T = window.SITE_TEXT;
+
+    var ht = document.querySelector('.hero-title span');
+    if (ht) T.heroTitle = ht.textContent;
+    var htag = document.querySelector('.hero-tagline');
+    if (htag) T.heroTagline = htag.innerHTML;
+
+    // Hero stats
+    var pills = document.querySelectorAll('.stat-pill');
+    T.heroStats = Array.from(pills).map(function(p) {
+      return {
+        value: p.querySelector('.stat-value').textContent,
+        label: p.querySelector('.stat-label').textContent,
+      };
+    });
+
+    // Overview
+    var ol = document.querySelector('#overview-section .section-label');
+    if (ol) T.overviewLabel = ol.textContent;
+    var oh = document.querySelector('#overview-section .section-headline');
+    if (oh) T.overviewHeadline = oh.innerHTML;
+    var paras = document.querySelectorAll('.overview-narrative p');
+    T.overviewParagraphs = Array.from(paras).map(function(p) { return p.innerHTML; });
+
+    // Key stats
+    var ksvs = document.querySelectorAll('.key-stat-value');
+    var ksls = document.querySelectorAll('.key-stat-label');
+    if (ksvs.length) {
+      T.keyStats = Array.from(ksvs).map(function(v, i) {
+        return {
+          value: v.textContent,
+          label: ksls[i] ? ksls[i].textContent : '',
+          style: v.classList.contains('gold') ? 'gold' : 'red',
+        };
+      });
+    }
+
+    // Revenue chart
+    var rvs = document.querySelectorAll('.rev-bar-value');
+    var rls = document.querySelectorAll('.rev-bar-label');
+    if (rvs.length) {
+      T.revenueChart = Array.from(rvs).map(function(v, i) {
+        var bar = document.getElementById('revbar-' + i);
+        return {
+          value: v.textContent,
+          label: rls[i] ? rls[i].innerHTML : '',
+          color: bar ? bar.style.background : '#34D399',
+        };
+      });
+    }
+
+    // Financials
+    var fl = document.querySelector('#financials-section .section-label');
+    if (fl) T.financialsLabel = fl.textContent;
+    var fh = document.querySelector('#financials-section .section-headline');
+    if (fh) T.financialsHeadline = fh.innerHTML;
+
+    // Timeline
+    var tl = document.querySelector('#timeline-section .section-label');
+    if (tl) T.timelineLabel = tl.textContent;
+    var th = document.querySelector('#timeline-section .section-headline');
+    if (th) T.timelineHeadline = th.innerHTML;
+
+    // Equity section
+    var eql = document.querySelector('#equity-section .section-label');
+    if (eql) T.equityLabel = eql.textContent;
+    var eqh = document.querySelector('#equity-section .section-headline');
+    if (eqh) T.equityHeadline = eqh.innerHTML;
+    var ecs = document.querySelectorAll('.equity-circle-wrap');
+    if (ecs.length) {
+      T.equityCircles = Array.from(ecs).map(function(w) {
+        var c = w.querySelector('.equity-circle');
+        return {
+          pct: c ? c.textContent : '',
+          name: w.querySelector('.equity-label') ? w.querySelector('.equity-label').textContent : '',
+          role: w.querySelector('.equity-sublabel') ? w.querySelector('.equity-sublabel').textContent : '',
+          size: c && c.classList.contains('small') ? 'small' : 'large',
+        };
+      });
+    }
+
+    // Agreement
+    var al = document.querySelector('#agreement-section .section-label');
+    if (al) T.agreementLabel = al.textContent;
+    var ah = document.querySelector('#agreement-section .section-headline');
+    if (ah) T.agreementHeadline = ah.innerHTML;
+
+    // Footer
+    var fls = document.querySelectorAll('.footer-line');
+    if (fls.length) T.footerLines = Array.from(fls).map(function(f) { return f.innerHTML; });
+
+    // Save to localStorage
+    localStorage.setItem('openyap_site_text', JSON.stringify(T));
+
+    // Exit edit mode
+    toggleEdit();
+
+    // Brief flash to confirm
+    save.textContent = 'SAVED';
+    save.style.color = '#34D399';
+    save.style.borderColor = 'rgba(52,211,153,0.4)';
+    setTimeout(function() {
+      save.textContent = 'SAVE';
+      save.style.color = '';
+      save.style.borderColor = '';
+    }, 1200);
+  }
+
+  btn.addEventListener('click', toggleEdit);
+  save.addEventListener('click', saveEdits);
 })();
 </script>
 </body>
