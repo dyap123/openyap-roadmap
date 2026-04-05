@@ -2565,27 +2565,103 @@ const BLDG_TOP = TOTAL_FLOORS * FLOOR_H;
 logoPlane.position.set(0, BLDG_TOP + 2.2, 0);
 logoGroup.add(logoPlane);
 
-// Rooftop structure (helipad / mechanical penthouse)
+// ---- Finished rooftop ----
+// Roof cap slab with glowing edge
 const roofBase = new THREE.Mesh(
-  new THREE.BoxGeometry(FLOOR_W + 0.3, 0.15, FLOOR_D + 0.3),
-  edgeMat
+  new THREE.BoxGeometry(FLOOR_W + 0.4, 0.2, FLOOR_D + 0.4), edgeMat
 );
 roofBase.position.y = BLDG_TOP;
 logoGroup.add(roofBase);
-const penthouse = new THREE.Mesh(
-  new THREE.BoxGeometry(FLOOR_W * 0.4, 1.2, FLOOR_D * 0.4),
-  frameMat
+
+// Mechanical penthouse (glass + frame)
+const phBase = new THREE.Mesh(new THREE.BoxGeometry(FLOOR_W * 0.5, 0.08, FLOOR_D * 0.5), edgeMat);
+phBase.position.y = BLDG_TOP + 0.2;
+logoGroup.add(phBase);
+const phGlass = new THREE.Mesh(
+  new THREE.BoxGeometry(FLOOR_W * 0.45, 1.4, FLOOR_D * 0.45),
+  glassMat.clone()
 );
-penthouse.position.y = BLDG_TOP + 0.6;
-logoGroup.add(penthouse);
-// Logo pole
-const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5, 8), frameMat);
-pole.position.y = BLDG_TOP + 1.5;
-logoGroup.add(pole);
-// Point light for logo glow
-const logoLight = new THREE.PointLight(0x3b82f6, 0, 15);
-logoLight.position.set(0, BLDG_TOP + 2.5, 2);
+phGlass.position.y = BLDG_TOP + 0.9;
+logoGroup.add(phGlass);
+const phCap = new THREE.Mesh(new THREE.BoxGeometry(FLOOR_W * 0.5, 0.08, FLOOR_D * 0.5), edgeMat);
+phCap.position.y = BLDG_TOP + 1.6;
+logoGroup.add(phCap);
+
+// Antenna spire
+const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.06, 2.5, 8), frameMat);
+spire.position.y = BLDG_TOP + 2.85;
+logoGroup.add(spire);
+// Spire tip light
+const spireLight = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8),
+  new THREE.MeshBasicMaterial({ color: 0x3b82f6 })
+);
+spireLight.position.y = BLDG_TOP + 4.1;
+logoGroup.add(spireLight);
+
+// Helipad circle on roof
+const heliGeo = new THREE.RingGeometry(0.6, 0.7, 32);
+const heliMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
+const helipad = new THREE.Mesh(heliGeo, heliMat);
+helipad.rotation.x = -Math.PI / 2;
+helipad.position.set(FLOOR_W * 0.15, BLDG_TOP + 0.21, -FLOOR_D * 0.15);
+logoGroup.add(helipad);
+// H mark
+const hGeo = new THREE.PlaneGeometry(0.5, 0.5);
+const hCanvas = document.createElement('canvas');
+hCanvas.width = 64; hCanvas.height = 64;
+const hCtx = hCanvas.getContext('2d');
+hCtx.clearRect(0, 0, 64, 64);
+hCtx.font = 'bold 48px sans-serif';
+hCtx.textAlign = 'center'; hCtx.textBaseline = 'middle';
+hCtx.fillStyle = '#3B82F6';
+hCtx.fillText('H', 32, 32);
+const hTex = new THREE.CanvasTexture(hCanvas);
+const hMark = new THREE.Mesh(hGeo, new THREE.MeshBasicMaterial({ map: hTex, transparent: true, side: THREE.DoubleSide }));
+hMark.rotation.x = -Math.PI / 2;
+hMark.position.set(FLOOR_W * 0.15, BLDG_TOP + 0.22, -FLOOR_D * 0.15);
+logoGroup.add(hMark);
+
+// Railing around roof edge
+const railMat = new THREE.MeshStandardMaterial({ color: 0x556677, metalness: 0.8, roughness: 0.3 });
+const railH = 0.25;
+[
+  [FLOOR_W/2 + 0.15, 0], [-FLOOR_W/2 - 0.15, 0],
+].forEach(([x, z]) => {
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(0.03, railH, FLOOR_D + 0.3), railMat);
+  rail.position.set(x, BLDG_TOP + railH/2 + 0.2, z);
+  logoGroup.add(rail);
+});
+[
+  [0, FLOOR_D/2 + 0.15], [0, -FLOOR_D/2 - 0.15],
+].forEach(([x, z]) => {
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(FLOOR_W + 0.3, railH, 0.03), railMat);
+  rail.position.set(x, BLDG_TOP + railH/2 + 0.2, z);
+  logoGroup.add(rail);
+});
+
+// Logo sign mount (two poles + plane)
+const poleMat = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.8, roughness: 0.3 });
+const lPole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.8, 8), poleMat);
+lPole1.position.set(-1.5, BLDG_TOP + 5.0, 0); logoGroup.add(lPole1);
+const lPole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.8, 8), poleMat);
+lPole2.position.set(1.5, BLDG_TOP + 5.0, 0); logoGroup.add(lPole2);
+logoPlane.position.set(0, BLDG_TOP + 5.2, 0);
+
+// Multiple lights for logo glow
+const logoLight = new THREE.PointLight(0x3b82f6, 0, 20);
+logoLight.position.set(0, BLDG_TOP + 5.5, 3);
 logoGroup.add(logoLight);
+const logoLight2 = new THREE.PointLight(0x3b82f6, 0, 15);
+logoLight2.position.set(0, BLDG_TOP + 5.5, -3);
+logoGroup.add(logoLight2);
+
+// Window glow lights (warm interior look when complete)
+const warmLight1 = new THREE.PointLight(0xffd080, 0, 12);
+warmLight1.position.set(0, BLDG_TOP * 0.5, 3);
+logoGroup.add(warmLight1);
+const warmLight2 = new THREE.PointLight(0xffd080, 0, 12);
+warmLight2.position.set(0, BLDG_TOP * 0.75, -3);
+logoGroup.add(warmLight2);
 
 logoGroup.visible = false;
 scene.add(logoGroup);
@@ -2686,36 +2762,59 @@ function animate() {
     }
   }
 
-  // Show crane once construction starts
+  // Crane: active during construction, disassembles near end
   const topY = activeFloors * FLOOR_H;
-  if (activeFloors > 2) {
+  const craneDisassemble = Math.max(0, (scrollProgress - 0.78) / 0.12); // 0-1 over scroll 0.78-0.90
+  if (activeFloors > 2 && craneDisassemble < 1) {
     craneGroup.visible = true;
+    // Normal crane operation
     craneSlew.rotation.y = t * 0.25;
     const tx = CRANE_JL * (0.3 + 0.3 * Math.sin(t * 0.35));
     trolley.position.x = tx;
     hookCable.position.x = tx;
     hook.position.x = tx;
     hook.position.z = Math.sin(t * 0.6) * 0.1;
-    // Warning lights pulse
     const wp = 0.3 + 0.7 * Math.sin(t * 4);
     wMat1.color.setRGB(wp, 0, 0);
     wMat2.color.setRGB(wp * 0.8, 0, 0);
     ledMat.opacity = 0.25 + 0.45 * Math.sin(t * 2);
+
+    // Disassembly: crane shrinks down and slides out
+    if (craneDisassemble > 0) {
+      const ease = craneDisassemble * craneDisassemble; // ease-in
+      craneGroup.scale.y = 1 - ease;
+      craneGroup.position.x = FLOOR_W / 2 + 0.5 + ease * 8;
+      craneGroup.children.forEach(c => {
+        if (c.material) c.material.opacity = Math.max(0, 1 - ease * 1.5);
+      });
+    } else {
+      craneGroup.scale.y = 1;
+      craneGroup.position.x = FLOOR_W / 2 + 0.5;
+    }
+  } else if (craneDisassemble >= 1) {
+    craneGroup.visible = false;
   }
 
   // Follow light tracks construction
   followLight.position.y = topY + 3;
 
-  // Logo reveal when building is complete (scroll > 0.9)
+  // Logo + rooftop reveal when building is complete (scroll > 0.88)
   const logoProgress = Math.max(0, (scrollProgress - 0.88) / 0.12);
   if (logoProgress > 0) {
     logoGroup.visible = true;
     logoAlpha += (logoProgress - logoAlpha) * 0.05;
     logoMat.opacity = logoAlpha;
-    logoLight.intensity = logoAlpha * 8;
-    // Logo gently bobs
-    logoPlane.position.y = BLDG_TOP + 2.2 + Math.sin(t * 0.8) * 0.15;
-    // Logo always faces camera
+    logoLight.intensity = logoAlpha * 10;
+    logoLight2.intensity = logoAlpha * 6;
+    // Warm interior glow fades in
+    warmLight1.intensity = logoAlpha * 3;
+    warmLight2.intensity = logoAlpha * 3;
+    // Spire light pulses
+    spireLight.material.color.setHex(Math.sin(t * 3) > 0 ? 0x3b82f6 : 0x1a4080);
+    // Helipad pulses
+    heliMat.opacity = 0.3 + 0.2 * Math.sin(t * 2);
+    // Logo gently bobs and faces camera
+    logoPlane.position.y = BLDG_TOP + 5.2 + Math.sin(t * 0.8) * 0.1;
     logoPlane.lookAt(camera.position);
   } else {
     logoGroup.visible = false;
