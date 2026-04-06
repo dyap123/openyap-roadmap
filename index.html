@@ -2559,10 +2559,15 @@ window.SITE_TEXT = JSON.parse(localStorage.getItem('openyap_site_text')) || {
 import * as THREE from 'three';
 
 const canvas = document.getElementById('building-canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+// Detect low-end GPU
+const _gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+const _dbg = _gl && _gl.getExtension('WEBGL_debug_renderer_info');
+const _gpu = _dbg ? _gl.getParameter(_dbg.UNMASKED_RENDERER_WEBGL) : '';
+const LOW_END = /Intel|HD Graphics|UHD Graphics|Iris|SwiftShader|llvmpipe/i.test(_gpu);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !LOW_END, alpha: true });
+renderer.setPixelRatio(LOW_END ? 1 : Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMapping = LOW_END ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.4;
 renderer.localClippingEnabled = true;
 
@@ -2592,12 +2597,10 @@ upLight.position.set(0, -2, 0);
 scene.add(upLight);
 
 // Materials
-const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0x0e1e38, metalness: 0.2, roughness: 0.05,
-  transmission: 0.35, thickness: 0.5, ior: 1.5,
-  transparent: true, opacity: 0.93,
+const glassMat = new THREE.MeshStandardMaterial({
+  color: 0x0e1e38, metalness: 0.3, roughness: 0.05,
+  transparent: true, opacity: 0.88,
   emissive: 0x2050a0, emissiveIntensity: 0.35,
-  envMapIntensity: 0.8,
 });
 const frameMat = new THREE.MeshStandardMaterial({
   color: 0x1a2e4a, metalness: 0.8, roughness: 0.15,
@@ -2618,11 +2621,11 @@ const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, 
 const crnCb = new THREE.LineBasicMaterial({ color: 0x667788 });
 const crnWarnMat = new THREE.MeshBasicMaterial({ color: 0xff2222 });
 const crnLedMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5 });
-const crnGlass = new THREE.MeshPhysicalMaterial({ color: 0x0a1a2e, metalness: 0.1, roughness: 0.05, transmission: 0.7, transparent: true, opacity: 0.8 });
+const crnGlass = new THREE.MeshStandardMaterial({ color: 0x0a1a2e, metalness: 0.3, roughness: 0.1, transparent: true, opacity: 0.75 });
 
 // ---- Helper: create a single building with floors that reveal on scroll ----
-const TOTAL_FLOORS = 45;
-const FLOOR_H = 0.75;
+const TOTAL_FLOORS = LOW_END ? 20 : 28;
+const FLOOR_H = LOW_END ? 1.69 : 1.2;
 const FLOOR_W = 9;
 const FLOOR_D = 6;
 
@@ -2673,8 +2676,8 @@ for (let i = 0; i < TOTAL_FLOORS; i++) {
     }
   }
 
-  // Front/back window dividers
-  const divCount = Math.max(1, Math.round(FLOOR_W / 1.5));
+  // Front/back window dividers (skip every other on low-end)
+  const divCount = Math.max(1, Math.round(FLOOR_W / (LOW_END ? 3 : 1.5)));
   for (let d = 1; d < divCount; d++) {
     const xPos = -FLOOR_W/2 + d * (FLOOR_W / divCount);
     for (const zSide of [FLOOR_D / 2 + 0.01, -FLOOR_D / 2 - 0.01]) {
@@ -2684,42 +2687,44 @@ for (let i = 0; i < TOTAL_FLOORS; i++) {
     }
   }
 
-  // Side window mullions
-  const sideDivCount = Math.max(1, Math.round(FLOOR_D / 1.5));
-  for (let d = 1; d < sideDivCount; d++) {
-    const zPos = -FLOOR_D/2 + d * (FLOOR_D / sideDivCount);
-    for (const xSide of [FLOOR_W / 2 + 0.01, -FLOOR_W / 2 - 0.01]) {
-      const sdiv = new THREE.Mesh(_divGeo, frameMat);
-      sdiv.position.set(xSide, y + FLOOR_H / 2, zPos);
-      group.add(sdiv);
+  if (!LOW_END) {
+    // Side window mullions
+    const sideDivCount = Math.max(1, Math.round(FLOOR_D / 1.5));
+    for (let d = 1; d < sideDivCount; d++) {
+      const zPos = -FLOOR_D/2 + d * (FLOOR_D / sideDivCount);
+      for (const xSide of [FLOOR_W / 2 + 0.01, -FLOOR_W / 2 - 0.01]) {
+        const sdiv = new THREE.Mesh(_divGeo, frameMat);
+        sdiv.position.set(xSide, y + FLOOR_H / 2, zPos);
+        group.add(sdiv);
+      }
     }
-  }
 
-  // Interior lit window (every ~2/3 of floors, subtle glow)
-  if (_litSeeds[i] > 0.45) {
-    const litMat = new THREE.MeshBasicMaterial({
-      color: _litSeeds[i] > 0.7 ? 0x4488cc : 0x6699dd,
-      transparent: true, opacity: 0.12 + _litSeeds[i] * 0.12,
-      blending: THREE.AdditiveBlending, depthWrite: false,
-    });
-    const litGeo = new THREE.BoxGeometry(
-      FLOOR_W * (0.2 + _litSeeds[i] * 0.4), FLOOR_H * 0.6, FLOOR_D * 0.3
-    );
-    const litPanel = new THREE.Mesh(litGeo, litMat);
-    litPanel.position.set(
-      (_litSeeds[i] - 0.5) * FLOOR_W * 0.4,
-      y + FLOOR_H / 2,
-      (_litSeeds[i] - 0.5) * FLOOR_D * 0.2
-    );
-    group.add(litPanel);
-  }
+    // Interior lit window (every ~2/3 of floors, subtle glow)
+    if (_litSeeds[i] > 0.45) {
+      const litMat = new THREE.MeshBasicMaterial({
+        color: _litSeeds[i] > 0.7 ? 0x4488cc : 0x6699dd,
+        transparent: true, opacity: 0.12 + _litSeeds[i] * 0.12,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const litGeo = new THREE.BoxGeometry(
+        FLOOR_W * (0.2 + _litSeeds[i] * 0.4), FLOOR_H * 0.6, FLOOR_D * 0.3
+      );
+      const litPanel = new THREE.Mesh(litGeo, litMat);
+      litPanel.position.set(
+        (_litSeeds[i] - 0.5) * FLOOR_W * 0.4,
+        y + FLOOR_H / 2,
+        (_litSeeds[i] - 0.5) * FLOOR_D * 0.2
+      );
+      group.add(litPanel);
+    }
 
-  // Corner glow strips
-  for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
-    for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
-      const strip = new THREE.Mesh(_stripGeo, _glowMat);
-      strip.position.set(cx, y + FLOOR_H / 2, cz);
-      group.add(strip);
+    // Corner glow strips
+    for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
+      for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
+        const strip = new THREE.Mesh(_stripGeo, _glowMat);
+        strip.position.set(cx, y + FLOOR_H / 2, cz);
+        group.add(strip);
+      }
     }
   }
 
@@ -2964,7 +2969,7 @@ ground.position.y = -0.01;
 scene.add(ground);
 
 // ======== FLOATING NODE NETWORK (OpenYap brain aesthetic — optimized) ========
-const NODE_COUNT = 30;
+const NODE_COUNT = LOW_END ? 12 : 30;
 const nodePositions = [];
 const nodeGeo = new THREE.SphereGeometry(0.12, 4, 4);
 const nodeGroup = new THREE.Group();
