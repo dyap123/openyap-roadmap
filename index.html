@@ -2920,7 +2920,7 @@ logoGroup.visible = false;
 scene.add(logoGroup);
 
 // ======== GROUND (minimal) ========
-const groundGeo = new THREE.PlaneGeometry(100, 100);
+const groundGeo = new THREE.PlaneGeometry(20, 20);
 const groundMat = new THREE.MeshStandardMaterial({ color: 0x050508, metalness: 0.6, roughness: 0.9 });
 const ground = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
