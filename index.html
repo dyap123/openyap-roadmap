@@ -3058,7 +3058,7 @@ function animate() {
     craneSlew.position.y += (slewTargetY - craneSlew.position.y) * 0.15;
 
     // Normal crane operation
-    craneSlew.rotation.y = t * 0.25;
+    craneSlew.rotation.y = t * 0.06;
     const tx = CRANE_JL * (0.3 + 0.3 * Math.sin(t * 0.35));
     trolley.position.x = tx;
     hookCable.position.x = tx;
