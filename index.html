@@ -3178,9 +3178,11 @@ animate();
     if (idx === -1) return;
     var count = groups.length || 1;
     var floorsPerGroup = Math.ceil(TOTAL / count);
+    // Invert: first accordion item → top floors, last → bottom floors
+    var invertedIdx = count - 1 - idx;
     window.highlightFloors = {
-      from: idx * floorsPerGroup,
-      to: Math.min(TOTAL - 1, (idx + 1) * floorsPerGroup - 1),
+      from: invertedIdx * floorsPerGroup,
+      to: Math.min(TOTAL - 1, (invertedIdx + 1) * floorsPerGroup - 1),
     };
   }, true);
 
