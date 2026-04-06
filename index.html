@@ -58,8 +58,8 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.008) 0.5px, transparent 0.5px);
-  background-size: 12px 12px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
   pointer-events: none;
   z-index: 0;
 }
@@ -2570,7 +2570,7 @@ const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x000000, 0.008);
 
 const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(24, 14, 28);
+camera.position.set(22, 14, 26);
 camera.lookAt(0, 12, 0);
 
 // Lights
@@ -2629,8 +2629,8 @@ const crnGlass = new THREE.MeshPhysicalMaterial({ color: 0x0a1a2e, metalness: 0.
 // ---- Helper: create a single building with floors that reveal on scroll ----
 const TOTAL_FLOORS = 45;
 const FLOOR_H = 0.75;
-const FLOOR_W = 6.5;
-const FLOOR_D = 4.5;
+const FLOOR_W = 9;
+const FLOOR_D = 6;
 
 const bldg = new THREE.Group();
 const floorData = [];
@@ -2671,6 +2671,46 @@ for (let i = 0; i < TOTAL_FLOORS; i++) {
       div.position.set(xPos, y + FLOOR_H / 2, zSide);
       group.add(div);
     }
+  }
+
+  // Horizontal spandrel bands (opaque strip between floors)
+  const spandrelGeo = new THREE.BoxGeometry(FLOOR_W + 0.02, 0.08, FLOOR_D + 0.02);
+  const spandrelMat = new THREE.MeshStandardMaterial({
+    color: 0x0a1628, metalness: 0.7, roughness: 0.3,
+  });
+  const spandrel = new THREE.Mesh(spandrelGeo, spandrelMat);
+  spandrel.position.y = y + FLOOR_H * 0.35;
+  group.add(spandrel);
+
+  // Side window mullions (depth faces)
+  const sideDivGeo = new THREE.BoxGeometry(0.03, FLOOR_H - 0.06, 0.03);
+  const sideDivCount = Math.max(1, Math.round(FLOOR_D / 1.5));
+  for (let d = 1; d < sideDivCount; d++) {
+    const zPos = -FLOOR_D/2 + d * (FLOOR_D / sideDivCount);
+    for (const xSide of [FLOOR_W / 2 + 0.01, -FLOOR_W / 2 - 0.01]) {
+      const sdiv = new THREE.Mesh(sideDivGeo, frameMat);
+      sdiv.position.set(xSide, y + FLOOR_H / 2, zPos);
+      group.add(sdiv);
+    }
+  }
+
+  // Random interior lit windows (warm glow behind glass)
+  if (Math.random() > 0.35) {
+    const litMat = new THREE.MeshBasicMaterial({
+      color: Math.random() > 0.5 ? 0x4488cc : 0x6699dd,
+      transparent: true, opacity: 0.12 + Math.random() * 0.15,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const litGeo = new THREE.BoxGeometry(
+      FLOOR_W * (0.2 + Math.random() * 0.5), FLOOR_H * 0.6, FLOOR_D * 0.3
+    );
+    const litPanel = new THREE.Mesh(litGeo, litMat);
+    litPanel.position.set(
+      (Math.random() - 0.5) * FLOOR_W * 0.4,
+      y + FLOOR_H / 2,
+      (Math.random() - 0.5) * FLOOR_D * 0.2
+    );
+    group.add(litPanel);
   }
 
   // Glowing vertical edge strips at corners
@@ -3059,11 +3099,11 @@ function animate() {
 
     // Normal crane operation
     craneSlew.rotation.y = t * 0.06;
-    const tx = CRANE_JL * (0.3 + 0.3 * Math.sin(t * 0.35));
+    const tx = CRANE_JL * (0.3 + 0.3 * Math.sin(t * 0.12));
     trolley.position.x = tx;
     hookCable.position.x = tx;
     hook.position.x = tx;
-    hook.position.z = Math.sin(t * 0.6) * 0.1;
+    hook.position.z = Math.sin(t * 0.2) * 0.08;
     const wp = 0.3 + 0.7 * Math.sin(t * 4);
     wMat1.color.setRGB(wp, 0, 0);
     wMat2.color.setRGB(wp * 0.8, 0, 0);
@@ -3129,8 +3169,8 @@ function animate() {
   // Camera: closer, follows construction responsively
   const camTargetY = 14 + topY * 0.4;
   const lookY = 8 + topY * 0.5;
-  camera.position.x = 24 + Math.sin(t * 0.1) * 2;
-  camera.position.z = 28 + Math.cos(t * 0.08) * 1.5;
+  camera.position.x = 22 + Math.sin(t * 0.1) * 2;
+  camera.position.z = 26 + Math.cos(t * 0.08) * 1.5;
   camera.position.y += (camTargetY - camera.position.y) * 0.1;
   camera.lookAt(0, lookY, 0);
 
