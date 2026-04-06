@@ -3082,8 +3082,12 @@ function animate() {
       craneGroup.scale.set(1, 1, 1);
       craneGroup.position.set(0, 0, 0);
     }
-  } else if (craneDisassemble >= 1) {
+  } else {
     craneGroup.visible = false;
+    craneGroup.scale.set(1, 1, 1);
+    craneGroup.position.set(0, 0, 0);
+    crnLn.opacity = 1;
+    crnGl.opacity = 0.15;
   }
 
   // Follow light tracks construction — pulses near active floor
