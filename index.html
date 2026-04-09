@@ -2559,8 +2559,11 @@ window.SITE_TEXT = JSON.parse(localStorage.getItem('openyap_site_text')) || {
 import * as THREE from 'three';
 
 const canvas = document.getElementById('building-canvas');
-// Detect low-end GPU
-const _gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+// Detect low-end GPU on a THROWAWAY canvas — calling getContext on the main
+// canvas locks in default attributes and blocks Three.js from claiming it
+// with the antialias/alpha options it needs (broke building render in d205171).
+const _detectCanvas = document.createElement('canvas');
+const _gl = _detectCanvas.getContext('webgl') || _detectCanvas.getContext('experimental-webgl');
 const _dbg = _gl && _gl.getExtension('WEBGL_debug_renderer_info');
 const _gpu = _dbg ? _gl.getParameter(_dbg.UNMASKED_RENDERER_WEBGL) : '';
 const LOW_END = /Intel|HD Graphics|UHD Graphics|Iris|SwiftShader|llvmpipe/i.test(_gpu);
