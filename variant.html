@@ -1,0 +1,3892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenYap</title>
+<meta name="description" content="AI-Powered Construction Intelligence Platform">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OpenYap">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiT3BlbllhcCBUZWNobm9sb2dpZXMiLCJzaG9ydF9uYW1lIjoiT3BlbllhcCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMDAwMDAwIiwidGhlbWVfY29sb3IiOiIjMDAwMDAwIn0=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #08080c;
+  --card: #0f1016;
+  --red: #3B82F6;
+  --gold: #ec4899;
+  --green: #3B82F6;
+  --blue: #3B82F6;
+  --blue-bright: #60a5fa;
+  --pink: #ec4899;
+  --text: #FFFFFF;
+  --text-body: #c8cad6;
+  --text-muted: #6a6d7a;
+  --border: rgba(148,163,198,0.08);
+  --radius: 18px;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ===== SHADER BACKGROUND ===== */
+#shader-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ===== DOT GRID BACKGROUND ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== LOADING OVERLAY ===== */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== SKELETON SHIMMER ===== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== ERROR STATE ===== */
+.error-banner {
+  background: rgba(59,130,246,0.06);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  margin: 24px auto;
+  max-width: 500px;
+  text-align: center;
+  color: var(--text-body);
+  font-size: 14px;
+  display: none;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.error-banner.show { display: block; }
+
+/* ========================================
+   SECTION 1: HERO
+   ======================================== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  padding: 60px max(24px, 5vw);
+}
+/* Dark gradient panel behind hero text — reads left-side column like the Figma */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(6,7,12,0.92) 0%, rgba(6,7,12,0.75) 35%, rgba(6,7,12,0.1) 65%, rgba(6,7,12,0) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+#building-canvas {
+  position: fixed;
+  top: 0;
+  /* Offset building to the right so left column has clean backdrop */
+  left: 15%;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+#building-canvas.visible { opacity: 1; }
+
+/* Global readability vignette — darker edges, lighter middle-bg for text areas */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, transparent 0%, rgba(4,5,10,0.6) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  text-align: left;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.95), 0 4px 60px rgba(0,0,0,0.7);
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #3B82F6;
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.25);
+  padding: 8px 16px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #3B82F6;
+  box-shadow: 0 0 12px #3B82F6;
+}
+
+/* Display font applies to all headings + numeric display values */
+.hero-title,
+.section-headline,
+.stat-value,
+.kpi-value,
+.timeline-title,
+.donut-center-value,
+.fin-year,
+.fin-value,
+.equity-circle .eq-value,
+.key-stat-value,
+.hero-eyebrow,
+.section-label,
+.stat-label,
+.kpi-name,
+.nav-badge,
+.phase-pill {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-feature-settings: "ss01", "ss02";
+}
+
+.hero-title {
+  font-size: clamp(56px, 8vw, 104px);
+  font-weight: 700;
+  letter-spacing: -3px;
+  line-height: 0.95;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.hero-title .line-cyan {
+  display: block;
+  background: linear-gradient(135deg, #3B82F6 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(59,130,246,0.4));
+}
+.hero-title .line-pink {
+  display: block;
+  background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(236,72,153,0.4));
+  font-size: 0.72em;
+  margin-top: 4px;
+}
+/* Legacy single-span gradient fallback — kept in case JS still writes <span> */
+.hero-title span {
+  background: linear-gradient(135deg, #3B82F6 0%, #a78bfa 55%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 32px rgba(59,130,246,0.25));
+}
+
+.hero-tagline {
+  font-size: 17px;
+  font-weight: 400;
+  color: #d4d6e0;
+  letter-spacing: 0;
+  margin-bottom: 36px;
+  max-width: 500px;
+  margin-left: 0;
+  margin-right: 0;
+  line-height: 1.6;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.stat-pill {
+  background: rgba(8,8,16,0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 14px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 160px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.stat-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: bounce-down 2s ease-in-out infinite;
+}
+
+.scroll-arrow {
+  width: 24px;
+  height: 24px;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: rotate(45deg);
+  margin-top: -4px;
+}
+
+@keyframes bounce-down {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.5; }
+  50% { transform: translateX(-50%) translateY(10px); opacity: 1; }
+}
+
+/* ========================================
+   SECTION 2: STICKY NAV
+   ======================================== */
+.sticky-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sticky-nav.visible {
+  transform: translateY(0);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+
+.nav-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-body);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+.nav-link.active {
+  color: var(--text);
+}
+
+.nav-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 100px;
+  padding: 4px 12px;
+}
+
+/* ========================================
+   SECTION 3: OVERVIEW
+   ======================================== */
+.section {
+  padding: 100px 0;
+  position: relative;
+  z-index: 2;
+}
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6,7,12,0.65) 0%, rgba(6,7,12,0.82) 50%, rgba(6,7,12,0.65) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.section-label {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 16px;
+}
+
+.section-headline {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1.5px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.8), 0 0 60px rgba(0,0,0,0.4);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 40px;
+  align-items: start;
+}
+
+.overview-narrative p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--text-body);
+  margin-bottom: 24px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.5);
+}
+
+.overview-narrative p:last-child {
+  margin-bottom: 0;
+}
+
+/* Overview charts panel */
+.overview-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Equity donut chart */
+.equity-chart {
+  background: rgba(6,6,14,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+}
+.equity-chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.donut-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 20px;
+}
+.donut-svg { width: 180px; height: 180px; transform: rotate(-90deg); }
+.donut-ring { fill: none; stroke-width: 20; }
+.donut-segment { fill: none; stroke-width: 20; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
+.donut-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.donut-center-value { font-size: 28px; font-weight: 700; color: var(--text); }
+.donut-center-label { font-size: 11px; color: var(--text-muted); }
+.equity-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+.equity-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.equity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Revenue growth mini chart */
+.revenue-chart {
+  background: rgba(6,6,14,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+.revenue-chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.rev-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 120px;
+  padding-top: 8px;
+}
+.rev-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.rev-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rev-bar-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #34D399;
+}
+.rev-bar-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Key stat row */
+.key-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.key-stat {
+  background: rgba(6,6,14,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+}
+.key-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.key-stat-value.gold { color: #34D399; }
+.key-stat-value.red { color: #34D399; }
+.key-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* Legacy KPI grid (kept for KPI section at bottom) */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.kpi-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(17,18,28,0.85) 0%, rgba(10,11,18,0.9) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148,163,198,0.1);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  will-change: transform;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 24px rgba(59,130,246,0.1);
+  border-color: rgba(59,130,246,0.2);
+}
+
+.kpi-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.kpi-value.gold { color: var(--blue); }
+.kpi-value.white { color: var(--text); }
+
+.kpi-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ========================================
+   SECTION 4: TIMELINE
+   ======================================== */
+.timeline-section {
+  padding: 100px 0;
+  position: relative;
+  z-index: 2;
+}
+.timeline-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6,7,12,0.72) 0%, rgba(6,7,12,0.9) 50%, rgba(6,7,12,0.72) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.phase-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+  margin-bottom: 40px;
+}
+
+.phase-pill {
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: var(--text-body);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.phase-pill:hover {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text);
+}
+
+.phase-pill.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  font-weight: 600;
+}
+
+.timeline {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Center line */
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(59,130,246,0.15);
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  position: relative;
+  width: 50%;
+  padding: 0 40px 56px;
+  opacity: 1;
+  transform: translateY(0);
+  will-change: transform, opacity;
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-item.hidden-by-filter {
+  display: none;
+}
+
+.timeline-item:nth-child(odd) {
+  left: 0;
+  padding-right: 60px;
+  text-align: right;
+}
+
+.timeline-item:nth-child(even) {
+  left: 50%;
+  padding-left: 60px;
+  text-align: left;
+}
+
+/* Dot on timeline */
+.timeline-dot {
+  position: absolute;
+  top: 8px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.timeline-item:nth-child(odd) .timeline-dot { right: -6px; }
+.timeline-item:nth-child(even) .timeline-dot { left: -6px; }
+
+.timeline-dot.done {
+  background: var(--blue);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.18), 0 0 14px rgba(59,130,246,0.55);
+}
+
+.timeline-dot.current {
+  background: var(--pink);
+  animation: pulse-neon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-neon {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(236,72,153,0.55), 0 0 12px rgba(236,72,153,0.6); }
+  50% { box-shadow: 0 0 0 12px rgba(236,72,153,0), 0 0 12px rgba(236,72,153,0.3); }
+}
+
+.timeline-dot.planned {
+  background: transparent;
+  border: 1.5px solid var(--text-muted);
+}
+
+/* Timeline card */
+.timeline-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(17,18,28,0.88) 0%, rgba(10,11,18,0.9) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148,163,198,0.1);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: inline-block;
+  text-align: left;
+  max-width: 420px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.timeline-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(236,72,153,0.0) 55%, rgba(236,72,153,0.35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.75;
+}
+.timeline-item:has(.timeline-dot.current) .timeline-card::before {
+  background: linear-gradient(135deg, rgba(236,72,153,0.6), rgba(236,72,153,0.05) 70%);
+  opacity: 1;
+}
+.timeline-item:has(.timeline-dot.done) .timeline-card::before {
+  background: linear-gradient(135deg, rgba(59,130,246,0.55), rgba(59,130,246,0.05) 70%);
+  opacity: 1;
+}
+
+.timeline-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 24px rgba(59,130,246,0.1);
+  border-color: rgba(148,163,198,0.18);
+}
+
+.timeline-item:nth-child(odd) .timeline-card {
+  float: right;
+}
+
+.timeline-date {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
+
+.timeline-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.timeline-desc {
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.tag-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.metric-box {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: rgba(52,211,153,0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(52,211,153,0.15);
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--text-body);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #34D399;
+  letter-spacing: -0.3px;
+}
+
+/* ========================================
+   SECTION 5: FINANCIALS
+   ======================================== */
+.financials-section {
+  padding: 100px 0;
+  position: relative;
+  z-index: 2;
+}
+.financials-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6,7,12,0.72) 0%, rgba(6,7,12,0.9) 50%, rgba(6,7,12,0.72) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.financial-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.financial-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(17,18,28,0.85) 0%, rgba(10,11,18,0.9) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148,163,198,0.1);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  will-change: transform;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.financial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 28px rgba(236,72,153,0.12);
+  border-color: rgba(236,72,153,0.22);
+}
+
+.fin-year {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fin-revenue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #34D399;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.fin-revenue-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.fin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+}
+
+.fin-row-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.fin-row-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-row-value.positive { color: var(--green); }
+.fin-row-value.negative { color: var(--red); }
+
+/* Revenue bar chart */
+.revenue-bars {
+  margin-top: 40px;
+  padding: 32px;
+  background: rgba(6,6,14,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59,130,246,0.08);
+  border-radius: var(--radius);
+}
+
+.bar-chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-body);
+  letter-spacing: 0.5px;
+  margin-bottom: 32px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bar-row:last-child { margin-bottom: 0; }
+
+.bar-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 60px;
+  text-align: right;
+}
+
+.bar-track {
+  flex: 1;
+  height: 28px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34D399, rgba(52,211,153,0.6));
+  border-radius: 6px;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  min-width: 0;
+}
+
+.bar-amount {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bg);
+  white-space: nowrap;
+}
+
+/* ========================================
+   SECTION 6: EQUITY & GOVERNANCE
+   ======================================== */
+.equity-section {
+  padding: 100px 0;
+  position: relative;
+  z-index: 2;
+}
+.equity-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6,7,12,0.72) 0%, rgba(6,7,12,0.9) 50%, rgba(6,7,12,0.72) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.equity-visual {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 48px;
+  margin-top: 40px;
+  margin-bottom: 48px;
+}
+
+.equity-circle-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.equity-circle {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: -1px;
+  border: 1px solid rgba(59,130,246,0.08);
+  background: rgba(6,6,14,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.equity-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+
+.equity-circle.large {
+  width: 180px;
+  height: 180px;
+  font-size: 40px;
+  color: var(--text);
+}
+
+.equity-circle.small {
+  width: 100px;
+  height: 100px;
+  font-size: 24px;
+  color: var(--red);
+  border-color: rgba(59,130,246,0.2);
+}
+
+.equity-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-body);
+  text-align: center;
+}
+
+.equity-sublabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 2px;
+}
+
+.governance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid rgba(59,130,246,0.08);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: rgba(6,6,14,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.governance-row {
+  display: contents;
+}
+
+.governance-term {
+  padding: 20px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.governance-desc {
+  padding: 20px 28px;
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border);
+}
+
+.governance-row:nth-child(odd) .governance-term,
+.governance-row:nth-child(odd) .governance-desc {
+  background: rgba(8,8,16,0.4);
+}
+
+.governance-row:nth-child(even) .governance-term,
+.governance-row:nth-child(even) .governance-desc {
+  background: rgba(8,8,16,0.2);
+}
+
+.governance-row:last-child .governance-term,
+.governance-row:last-child .governance-desc {
+  border-bottom: none;
+}
+
+/* ========================================
+   SECTION 7: AGREEMENT
+   ======================================== */
+.agreement-section {
+  padding: 100px 0;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+}
+
+.agreement-section .container {
+  max-width: 800px;
+}
+
+.accordion {
+  margin-top: 40px;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accordion-group {
+  border-bottom: none;
+  border: 1px solid rgba(59,130,246,0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(6,6,18,0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.accordion-group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.25);
+}
+
+.accordion-group:last-child {
+  border-bottom: none;
+}
+
+.accordion-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  transition: background 0.2s ease;
+}
+
+.accordion-header:hover {
+  background: rgba(59,130,246,0.04);
+}
+
+.accordion-chevron {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-chevron::before,
+.accordion-chevron::after {
+  content: '';
+  position: absolute;
+  background: var(--text-muted);
+  border-radius: 1px;
+}
+
+.accordion-chevron::before {
+  width: 10px;
+  height: 1.5px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: right center;
+}
+
+.accordion-chevron::after {
+  width: 10px;
+  height: 1.5px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: left center;
+}
+
+.accordion-group.open .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-group.open .accordion-body {
+  max-height: 2000px;
+}
+
+.accordion-content {
+  padding: 0 28px 20px;
+  background: transparent;
+}
+
+.agreement-term {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.agreement-term:last-child { border-bottom: none; }
+
+.agreement-term-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.agreement-term-detail {
+  font-size: 13px;
+  color: var(--text-body);
+  line-height: 1.5;
+}
+
+.agreement-doc-link {
+  display: inline-block;
+  margin-top: 40px;
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--text-body);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: all 0.25s ease;
+}
+
+.agreement-doc-link:hover {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   SECTION 8: FOOTER
+   ======================================== */
+.footer {
+  padding: 56px 0 40px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.footer-line {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.footer-line:first-child {
+  font-weight: 600;
+  color: var(--text-body);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.footer-line:last-child {
+  margin-top: 24px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.6;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1024px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .equity-visual {
+    gap: 32px;
+  }
+
+  .equity-circle.large {
+    width: 150px;
+    height: 150px;
+    font-size: 34px;
+  }
+
+  .equity-circle.small {
+    width: 85px;
+    height: 85px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 56px;
+    letter-spacing: -2px;
+  }
+
+  .hero-tagline { font-size: 16px; }
+
+  .hero-stats {
+    gap: 10px;
+  }
+
+  .stat-pill {
+    min-width: 140px;
+    padding: 12px 20px;
+  }
+
+  .stat-value { font-size: 17px; }
+
+  .section { padding: 72px 0; }
+  .timeline-section { padding: 72px 0; }
+  .financials-section { padding: 72px 0; }
+  .equity-section { padding: 72px 0; }
+  .agreement-section { padding: 72px 0; }
+
+  .section-headline { font-size: 36px; }
+
+  .timeline::before {
+    left: 20px;
+  }
+
+  .timeline-item {
+    width: 100%;
+    left: 0 !important;
+    padding: 0 0 36px 52px !important;
+    text-align: left !important;
+  }
+
+  .timeline-item:nth-child(odd) .timeline-card {
+    float: none;
+    max-width: 100%;
+  }
+
+  .timeline-item:nth-child(even) .timeline-card {
+    max-width: 100%;
+  }
+
+  .timeline-dot {
+    left: 14px !important;
+    right: auto !important;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .governance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .governance-term,
+  .governance-desc {
+    padding: 16px 24px;
+  }
+
+  .governance-term {
+    border-bottom: none;
+    padding-bottom: 4px;
+  }
+
+  .equity-visual {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .equity-circle.large {
+    width: 120px;
+    height: 120px;
+    font-size: 28px;
+  }
+
+  .equity-circle.small {
+    width: 70px;
+    height: 70px;
+    font-size: 18px;
+  }
+
+  .nav-links { gap: 20px; }
+  .nav-link { font-size: 12px; }
+  .nav-badge { display: none; }
+
+  .financial-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .revenue-bars { padding: 24px; }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 40px;
+    letter-spacing: -1.5px;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-pill {
+    width: 100%;
+    max-width: 280px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .section-headline { font-size: 28px; }
+
+  .container { padding: 0 16px; }
+
+  .kpi-grid { grid-template-columns: 1fr; }
+
+  .financial-cards { grid-template-columns: 1fr; }
+
+  .fin-revenue { font-size: 26px; }
+
+  .kpi-value { font-size: 24px; }
+
+  .equity-visual { flex-wrap: wrap; justify-content: center; }
+
+  .governance-grid { grid-template-columns: 1fr; }
+
+  .accordion-header {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+
+  .accordion-content { padding: 0 20px 16px; }
+
+  .timeline-card { padding: 20px; }
+  .timeline-title { font-size: 16px; }
+}
+
+/* ===== DYNAMIC EFFECTS ===== */
+
+/* Aurora gradient behind hero */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 50%, rgba(59,130,246,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 300px at 80% 30%, rgba(52,211,153,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 600px at 60% 80%, rgba(139,92,246,0.03) 0%, transparent 70%);
+  animation: aurora 15s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+@keyframes aurora {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(-3%, 2%) scale(1.1) rotate(1deg); }
+  100% { transform: translate(2%, -1%) scale(0.95) rotate(-1deg); }
+}
+
+/* Card glow on hover */
+.kpi-card:hover,
+.financial-card:hover,
+.timeline-card:hover,
+.key-stat:hover {
+  border-color: rgba(59,130,246,0.2) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 30px rgba(59,130,246,0.06) !important;
+}
+
+/* Stat pill sweep shimmer */
+.stat-pill {
+  position: relative;
+  overflow: hidden;
+}
+.stat-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.06) 50%, transparent 100%);
+  animation: stat-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes stat-sweep {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+/* Section top glow divider */
+.section::before,
+.timeline-section::before,
+.financials-section::before,
+.equity-section::before,
+.agreement-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,0.2), transparent);
+  pointer-events: none;
+}
+
+/* 3D tilt transition */
+.kpi-card, .financial-card, .timeline-card, .stat-pill, .key-stat, .equity-circle {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+}
+
+/* ===== INLINE EDITOR ===== */
+#edit-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(17,17,17,0.7);
+  backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+#edit-toggle:hover { background: rgba(30,30,30,0.9); color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.15); }
+#edit-toggle.active { background: rgba(59,130,246,0.2); color: #3B82F6; border-color: rgba(59,130,246,0.4); }
+
+#edit-save {
+  position: fixed;
+  top: 12px;
+  right: 52px;
+  z-index: 9999;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(59,130,246,0.4);
+  background: rgba(59,130,246,0.15);
+  backdrop-filter: blur(8px);
+  color: #3B82F6;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+#edit-save:hover { background: rgba(59,130,246,0.3); }
+#edit-save.visible { display: flex; }
+
+[contenteditable="true"] {
+  outline: 1px dashed rgba(59,130,246,0.3);
+  outline-offset: 4px;
+  border-radius: 4px;
+  min-width: 20px;
+}
+[contenteditable="true"]:focus {
+  outline-color: rgba(59,130,246,0.6);
+}
+</style>
+</head>
+<body>
+
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  EDITABLE SITE TEXT — change values below to update     ║
+  ║  all text on the site. No need to hunt through HTML.    ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
+<script id="site-config">
+// Load saved edits from localStorage, or use defaults
+window.SITE_TEXT = JSON.parse(localStorage.getItem('openyap_site_text')) || {
+  // ---- HERO SECTION ----
+  heroTitle: 'OpenYap',
+  heroTagline: 'Machine learning infrastructure for construction.<br>Built in-house. Running in production. Ready to scale.',
+  heroStats: [
+    { value: '$1.2M',   label: 'Seed Ask' },
+    { value: '50/1/49', label: 'Equity' },
+    { value: '$25M',    label: 'Year 2' },
+    { value: '1,000%+', label: 'Board ROI' },
+  ],
+
+  // ---- OVERVIEW SECTION ----
+  overviewLabel: 'THE OPPORTUNITY',
+  overviewHeadline: 'From one engineer<br>to industry platform.',
+  overviewParagraphs: [
+    'OpenYap started at a desk inside Clune Construction. One project engineer saw the gap between what AI could do and what the industry was willing to try. When the idea was taken and rebuilt without him, he spent 18 months learning to build it himself.',
+    'Now it runs on a live Webcor project -- processing plans, tracking RFIs, managing submittals, and generating takeoffs with a purpose-built AI agent. Not a demo. Not a prototype. A working system used by a real construction team.',
+    'The pitch is simple: partner with a builder who already has the technology running, scale it across the portfolio, and own the platform that becomes the industry standard.',
+  ],
+  equityLegend: [
+    { color: '#3B82F6', text: 'Founder 50%' },
+    { color: '#34D399', text: 'Karo 1%' },
+    { color: '#8B95A5', text: 'Board 49%' },
+  ],
+  revenueChart: [
+    { value: '$0',    label: 'Y1<br>Build',  color: 'rgba(255,255,255,0.1)' },
+    { value: '$25M',  label: 'Y2<br>Deploy', color: '#34D399' },
+    { value: '$35M',  label: 'Y3<br>Scale',  color: '#34D399' },
+    { value: '$432M+',label: 'Y5<br>Scale',  color: '#34D399' },
+  ],
+  keyStats: [
+    { value: '1,000%+',  label: 'Board ROI Year 2', style: 'gold' },
+    { value: '$12.25M',  label: 'Board Return Year 2', style: 'red' },
+  ],
+
+  // ---- FINANCIALS SECTION ----
+  financialsLabel: 'THE NUMBERS',
+  financialsHeadline: 'Built to return 1,000%+ in Year 2.',
+
+  // ---- EQUITY SECTION ----
+  equityLabel: 'THE STRUCTURE',
+  equityHeadline: 'Equal partnership.<br>Independent tiebreaker.',
+  equityCircles: [
+    { pct: '50%', name: 'Danzel Yap', role: 'Founder / CTO', size: 'large' },
+    { pct: '1%',  name: 'Tiebreaker', role: 'Independent Board', size: 'small' },
+    { pct: '49%', name: 'Webcor',     role: 'Strategic Partner', size: 'large' },
+  ],
+
+  // ---- AGREEMENT SECTION ----
+  agreementLabel: 'THE AGREEMENT',
+  agreementHeadline: 'Terms, structured for trust.',
+  agreementDocUrl: 'https://docs.google.com/document/d/1bFhSGH3J4tZjT6DWi-JPBthC5I6UJ2SrA7EaIRSf-sk/edit',
+
+  // ---- TIMELINE SECTION ----
+  timelineLabel: 'MILESTONES',
+  timelineHeadline: 'Timeline',
+
+  // ---- FOOTER ----
+  footerLines: [
+    'Confidential — OpenYap',
+    'Prepared by Danzel Yap  |  Q2 2026',
+    'Not for distribution outside Webcor leadership',
+    'This site updates live from the source data',
+  ],
+};
+</script>
+
+<canvas id="shader-bg"></canvas>
+<canvas id="building-canvas"></canvas>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading</div>
+</div>
+
+<!-- Sticky Nav -->
+<nav class="sticky-nav" id="sticky-nav">
+  <div class="nav-inner">
+    <div class="nav-links">
+      <a class="nav-link" data-target="overview-section">Overview</a>
+      <a class="nav-link" data-target="timeline-section">Timeline</a>
+      <a class="nav-link" data-target="financials-section">Financials</a>
+      <a class="nav-link" data-target="agreement-section">Agreement</a>
+    </div>
+    <div class="nav-badge">Confidential</div>
+  </div>
+</nav>
+
+<!-- SECTION 1: HERO -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">Live · Running in Production</div>
+    <div class="hero-title">
+      <span class="line-cyan">OPENYAP</span>
+      <span class="line-pink">EVOLVING BUILDING<br>ROADMAP</span>
+    </div>
+    <div class="hero-tagline">Machine learning infrastructure for construction.<br>Built in-house. Running in production. Ready to scale.</div>
+    <div class="hero-stats" id="hero-stats">
+      <div class="stat-pill">
+        <span class="stat-value">$1.2M</span>
+        <span class="stat-label">Seed Ask</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-value">50/1/49</span>
+        <span class="stat-label">Equity</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-value">$25M</span>
+        <span class="stat-label">Year 2</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-value">1,000%+</span>
+        <span class="stat-label">Board ROI</span>
+      </div>
+    </div>
+    <div class="error-banner" id="error-banner">
+      Unable to load live data. Displaying cached version.
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- SECTION 3: OVERVIEW -->
+<section class="section" id="overview-section">
+  <div class="container">
+    <div class="section-label reveal">THE OPPORTUNITY</div>
+    <h2 class="section-headline reveal">From one engineer<br>to industry platform.</h2>
+    <div class="overview-grid">
+      <div class="overview-narrative reveal">
+        <p>OpenYap started at a desk inside Clune Construction. One project engineer saw the gap between what AI could do and what the industry was willing to try. When the idea was taken and rebuilt without him, he spent 18 months learning to build it himself.</p>
+        <p>Now it runs on a live Webcor project -- processing plans, tracking RFIs, managing submittals, and generating takeoffs with a purpose-built AI agent. Not a demo. Not a prototype. A working system used by a real construction team.</p>
+        <p>The pitch is simple: partner with a builder who already has the technology running, scale it across the portfolio, and own the platform that becomes the industry standard.</p>
+      </div>
+      <div class="overview-charts" id="overview-charts">
+        <!-- Equity donut chart -->
+        <div class="equity-chart reveal">
+          <div class="equity-chart-title">Equity Structure</div>
+          <div class="donut-container">
+            <svg class="donut-svg" viewBox="0 0 180 180">
+              <circle class="donut-ring" cx="90" cy="90" r="70" stroke="rgba(255,255,255,0.04)"/>
+              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#3B82F6" stroke-dasharray="0 440" id="donut-founder"/>
+              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#8B95A5" stroke-dasharray="0 440" id="donut-board"/>
+              <circle class="donut-segment" cx="90" cy="90" r="70" stroke="#34D399" stroke-dasharray="0 440" id="donut-karo"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-center-value">50%</div>
+              <div class="donut-center-label">Founder</div>
+            </div>
+          </div>
+          <div class="equity-legend">
+            <div class="equity-legend-item"><div class="equity-dot" style="background:#3B82F6"></div>Founder 50%</div>
+            <div class="equity-legend-item"><div class="equity-dot" style="background:#34D399"></div>Karo 1%</div>
+            <div class="equity-legend-item"><div class="equity-dot" style="background:#8B95A5"></div>Board 49%</div>
+          </div>
+        </div>
+
+        <!-- Revenue growth chart -->
+        <div class="revenue-chart reveal">
+          <div class="revenue-chart-title">Revenue Projection</div>
+          <div class="rev-bars" id="rev-bars">
+            <div class="rev-bar-col"><div class="rev-bar-value">$0</div><div class="rev-bar" style="height:2px;background:rgba(255,255,255,0.1)" id="revbar-0"></div><div class="rev-bar-label">Y1<br>Build</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$25M</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-1"></div><div class="rev-bar-label">Y2<br>Deploy</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$35M</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-2"></div><div class="rev-bar-label">Y3<br>Scale</div></div>
+            <div class="rev-bar-col"><div class="rev-bar-value">$432M+</div><div class="rev-bar" style="height:2px;background:#34D399" id="revbar-3"></div><div class="rev-bar-label">Y5<br>Scale</div></div>
+          </div>
+        </div>
+
+        <!-- Key stats -->
+        <div class="key-stats">
+          <div class="key-stat reveal"><div class="key-stat-value gold">1,000%+</div><div class="key-stat-label">Board ROI Year 2</div></div>
+          <div class="key-stat reveal"><div class="key-stat-value red">$12.25M</div><div class="key-stat-label">Board Return Year 2</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: TIMELINE -->
+<section class="timeline-section" id="timeline-section">
+  <div class="container">
+    <div class="section-label reveal">MILESTONES</div>
+    <h2 class="section-headline reveal">Timeline</h2>
+    <div class="phase-filters reveal" id="phase-filters">
+      <button class="phase-pill active" data-phase="all">All</button>
+      <!-- Populated by JS with phases from data -->
+    </div>
+    <div class="timeline" id="timeline">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: FINANCIALS -->
+<section class="financials-section" id="financials-section">
+  <div class="container">
+    <div class="section-label reveal">THE NUMBERS</div>
+    <h2 class="section-headline reveal">Built to return 1,000%+ in Year 2.</h2>
+    <div class="financial-cards" id="financial-cards">
+      <!-- Populated by JS -->
+    </div>
+    <div class="revenue-bars reveal" id="revenue-bars">
+      <div class="bar-chart-title">Revenue Growth Projection</div>
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6: EQUITY & GOVERNANCE -->
+<section class="equity-section" id="equity-section">
+  <div class="container">
+    <div class="section-label reveal">THE STRUCTURE</div>
+    <h2 class="section-headline reveal">Equal partnership.<br>Independent tiebreaker.</h2>
+    <div class="equity-visual reveal">
+      <div class="equity-circle-wrap">
+        <div class="equity-circle large">50%</div>
+        <div class="equity-label">Danzel Yap</div>
+        <div class="equity-sublabel">Founder / CTO</div>
+      </div>
+      <div class="equity-circle-wrap">
+        <div class="equity-circle small">1%</div>
+        <div class="equity-label">Tiebreaker</div>
+        <div class="equity-sublabel">Independent Board</div>
+      </div>
+      <div class="equity-circle-wrap">
+        <div class="equity-circle large">49%</div>
+        <div class="equity-label">Webcor</div>
+        <div class="equity-sublabel">Strategic Partner</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 7: AGREEMENT -->
+<section class="agreement-section" id="agreement-section">
+  <div class="container">
+    <div class="section-label reveal">THE AGREEMENT</div>
+    <h2 class="section-headline reveal">Terms, structured for trust.</h2>
+    <div class="accordion reveal" id="agreement-accordion">
+      <!-- Populated by JS -->
+    </div>
+    <div class="reveal" style="text-align:center;margin-top:48px;">
+      <a class="agreement-doc-link" href="https://docs.google.com/document/d/1bFhSGH3J4tZjT6DWi-JPBthC5I6UJ2SrA7EaIRSf-sk/edit" target="_blank" rel="noopener">View Full Operating Agreement (Draft)</a>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 8: FOOTER -->
+<footer class="footer">
+  <div class="container" id="footer-content"></div>
+</footer>
+
+<!-- Populate HTML from SITE_TEXT config -->
+<script>
+(function() {
+  var T = window.SITE_TEXT;
+  if (!T) return;
+
+  // Hero
+  // Variant uses a two-line cyan/pink title — skip JS overwrite so the static markup wins
+  var htag = document.querySelector('.hero-tagline');
+  if (htag) htag.innerHTML = T.heroTagline;
+  var hs = document.getElementById('hero-stats');
+  if (hs && T.heroStats) {
+    hs.innerHTML = T.heroStats.map(function(s) {
+      return '<div class="stat-pill"><span class="stat-value">' + s.value + '</span><span class="stat-label">' + s.label + '</span></div>';
+    }).join('');
+  }
+
+  // Overview
+  var ol = document.querySelector('#overview-section .section-label');
+  if (ol) ol.textContent = T.overviewLabel;
+  var oh = document.querySelector('#overview-section .section-headline');
+  if (oh) oh.innerHTML = T.overviewHeadline;
+  var on = document.querySelector('.overview-narrative');
+  if (on && T.overviewParagraphs) {
+    on.innerHTML = T.overviewParagraphs.map(function(p) { return '<p>' + p + '</p>'; }).join('');
+  }
+  // Equity legend
+  var el = document.querySelector('.equity-legend');
+  if (el && T.equityLegend) {
+    el.innerHTML = T.equityLegend.map(function(e) {
+      return '<div class="equity-legend-item"><div class="equity-dot" style="background:' + e.color + '"></div>' + e.text + '</div>';
+    }).join('');
+  }
+  // Revenue chart
+  var rb = document.getElementById('rev-bars');
+  if (rb && T.revenueChart) {
+    rb.innerHTML = T.revenueChart.map(function(r, i) {
+      return '<div class="rev-bar-col"><div class="rev-bar-value">' + r.value + '</div><div class="rev-bar" style="height:2px;background:' + r.color + '" id="revbar-' + i + '"></div><div class="rev-bar-label">' + r.label + '</div></div>';
+    }).join('');
+  }
+  // Key stats
+  var ks = document.querySelector('.key-stats');
+  if (ks && T.keyStats) {
+    ks.innerHTML = T.keyStats.map(function(s) {
+      return '<div class="key-stat reveal"><div class="key-stat-value ' + s.style + '">' + s.value + '</div><div class="key-stat-label">' + s.label + '</div></div>';
+    }).join('');
+  }
+
+  // Financials
+  var fl = document.querySelector('#financials-section .section-label');
+  if (fl) fl.textContent = T.financialsLabel;
+  var fh = document.querySelector('#financials-section .section-headline');
+  if (fh) fh.innerHTML = T.financialsHeadline;
+
+  // Timeline
+  var tl = document.querySelector('#timeline-section .section-label');
+  if (tl) tl.textContent = T.timelineLabel;
+  var th = document.querySelector('#timeline-section .section-headline');
+  if (th) th.innerHTML = T.timelineHeadline;
+
+  // Equity section
+  var eql = document.querySelector('#equity-section .section-label');
+  if (eql) eql.textContent = T.equityLabel;
+  var eqh = document.querySelector('#equity-section .section-headline');
+  if (eqh) eqh.innerHTML = T.equityHeadline;
+  var eqv = document.querySelector('.equity-visual');
+  if (eqv && T.equityCircles) {
+    eqv.innerHTML = T.equityCircles.map(function(c) {
+      return '<div class="equity-circle-wrap"><div class="equity-circle ' + c.size + '">' + c.pct + '</div><div class="equity-label">' + c.name + '</div><div class="equity-sublabel">' + c.role + '</div></div>';
+    }).join('');
+  }
+
+  // Agreement
+  var al = document.querySelector('#agreement-section .section-label');
+  if (al) al.textContent = T.agreementLabel;
+  var ah = document.querySelector('#agreement-section .section-headline');
+  if (ah) ah.innerHTML = T.agreementHeadline;
+  var adl = document.querySelector('.agreement-doc-link');
+  if (adl && T.agreementDocUrl) adl.href = T.agreementDocUrl;
+
+  // Footer
+  var fc = document.getElementById('footer-content');
+  if (fc && T.footerLines) {
+    fc.innerHTML = T.footerLines.map(function(l) {
+      return '<div class="footer-line">' + l + '</div>';
+    }).join('');
+  }
+})();
+</script>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ===========================================
+     CONFIGURATION
+     =========================================== */
+
+  const SHEET_ID = '1Qitd17OuDbsglRTwPgiDiw1dhWo76fg9d6VpuSMX7RE';
+  const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+
+  /* ===========================================
+     DATA FETCHING
+     =========================================== */
+
+  function gvizUrl(sheetName) {
+    return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(sheetName);
+  }
+
+  function parseGviz(text) {
+    var start = text.indexOf('{');
+    var end = text.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('Invalid gviz response — no JSON object found');
+    var json;
+    try {
+      json = JSON.parse(text.substring(start, end + 1));
+    } catch (e) {
+      throw new Error('Failed to parse gviz JSON: ' + e.message);
+    }
+    if (!json.table || !json.table.cols || !json.table.rows) {
+      throw new Error('Unexpected gviz structure — missing table/cols/rows');
+    }
+    return json;
+  }
+
+  function gvizToRows(data) {
+    var cols = data.table.cols;
+    var rows = data.table.rows;
+
+    // Determine headers: use label if available
+    var headers = cols.map(function(c) { return c.label; }).filter(Boolean);
+    var dataRows = rows;
+
+    if (headers.length === 0 || headers.every(function(h) { return h === ''; })) {
+      if (rows.length > 0) {
+        headers = rows[0].c.map(function(cell) {
+          return (cell && cell.v != null) ? String(cell.v) : '';
+        });
+        dataRows = rows.slice(1);
+      }
+    }
+
+    return dataRows.map(function(row) {
+      var obj = {};
+      if (!row.c) return obj;
+      row.c.forEach(function(cell, i) {
+        var key = headers[i] || ('col' + i);
+        if (cell && cell.v != null) {
+          obj[key] = cell.v;
+        } else if (cell && cell.f != null) {
+          obj[key] = cell.f;
+        } else {
+          obj[key] = null;
+        }
+      });
+      return obj;
+    }).filter(function(row) {
+      // Filter out completely empty rows
+      return Object.values(row).some(function(v) { return v != null && v !== ''; });
+    });
+  }
+
+  function getCachedData(sheetName) {
+    var cacheKey = 'openyap_v2_' + sheetName;
+    try {
+      var cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        var parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < CACHE_TTL) {
+          return parsed.data;
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  function setCachedData(sheetName, data) {
+    var cacheKey = 'openyap_v2_' + sheetName;
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: data }));
+    } catch (e) { /* storage full */ }
+  }
+
+  function getAnyCachedData(sheetName) {
+    var cacheKey = 'openyap_v2_' + sheetName;
+    try {
+      var cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        return JSON.parse(cached).data;
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  async function fetchSheet(sheetName) {
+    // Try fresh cache first
+    var cached = getCachedData(sheetName);
+    if (cached) return cached;
+
+    var resp = await fetch(gvizUrl(sheetName));
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' fetching ' + sheetName);
+    var text = await resp.text();
+    var data = parseGviz(text);
+    var rows = gvizToRows(data);
+    setCachedData(sheetName, rows);
+    return rows;
+  }
+
+  /* ===========================================
+     UTILITY
+     =========================================== */
+
+  function esc(str) {
+    if (str == null) return '';
+    var s = String(str);
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function parseMoneyToNumber(str) {
+    if (str == null) return 0;
+    var s = String(str).replace(/[^0-9.\-]/g, '');
+    return parseFloat(s) || 0;
+  }
+
+  function isFinancialKPI(name) {
+    if (!name) return false;
+    var lower = name.toLowerCase();
+    return lower.includes('$') || lower.includes('revenue') || lower.includes('funding') ||
+           lower.includes('cost') || lower.includes('return') || lower.includes('roi') ||
+           lower.includes('savings') || lower.includes('budget');
+  }
+
+  function isFinancialValue(val) {
+    if (!val) return false;
+    return String(val).includes('$') || String(val).includes('%');
+  }
+
+  /* ===========================================
+     RENDER: KPI GRID (Overview section)
+     =========================================== */
+
+  function renderKPIGrid(kpis) {
+    var container = document.getElementById('kpi-grid');
+    if (!container || !kpis || kpis.length === 0) return;
+
+    container.innerHTML = kpis.map(function(k, i) {
+      var name = k.KPI || k.Metric || k.Name || '';
+      var value = k.Value || k.Amount || '';
+      var desc = k.Description || k.Detail || k.Notes || '';
+      var isGold = isFinancialKPI(name) || isFinancialValue(value);
+      var colorClass = isGold ? 'gold' : 'white';
+      var delay = i * 80;
+
+      return '<div class="kpi-card reveal" style="transition-delay:' + delay + 'ms">' +
+        '<div class="kpi-name">' + esc(name) + '</div>' +
+        '<div class="kpi-value ' + colorClass + '">' + esc(value) + '</div>' +
+        '<div class="kpi-desc">' + esc(desc) + '</div>' +
+      '</div>';
+    }).join('');
+
+    // Re-observe new elements
+    observeElements();
+  }
+
+  /* ===========================================
+     RENDER: TIMELINE
+     =========================================== */
+
+  function renderPhaseFilters(items) {
+    var phases = [];
+    items.forEach(function(item) {
+      var phase = item.Phase || '';
+      if (phase && phases.indexOf(phase) === -1) {
+        phases.push(phase);
+      }
+    });
+
+    var container = document.getElementById('phase-filters');
+    var html = '<button class="phase-pill active" data-phase="all">All</button>';
+    phases.forEach(function(phase) {
+      html += '<button class="phase-pill" data-phase="' + esc(phase) + '">' + esc(phase) + '</button>';
+    });
+    container.innerHTML = html;
+    setupPhaseFilter();
+  }
+
+  function renderTimeline(items) {
+    var container = document.getElementById('timeline');
+    if (!items || items.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">No timeline data available.</p>';
+      return;
+    }
+
+    renderPhaseFilters(items);
+
+    container.innerHTML = items.map(function(item, i) {
+      var phase = item.Phase || '';
+      var status = (item.Status || '').toLowerCase().trim();
+      var tags = item.Tags ? item.Tags.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
+      var hasMetric = item['Metric Label'] && item['Metric Value'];
+      var delay = (i % 6) * 100; // stagger in groups
+
+      var dotClass = 'planned';
+      if (status === 'done' || status === 'complete' || status === 'completed') dotClass = 'done';
+      else if (status === 'current' || status === 'active' || status === 'in progress') dotClass = 'current';
+
+      var tagsHTML = tags.map(function(t) {
+        return '<span class="tag-pill">' + esc(t) + '</span>';
+      }).join('');
+
+      var metricHTML = '';
+      if (hasMetric) {
+        metricHTML = '<div class="metric-box">' +
+          '<span class="metric-label">' + esc(item['Metric Label']) + '</span>' +
+          '<span class="metric-value">' + esc(item['Metric Value']) + '</span>' +
+        '</div>';
+      }
+
+      return '<div class="timeline-item" data-phase="' + esc(phase) + '" style="transition-delay:' + delay + 'ms">' +
+        '<div class="timeline-dot ' + dotClass + '"></div>' +
+        '<div class="timeline-card">' +
+          '<div class="timeline-date">' + esc(item.Date || '') + '</div>' +
+          '<div class="timeline-title">' + esc(item.Title || '') + '</div>' +
+          '<div class="timeline-desc">' + esc(item.Description || '') + '</div>' +
+          '<div class="timeline-meta">' + tagsHTML + '</div>' +
+          metricHTML +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    observeElements();
+  }
+
+  /* ===========================================
+     RENDER: FINANCIALS
+     =========================================== */
+
+  function renderFinancials(rows) {
+    var cardsContainer = document.getElementById('financial-cards');
+    var barsContainer = document.getElementById('revenue-bars');
+
+    if (!rows || rows.length === 0) {
+      cardsContainer.innerHTML = '<p style="color:var(--text-muted);padding:24px;">No financial data available.</p>';
+      barsContainer.style.display = 'none';
+      return;
+    }
+
+    // Render cards
+    cardsContainer.innerHTML = rows.map(function(row, i) {
+      var year = row['Year'] || '';
+      var revenue = row['Revenue'] || '';
+      var expenses = row['Expenses'] || '';
+      var net = row['Net'] || '';
+      var boardReturn = row['Board 49% Return'] || row['Board Return'] || '';
+
+      var isNegative = String(net).includes('-') || String(net).includes('(');
+      var netClass = isNegative ? 'negative' : 'positive';
+      var delay = i * 100;
+
+      var detailRows = '';
+      if (expenses) {
+        detailRows += '<div class="fin-row"><span class="fin-row-label">Expenses</span><span class="fin-row-value">' + esc(expenses) + '</span></div>';
+      }
+      if (net) {
+        detailRows += '<div class="fin-row"><span class="fin-row-label">Net</span><span class="fin-row-value ' + netClass + '">' + esc(net) + '</span></div>';
+      }
+      if (boardReturn) {
+        detailRows += '<div class="fin-row"><span class="fin-row-label">Board Return</span><span class="fin-row-value">' + esc(boardReturn) + '</span></div>';
+      }
+
+      return '<div class="financial-card reveal" style="transition-delay:' + delay + 'ms">' +
+        '<div class="fin-year">' + esc(year) + '</div>' +
+        '<div class="fin-revenue">' + esc(revenue) + '</div>' +
+        '<div class="fin-revenue-label">Revenue</div>' +
+        detailRows +
+      '</div>';
+    }).join('');
+
+    // Render revenue bar chart
+    var revenues = rows.map(function(row) {
+      return {
+        year: row['Year'] || '',
+        amount: row['Revenue'] || '',
+        numeric: parseMoneyToNumber(row['Revenue'])
+      };
+    });
+
+    var maxRev = Math.max.apply(null, revenues.map(function(r) { return r.numeric; }));
+    if (maxRev <= 0) maxRev = 1;
+
+    var barsHTML = '<div class="bar-chart-title">Revenue Growth Projection</div>';
+    revenues.forEach(function(r) {
+      var pct = Math.max(2, (r.numeric / maxRev) * 100);
+      barsHTML += '<div class="bar-row">' +
+        '<span class="bar-label">' + esc(r.year) + '</span>' +
+        '<div class="bar-track">' +
+          '<div class="bar-fill" style="width:0%" data-width="' + pct + '%">' +
+            '<span class="bar-amount">' + esc(r.amount) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    barsContainer.innerHTML = barsHTML;
+    barsContainer.style.display = '';
+
+    // Animate bars after a small delay
+    setTimeout(function() {
+      var fills = barsContainer.querySelectorAll('.bar-fill');
+      fills.forEach(function(fill) {
+        fill.style.width = fill.getAttribute('data-width');
+      });
+    }, 300);
+
+    observeElements();
+  }
+
+  /* ===========================================
+     RENDER: AGREEMENT (Accordion)
+     =========================================== */
+
+  function renderAgreement(rows) {
+    var accordion = document.getElementById('agreement-accordion');
+
+    if (!rows || rows.length === 0) {
+      accordion.innerHTML = '<p style="color:var(--text-muted);padding:24px;">No agreement data available.</p>';
+      return;
+    }
+
+    // Group by Section
+    var groups = {};
+    var groupOrder = [];
+    rows.forEach(function(row) {
+      var section = row.Section || row.Category || row.Group || 'General';
+      if (!groups[section]) {
+        groups[section] = [];
+        groupOrder.push(section);
+      }
+      groups[section].push(row);
+    });
+
+    // Render accordion
+    accordion.innerHTML = groupOrder.map(function(section) {
+      var terms = groups[section];
+      var termsHTML = terms.map(function(term) {
+        var name = term.Title || term.Term || term.Name || term.Item || '';
+        var detail = term.Content || term.Detail || term.Description || term.Value || '';
+        return '<div class="agreement-term">' +
+          '<div class="agreement-term-name">' + esc(name) + '</div>' +
+          '<div class="agreement-term-detail">' + esc(detail) + '</div>' +
+        '</div>';
+      }).join('');
+
+      return '<div class="accordion-group">' +
+        '<button class="accordion-header">' +
+          '<span>' + esc(section) + '</span>' +
+          '<span class="accordion-chevron"></span>' +
+        '</button>' +
+        '<div class="accordion-body">' +
+          '<div class="accordion-content">' + termsHTML + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Setup accordion interactions
+    accordion.querySelectorAll('.accordion-header').forEach(function(header) {
+      header.addEventListener('click', function() {
+        var group = header.parentElement;
+        var wasOpen = group.classList.contains('open');
+
+        // Close all
+        accordion.querySelectorAll('.accordion-group').forEach(function(g) {
+          g.classList.remove('open');
+        });
+
+        // Toggle clicked
+        if (!wasOpen) {
+          group.classList.add('open');
+        }
+      });
+    });
+
+  }
+
+  /* ===========================================
+     PHASE FILTER
+     =========================================== */
+
+  function setupPhaseFilter() {
+    var pills = document.querySelectorAll('#phase-filters .phase-pill');
+    pills.forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        pills.forEach(function(p) { p.classList.remove('active'); });
+        pill.classList.add('active');
+        var phase = pill.getAttribute('data-phase');
+        filterTimeline(phase);
+      });
+    });
+  }
+
+  function filterTimeline(phase) {
+    var items = document.querySelectorAll('.timeline-item');
+    items.forEach(function(item) {
+      if (phase === 'all' || item.getAttribute('data-phase') === phase) {
+        item.classList.remove('hidden-by-filter');
+      } else {
+        item.classList.add('hidden-by-filter');
+      }
+    });
+    observeElements();
+  }
+
+  /* ===========================================
+     STICKY NAV
+     =========================================== */
+
+  function setupStickyNav() {
+    var nav = document.getElementById('sticky-nav');
+    var hero = document.getElementById('hero');
+    var navLinks = nav.querySelectorAll('.nav-link');
+    var sections = [];
+
+    navLinks.forEach(function(link) {
+      var targetId = link.getAttribute('data-target');
+      if (targetId) {
+        sections.push({ link: link, el: document.getElementById(targetId) });
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var target = document.getElementById(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+    });
+
+    // Show/hide nav based on scroll position
+    var lastScroll = 0;
+    function onScroll() {
+      var heroBottom = hero.getBoundingClientRect().bottom;
+      if (heroBottom < 0) {
+        nav.classList.add('visible');
+      } else {
+        nav.classList.remove('visible');
+      }
+
+      // Active section tracking
+      var scrollY = window.scrollY + 100;
+      var activeLink = null;
+      sections.forEach(function(s) {
+        if (s.el && s.el.offsetTop <= scrollY) {
+          activeLink = s.link;
+        }
+      });
+      navLinks.forEach(function(l) { l.classList.remove('active'); });
+      if (activeLink) activeLink.classList.add('active');
+
+      lastScroll = window.scrollY;
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* ===========================================
+     SCROLL ANIMATIONS
+     =========================================== */
+
+  var observer;
+
+  /* ===========================================
+     CHARTS ANIMATION
+     =========================================== */
+
+  var chartsAnimated = false;
+  function animateCharts() {
+    if (chartsAnimated) return;
+    chartsAnimated = true;
+
+    // Donut chart — animate segments
+    var circumference = 2 * Math.PI * 70; // ~440
+    var founder = circumference * 0.50;
+    var board = circumference * 0.49;
+    var karo = circumference * 0.01;
+
+    var founderEl = document.getElementById('donut-founder');
+    var boardEl = document.getElementById('donut-board');
+    var karoEl = document.getElementById('donut-karo');
+
+    if (founderEl) {
+      setTimeout(function() { founderEl.style.strokeDasharray = founder + ' ' + circumference; }, 200);
+      setTimeout(function() {
+        boardEl.style.strokeDashoffset = -founder;
+        boardEl.style.strokeDasharray = board + ' ' + circumference;
+      }, 500);
+      setTimeout(function() {
+        karoEl.style.strokeDashoffset = -(founder + board);
+        karoEl.style.strokeDasharray = karo + ' ' + circumference;
+      }, 800);
+    }
+
+    // Revenue bars — animate heights
+    var heights = [2, 42, 58, 100]; // percentages
+    ['revbar-0','revbar-1','revbar-2','revbar-3'].forEach(function(id, i) {
+      var el = document.getElementById(id);
+      if (el) {
+        setTimeout(function() {
+          el.style.height = heights[i] + '%';
+        }, 400 + (i * 200));
+      }
+    });
+  }
+
+  function observeElements() {
+    if (observer) observer.disconnect();
+
+    observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          // Trigger chart animations when overview section is visible
+          if (entry.target.closest && entry.target.closest('#overview-section')) {
+            animateCharts();
+          }
+        }
+      });
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -60px 0px'
+    });
+
+    document.querySelectorAll('.reveal:not(.visible), .timeline-item:not(.hidden-by-filter):not(.visible)').forEach(function(el) {
+      observer.observe(el);
+    });
+  }
+
+  /* ===========================================
+     INIT
+     =========================================== */
+
+  async function fetchSheetSafe(sheetName) {
+    try {
+      return await fetchSheet(sheetName);
+    } catch (err) {
+      console.warn('Failed to fetch ' + sheetName + ':', err);
+      // Fall back to any cached version (even stale)
+      var cached = getAnyCachedData(sheetName);
+      if (cached) return { data: cached, stale: true };
+      return null;
+    }
+  }
+
+  async function init() {
+    var overlay = document.getElementById('loading-overlay');
+    var errorBanner = document.getElementById('error-banner');
+
+    var results = await Promise.all([
+      fetchSheetSafe('Timeline'),
+      fetchSheetSafe('Financials'),
+      fetchSheetSafe('KPIs'),
+      fetchSheetSafe('Agreement')
+    ]);
+
+    // Unwrap results — each is either raw array, {data, stale}, or null
+    var hadStale = false;
+    var hadAnyData = false;
+    function unwrap(result) {
+      if (!result) return null;
+      if (Array.isArray(result)) { hadAnyData = true; return result; }
+      if (result.stale) { hadStale = true; hadAnyData = true; return result.data; }
+      return null;
+    }
+
+    var timeline = unwrap(results[0]);
+    var financials = unwrap(results[1]);
+    var kpis = unwrap(results[2]);
+    var agreement = unwrap(results[3]);
+
+    try {
+      if (kpis) renderKPIGrid(kpis);
+      if (timeline) renderTimeline(timeline);
+      if (financials) renderFinancials(financials);
+      if (agreement) renderAgreement(agreement);
+      animateCharts();
+    } catch (renderErr) {
+      console.error('Render error:', renderErr);
+    }
+
+    if (!hadAnyData) {
+      errorBanner.textContent = 'Unable to load data. Please check your connection and refresh.';
+      errorBanner.classList.add('show');
+    } else if (hadStale) {
+      errorBanner.classList.add('show');
+    }
+
+    setupStickyNav();
+    observeElements();
+
+    // Always dismiss loading overlay
+    overlay.classList.add('hidden');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<!-- Three.js 3D Building -->
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('building-canvas');
+// Detect low-end GPU on a THROWAWAY canvas — calling getContext on the main
+// canvas locks in default attributes and blocks Three.js from claiming it
+// with the antialias/alpha options it needs (broke building render in d205171).
+const _detectCanvas = document.createElement('canvas');
+const _gl = _detectCanvas.getContext('webgl') || _detectCanvas.getContext('experimental-webgl');
+const _dbg = _gl && _gl.getExtension('WEBGL_debug_renderer_info');
+const _gpu = _dbg ? _gl.getParameter(_dbg.UNMASKED_RENDERER_WEBGL) : '';
+const LOW_END = /Intel|HD Graphics|UHD Graphics|Iris|SwiftShader|llvmpipe/i.test(_gpu);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !LOW_END, alpha: true });
+renderer.setPixelRatio(LOW_END ? 1 : Math.min(window.devicePixelRatio, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = LOW_END ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.35;
+renderer.localClippingEnabled = true;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000000, 0.008);
+
+const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(26, 12, 30);
+camera.lookAt(0, 10, 0);
+
+// Lights — low ambient so neon does the talking
+const ambient = new THREE.AmbientLight(0x1a2438, 0.6);
+scene.add(ambient);
+const dir = new THREE.DirectionalLight(0x8fb8ff, 1.2);
+dir.position.set(10, 30, 15);
+scene.add(dir);
+const rim = new THREE.DirectionalLight(0x3b82f6, 1.8);
+rim.position.set(-10, 5, -10);
+scene.add(rim);
+// Cyan crown light — follows top of construction
+const followLight = new THREE.PointLight(0x3b82f6, 12, 60);
+followLight.position.set(0, 10, 6);
+scene.add(followLight);
+// Hot pink ground wash — always blasting the base
+const upLight = new THREE.PointLight(0xec4899, 14, 40);
+upLight.position.set(0, 0.5, 0);
+scene.add(upLight);
+// Second pink uplight behind for silhouette rim
+const upLight2 = new THREE.PointLight(0xec4899, 9, 35);
+upLight2.position.set(0, 1.5, -3);
+scene.add(upLight2);
+// Subtle cyan top-down for upper-floor specular (height set after TOTAL_FLOORS below)
+const topLight = new THREE.PointLight(0x3b82f6, 6, 45);
+topLight.position.set(0, 36, 0);
+scene.add(topLight);
+
+// Materials — neon wireframe aesthetic (see-through, skeletal)
+const glassMat = new THREE.MeshStandardMaterial({
+  color: 0x05080e, metalness: 0.2, roughness: 0.15,
+  transparent: true, opacity: 0.18,
+  emissive: 0x0a2638, emissiveIntensity: 0.25,
+  depthWrite: false,
+});
+const frameMat = new THREE.MeshStandardMaterial({
+  color: 0x2a3450, metalness: 0.9, roughness: 0.2,
+  emissive: 0x1a3a5a, emissiveIntensity: 0.4,
+});
+const edgeMat = new THREE.MeshStandardMaterial({
+  color: 0x60a5fa, metalness: 0.35, roughness: 0.22,
+  emissive: 0x3b82f6, emissiveIntensity: 1.8,
+});
+const stackMat = new THREE.MeshStandardMaterial({
+  color: 0x1a1a22, metalness: 0.4, roughness: 0.7,
+});
+const crnSolid = new THREE.MeshStandardMaterial({ color: 0x3a4258, metalness: 0.8, roughness: 0.25, emissive: 0x0a1220, emissiveIntensity: 0.04 });
+const crnDark = new THREE.MeshStandardMaterial({ color: 0x232834, metalness: 0.85, roughness: 0.3 });
+const mastClip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 2);
+const crnLn = new THREE.LineBasicMaterial({ color: 0x4a5a7a, clippingPlanes: [mastClip] });
+const crnGl = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, clippingPlanes: [mastClip] });
+const crnCb = new THREE.LineBasicMaterial({ color: 0x6a7a96 });
+const crnWarnMat = new THREE.MeshBasicMaterial({ color: 0xec4899 });
+const crnLedMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.65 });
+const crnGlass = new THREE.MeshStandardMaterial({ color: 0x0a1a2e, metalness: 0.3, roughness: 0.1, transparent: true, opacity: 0.75 });
+
+// ---- Helper: create a single building with floors that reveal on scroll ----
+const TOTAL_FLOORS = LOW_END ? 16 : 20;
+const FLOOR_H = LOW_END ? 1.6 : 1.35;
+const FLOOR_W = 10;
+const FLOOR_D = 7;
+
+// Per-floor setback profile — wider podium, main tower, tapered crown
+function floorScale(i) {
+  const t = i / (TOTAL_FLOORS - 1);
+  if (i < 3) {
+    // Podium base — wider
+    return { sx: 1.38, sz: 1.32 };
+  }
+  if (i < TOTAL_FLOORS - 4) {
+    // Main tower — gentle taper
+    const taper = 1.0 - (i - 3) / (TOTAL_FLOORS - 7) * 0.10;
+    return { sx: taper, sz: taper };
+  }
+  // Crown / setback tower top
+  const topT = (i - (TOTAL_FLOORS - 4)) / 4;
+  return { sx: 0.75 - topT * 0.18, sz: 0.72 - topT * 0.18 };
+}
+
+const bldg = new THREE.Group();
+const floorData = [];
+
+// Shared geometries (created once, reused per floor)
+const _glassGeo = new THREE.BoxGeometry(FLOOR_W, FLOOR_H - 0.06, FLOOR_D);
+const _slabGeo = new THREE.BoxGeometry(FLOOR_W + 0.12, 0.06, FLOOR_D + 0.12);
+const _spandrelGeo = new THREE.BoxGeometry(FLOOR_W + 0.02, 0.08, FLOOR_D + 0.02);
+const _colGeo = new THREE.BoxGeometry(0.1, FLOOR_H, 0.1);
+const _divGeo = new THREE.BoxGeometry(0.03, FLOOR_H - 0.06, 0.03);
+const _stripGeo = new THREE.BoxGeometry(0.04, FLOOR_H, 0.04);
+const _spandrelMat = new THREE.MeshStandardMaterial({ color: 0x0d1422, metalness: 0.7, roughness: 0.3 });
+// Per-floor glow material: pink for lower floors, cyan for upper — set per-floor in loop
+function makeGlowMat(t) {
+  // t = i / TOTAL_FLOORS; bottom (0) = pink, top (1) = cyan
+  const pink = new THREE.Color(0xec4899);
+  const cyan = new THREE.Color(0x3b82f6);
+  const c = pink.clone().lerp(cyan, t);
+  return new THREE.MeshBasicMaterial({
+    color: c, transparent: true, opacity: 0.65 + (1 - t) * 0.2,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+}
+// Per-floor edge/slab tint: pink->cyan gradient matches the Stitch reference
+function makeEdgeMat(t) {
+  const pink = new THREE.Color(0xec4899);
+  const cyan = new THREE.Color(0x60a5fa);
+  const c = pink.clone().lerp(cyan, t);
+  return new THREE.MeshStandardMaterial({
+    color: c, metalness: 0.35, roughness: 0.22,
+    emissive: c, emissiveIntensity: 1.8,
+  });
+}
+
+// Pre-seed RNG for consistent lit windows
+const _litSeeds = Array.from({length: TOTAL_FLOORS}, () => Math.random());
+
+for (let i = 0; i < TOTAL_FLOORS; i++) {
+  const group = new THREE.Group();
+  const y = i * FLOOR_H;
+  const tFloor = i / Math.max(1, TOTAL_FLOORS - 1); // 0 bottom → 1 top
+  const floorEdgeMat = makeEdgeMat(tFloor);
+
+  // Glass panel (see-through, tinted toward floor color)
+  const gm = glassMat.clone();
+  const gC = new THREE.Color(0xec4899).lerp(new THREE.Color(0x3b82f6), tFloor);
+  gm.emissive = gC.clone().multiplyScalar(0.7);
+  gm.emissiveIntensity = 0.35 + (1 - tFloor) * 0.55; // pink base glows harder
+  gm.opacity = 0.14 + (1 - tFloor) * 0.16; // base floors more filled, top airy
+  const glass = new THREE.Mesh(_glassGeo, gm);
+  glass.position.y = y + FLOOR_H / 2;
+  group.add(glass);
+
+  // Explicit wireframe outline — pink/cyan gradient neon edges
+  const edgeColor = new THREE.Color(0xec4899).lerp(new THREE.Color(0x3b82f6), tFloor);
+  const wireMat = new THREE.LineBasicMaterial({
+    color: edgeColor, transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending,
+  });
+  const wireEdges = new THREE.EdgesGeometry(_glassGeo);
+  const wire = new THREE.LineSegments(wireEdges, wireMat);
+  wire.position.y = y + FLOOR_H / 2;
+  group.add(wire);
+  // Glow halo — fatter additive line effect via scaled transparent edges
+  const haloMat = new THREE.LineBasicMaterial({
+    color: edgeColor, transparent: true, opacity: 0.4,
+    blending: THREE.AdditiveBlending,
+  });
+  const halo = new THREE.LineSegments(wireEdges, haloMat);
+  halo.position.y = y + FLOOR_H / 2;
+  halo.scale.set(1.015, 1.015, 1.015);
+  group.add(halo);
+
+  // Floor slab — pink at bottom, cyan at top
+  const slab = new THREE.Mesh(_slabGeo, floorEdgeMat);
+  slab.position.y = y;
+  group.add(slab);
+
+  // Spandrel band
+  const spandrel = new THREE.Mesh(_spandrelGeo, _spandrelMat);
+  spandrel.position.y = y + FLOOR_H * 0.35;
+  group.add(spandrel);
+
+  // Frame columns at corners
+  for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
+    for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
+      const col = new THREE.Mesh(_colGeo, frameMat);
+      col.position.set(cx, y + FLOOR_H / 2, cz);
+      group.add(col);
+    }
+  }
+
+  // Front/back window dividers (skip every other on low-end)
+  const divCount = Math.max(1, Math.round(FLOOR_W / (LOW_END ? 3 : 1.5)));
+  for (let d = 1; d < divCount; d++) {
+    const xPos = -FLOOR_W/2 + d * (FLOOR_W / divCount);
+    for (const zSide of [FLOOR_D / 2 + 0.01, -FLOOR_D / 2 - 0.01]) {
+      const div = new THREE.Mesh(_divGeo, frameMat);
+      div.position.set(xPos, y + FLOOR_H / 2, zSide);
+      group.add(div);
+    }
+  }
+
+  if (!LOW_END) {
+    // Side window mullions
+    const sideDivCount = Math.max(1, Math.round(FLOOR_D / 1.5));
+    for (let d = 1; d < sideDivCount; d++) {
+      const zPos = -FLOOR_D/2 + d * (FLOOR_D / sideDivCount);
+      for (const xSide of [FLOOR_W / 2 + 0.01, -FLOOR_W / 2 - 0.01]) {
+        const sdiv = new THREE.Mesh(_divGeo, frameMat);
+        sdiv.position.set(xSide, y + FLOOR_H / 2, zPos);
+        group.add(sdiv);
+      }
+    }
+
+    // Interior panels — bottom floors get multiple bright pink "rooms"
+    const floorColor = new THREE.Color(0xec4899).lerp(new THREE.Color(0x3b82f6), tFloor);
+    const isBase = tFloor < 0.4;
+    const panelCount = isBase ? 3 : (_litSeeds[i] > 0.45 ? 1 : 0);
+    for (let pi = 0; pi < panelCount; pi++) {
+      const seed = (_litSeeds[i] + pi * 0.37) % 1;
+      const intensity = isBase ? 0.55 + seed * 0.3 : 0.18 + seed * 0.2;
+      const litMat = new THREE.MeshBasicMaterial({
+        color: floorColor,
+        transparent: true, opacity: intensity,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const litGeo = new THREE.BoxGeometry(
+        FLOOR_W * (0.18 + seed * 0.28), FLOOR_H * (isBase ? 0.82 : 0.6), FLOOR_D * 0.32
+      );
+      const litPanel = new THREE.Mesh(litGeo, litMat);
+      const xOff = (seed - 0.5) * FLOOR_W * 0.55;
+      const zOff = ((seed * 1.7) % 1 - 0.5) * FLOOR_D * 0.35;
+      litPanel.position.set(xOff, y + FLOOR_H / 2, zOff);
+      group.add(litPanel);
+    }
+    // Horizontal floor-edge neon strip running along the slab — reads as "LED bar"
+    if (tFloor < 0.6) {
+      const barMat = new THREE.MeshBasicMaterial({
+        color: floorColor, transparent: true,
+        opacity: 0.75 * (1 - tFloor * 0.6),
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const barGeo = new THREE.BoxGeometry(FLOOR_W + 0.05, 0.04, FLOOR_D + 0.05);
+      const bar = new THREE.Mesh(barGeo, barMat);
+      bar.position.y = y + 0.04;
+      group.add(bar);
+    }
+
+    // Corner glow strips — per-floor pink→cyan gradient
+    const stripMat = makeGlowMat(tFloor);
+    for (const cx of [-FLOOR_W/2, FLOOR_W/2]) {
+      for (const cz of [-FLOOR_D/2, FLOOR_D/2]) {
+        const strip = new THREE.Mesh(_stripGeo, stripMat);
+        strip.position.set(cx, y + FLOOR_H / 2, cz);
+        group.add(strip);
+      }
+    }
+
+    // X-bracing on structural/transfer floors (podium top + mid-tower) — reads as engineered façade
+    const isBrace = i === 2 || i === Math.floor(TOTAL_FLOORS * 0.45) || i === Math.floor(TOTAL_FLOORS * 0.72);
+    if (isBrace) {
+      const braceColor = new THREE.Color(0xec4899).lerp(new THREE.Color(0x60a5fa), tFloor);
+      const braceMat = new THREE.LineBasicMaterial({
+        color: braceColor, transparent: true, opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+      });
+      const hw = FLOOR_W / 2, hd = FLOOR_D / 2;
+      const yB = y + 0.04, yT = y + FLOOR_H - 0.04;
+      // Front + back faces
+      const pts = [
+        new THREE.Vector3(-hw, yB, hd), new THREE.Vector3(hw, yT, hd),
+        new THREE.Vector3(hw, yB, hd), new THREE.Vector3(-hw, yT, hd),
+        new THREE.Vector3(-hw, yB, -hd), new THREE.Vector3(hw, yT, -hd),
+        new THREE.Vector3(hw, yB, -hd), new THREE.Vector3(-hw, yT, -hd),
+      ];
+      const brace = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), braceMat);
+      group.add(brace);
+    }
+
+    // Circular control-panel disks on podium floors — reads as tech/civic detail
+    if (tFloor < 0.18) {
+      const diskColor = new THREE.Color(0xec4899).lerp(new THREE.Color(0x60a5fa), tFloor);
+      const diskMat = new THREE.MeshBasicMaterial({
+        color: diskColor, transparent: true, opacity: 0.9,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const diskMatSoft = new THREE.MeshBasicMaterial({
+        color: diskColor, transparent: true, opacity: 0.28,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const ringGeo = new THREE.RingGeometry(0.24, 0.32, 32);
+      const ringGeoGlow = new THREE.RingGeometry(0.20, 0.46, 32);
+      const count = 3;
+      for (let d = 0; d < count; d++) {
+        const xPos = (d - (count - 1) / 2) * (FLOOR_W * 0.28);
+        const ring = new THREE.Mesh(ringGeo, diskMat);
+        ring.position.set(xPos, y + FLOOR_H * 0.5, FLOOR_D / 2 + 0.02);
+        group.add(ring);
+        const glow = new THREE.Mesh(ringGeoGlow, diskMatSoft);
+        glow.position.set(xPos, y + FLOOR_H * 0.5, FLOOR_D / 2 + 0.015);
+        group.add(glow);
+      }
+    }
+  }
+
+  // Apply per-floor setback scale (static — .scale.y is reserved for reveal animation)
+  const fs = floorScale(i);
+  group.scale.set(fs.sx, 0, fs.sz);
+  group.visible = false;
+  bldg.add(group);
+  floorData.push({ group, glass, targetScale: 0, currentScale: 0, sx: fs.sx, sz: fs.sz });
+}
+scene.add(bldg);
+
+// ---- Crane helper functions ----
+function mkLn(pts, m) { return new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), m); }
+
+function sqLat(w, h, n) {
+  const p = [], hw = w/2, dh = h/n;
+  const c = [[-hw,-hw],[hw,-hw],[hw,hw],[-hw,hw]];
+  for (let i = 0; i < n; i++) {
+    const y0 = i*dh, y1 = y0+dh;
+    c.forEach(([x,z]) => { p.push(new THREE.Vector3(x,y0,z), new THREE.Vector3(x,y1,z)); });
+    [y0,y1].forEach(y => { for(let j=0;j<4;j++) p.push(new THREE.Vector3(c[j][0],y,c[j][1]), new THREE.Vector3(c[(j+1)%4][0],y,c[(j+1)%4][1])); });
+    for(let j=0;j<4;j++) { const k=(j+1)%4; p.push(new THREE.Vector3(c[j][0],y0,c[j][1]), new THREE.Vector3(c[k][0],y1,c[k][1])); }
+  }
+  return p;
+}
+
+function hzLat(len, w, n, dir) {
+  const p = [], hw = w/2, dl = len/n;
+  const c = [[-hw,-hw],[hw,-hw],[0,hw]];
+  for (let i = 0; i < n; i++) {
+    const x0 = i*dl*dir, x1 = x0+dl*dir;
+    c.forEach(([y,z]) => { p.push(new THREE.Vector3(x0,y,z), new THREE.Vector3(x1,y,z)); });
+    [x0,x1].forEach(x => { for(let j=0;j<3;j++) p.push(new THREE.Vector3(x,c[j][0],c[j][1]), new THREE.Vector3(x,c[(j+1)%3][0],c[(j+1)%3][1])); });
+    for(let j=0;j<3;j++) { const k=(j+1)%3; p.push(new THREE.Vector3(x0,c[j][0],c[j][1]), new THREE.Vector3(x1,c[k][0],c[k][1])); }
+  }
+  return p;
+}
+
+// ---- Single crane — climbs with building ----
+const craneGroup = new THREE.Group();
+const craneSlew = new THREE.Group();
+const CRANE_JL = 14, CRANE_CJL = 5;
+const craneMastH = TOTAL_FLOORS * FLOOR_H + 5; // full height mast — base always at ground
+const MW = 0.8;
+
+// Full-height mast lattice — stays grounded, slew rides up
+craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnLn));
+craneGroup.add(mkLn(sqLat(MW, craneMastH, Math.round(craneMastH / 0.8)), crnGl));
+// Base cross (inside building, compact)
+[0, Math.PI/2].forEach(r => {
+  const b = new THREE.Mesh(new THREE.BoxGeometry(2, 0.12, 0.2), crnSolid);
+  b.rotation.y = r; b.position.y = 0.06; craneGroup.add(b);
+});
+
+// Slewing unit — starts at SY, moved dynamically via craneSlew.position.y
+const SY = 0; // base offset within slew group (slew.position.y moves it)
+const ch = mkLn(sqLat(0.5, 3.5, 4), crnLn);
+ch.position.y = SY; craneSlew.add(ch);
+const cab = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.0), crnSolid);
+cab.position.set(0.2, SY + 0.4, 0); craneSlew.add(cab);
+const cabWin = new THREE.Mesh(new THREE.BoxGeometry(1.22, 0.35, 1.02), crnGlass);
+cabWin.position.set(0.2, SY + 0.65, 0); craneSlew.add(cabWin);
+const JW = 0.4;
+const jibG = new THREE.Group(); jibG.position.y = SY + 1.0;
+jibG.add(mkLn(hzLat(CRANE_JL, JW, 20, 1), crnLn));
+jibG.add(mkLn(hzLat(CRANE_JL, JW, 20, 1), crnGl));
+craneSlew.add(jibG);
+const cjG = new THREE.Group(); cjG.position.y = SY + 1.0;
+cjG.add(mkLn(hzLat(CRANE_CJL, JW, 7, -1), crnLn));
+craneSlew.add(cjG);
+const cw = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 0.8), crnDark);
+cw.position.set(-CRANE_CJL + 0.4, SY + 0.7, 0); craneSlew.add(cw);
+const catTop = SY + 3.5;
+[[0,catTop,0, CRANE_JL,SY+1.0,0], [0,catTop,0, CRANE_JL*0.6,SY+1.0,0], [0,catTop,0, -CRANE_CJL,SY+1.0,0]].forEach(([a,b,c,d,e,f]) => {
+  craneSlew.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a,b,c), new THREE.Vector3(d,e,f)]), crnCb));
+});
+const trolley = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.5), crnSolid);
+trolley.position.set(CRANE_JL * 0.5, SY + 0.85, 0); craneSlew.add(trolley);
+const hookBaseY = SY + 0.8, hookLen = 6;
+const hookCable = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,-hookLen,0)]), crnCb
+);
+hookCable.position.set(CRANE_JL * 0.5, hookBaseY, 0); craneSlew.add(hookCable);
+const hook = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.04, 6, 12, Math.PI * 1.5), crnSolid);
+hook.position.set(CRANE_JL * 0.5, hookBaseY - hookLen - 0.1, 0);
+hook.rotation.z = Math.PI; craneSlew.add(hook);
+const wG = new THREE.SphereGeometry(0.1, 8, 8);
+const wMat1 = crnWarnMat.clone(), wMat2 = crnWarnMat.clone();
+const wl1 = new THREE.Mesh(wG, wMat1); wl1.position.set(0, catTop + 0.15, 0); craneSlew.add(wl1);
+const wl2 = new THREE.Mesh(wG, wMat2); wl2.position.set(CRANE_JL, SY + 1.2, 0); craneSlew.add(wl2);
+const ledG = new THREE.BoxGeometry(CRANE_JL, 0.02, 0.02);
+const ledMat = crnLedMat.clone();
+const ls1 = new THREE.Mesh(ledG, ledMat); ls1.position.set(CRANE_JL/2, SY + 1.15, JW/2 + 0.02); craneSlew.add(ls1);
+const ls2 = ls1.clone(); ls2.position.z = -(JW/2 + 0.02); craneSlew.add(ls2);
+
+craneGroup.add(craneSlew);
+craneGroup.position.set(0, 0, 0); // centered in building
+craneGroup.visible = false;
+scene.add(craneGroup);
+
+// ======== OPENYAP LOGO (on rooftop) ========
+const logoGroup = new THREE.Group();
+// Create text texture via Canvas2D
+const logoCanvas = document.createElement('canvas');
+logoCanvas.width = 1024; logoCanvas.height = 256;
+const ctx = logoCanvas.getContext('2d');
+ctx.clearRect(0, 0, 1024, 256);
+// Outer glow
+ctx.shadowColor = '#3B82F6';
+ctx.shadowBlur = 40;
+ctx.font = 'bold 140px -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillStyle = '#3B82F6';
+ctx.fillText('OpenYap', 512, 128);
+// Mid glow
+ctx.shadowBlur = 15;
+ctx.fillStyle = '#7BB8FF';
+ctx.fillText('OpenYap', 512, 128);
+// Bright core
+ctx.shadowBlur = 4;
+ctx.fillStyle = '#FFFFFF';
+ctx.fillText('OpenYap', 512, 128);
+
+const logoTexture = new THREE.CanvasTexture(logoCanvas);
+logoTexture.needsUpdate = true;
+const logoMat = new THREE.MeshBasicMaterial({
+  map: logoTexture, transparent: true, side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+});
+const logoPlane = new THREE.Mesh(new THREE.PlaneGeometry(7, 1.75), logoMat);
+const BLDG_TOP = TOTAL_FLOORS * FLOOR_H;
+logoPlane.position.set(0, BLDG_TOP + 2.2, 0);
+logoGroup.add(logoPlane);
+
+// ---- Finished rooftop ----
+// Roof cap slab with glowing edge
+const roofBase = new THREE.Mesh(
+  new THREE.BoxGeometry(FLOOR_W + 0.4, 0.2, FLOOR_D + 0.4), edgeMat
+);
+roofBase.position.y = BLDG_TOP;
+logoGroup.add(roofBase);
+
+// Mechanical penthouse (glass + frame)
+const phBase = new THREE.Mesh(new THREE.BoxGeometry(FLOOR_W * 0.5, 0.08, FLOOR_D * 0.5), edgeMat);
+phBase.position.y = BLDG_TOP + 0.2;
+logoGroup.add(phBase);
+const phGlass = new THREE.Mesh(
+  new THREE.BoxGeometry(FLOOR_W * 0.45, 1.4, FLOOR_D * 0.45),
+  glassMat.clone()
+);
+phGlass.position.y = BLDG_TOP + 0.9;
+logoGroup.add(phGlass);
+const phCap = new THREE.Mesh(new THREE.BoxGeometry(FLOOR_W * 0.5, 0.08, FLOOR_D * 0.5), edgeMat);
+phCap.position.y = BLDG_TOP + 1.6;
+logoGroup.add(phCap);
+
+// Antenna spire
+const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.06, 2.5, 8), frameMat);
+spire.position.y = BLDG_TOP + 2.85;
+logoGroup.add(spire);
+// Spire tip light
+const spireLight = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8),
+  new THREE.MeshBasicMaterial({ color: 0x3b82f6 })
+);
+spireLight.position.y = BLDG_TOP + 4.1;
+logoGroup.add(spireLight);
+
+// Helipad circle on roof
+const heliGeo = new THREE.RingGeometry(0.6, 0.7, 32);
+const heliMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
+const helipad = new THREE.Mesh(heliGeo, heliMat);
+helipad.rotation.x = -Math.PI / 2;
+helipad.position.set(FLOOR_W * 0.15, BLDG_TOP + 0.21, -FLOOR_D * 0.15);
+logoGroup.add(helipad);
+// H mark
+const hGeo = new THREE.PlaneGeometry(0.5, 0.5);
+const hCanvas = document.createElement('canvas');
+hCanvas.width = 64; hCanvas.height = 64;
+const hCtx = hCanvas.getContext('2d');
+hCtx.clearRect(0, 0, 64, 64);
+hCtx.font = 'bold 48px sans-serif';
+hCtx.textAlign = 'center'; hCtx.textBaseline = 'middle';
+hCtx.fillStyle = '#3B82F6';
+hCtx.fillText('H', 32, 32);
+const hTex = new THREE.CanvasTexture(hCanvas);
+const hMark = new THREE.Mesh(hGeo, new THREE.MeshBasicMaterial({ map: hTex, transparent: true, side: THREE.DoubleSide }));
+hMark.rotation.x = -Math.PI / 2;
+hMark.position.set(FLOOR_W * 0.15, BLDG_TOP + 0.22, -FLOOR_D * 0.15);
+logoGroup.add(hMark);
+
+// Railing around roof edge
+const railMat = new THREE.MeshStandardMaterial({ color: 0x556677, metalness: 0.8, roughness: 0.3 });
+const railH = 0.25;
+[
+  [FLOOR_W/2 + 0.15, 0], [-FLOOR_W/2 - 0.15, 0],
+].forEach(([x, z]) => {
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(0.03, railH, FLOOR_D + 0.3), railMat);
+  rail.position.set(x, BLDG_TOP + railH/2 + 0.2, z);
+  logoGroup.add(rail);
+});
+[
+  [0, FLOOR_D/2 + 0.15], [0, -FLOOR_D/2 - 0.15],
+].forEach(([x, z]) => {
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(FLOOR_W + 0.3, railH, 0.03), railMat);
+  rail.position.set(x, BLDG_TOP + railH/2 + 0.2, z);
+  logoGroup.add(rail);
+});
+
+// Logo sign mount (two poles + plane)
+const poleMat = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.8, roughness: 0.3 });
+const lPole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.8, 8), poleMat);
+lPole1.position.set(-1.5, BLDG_TOP + 5.0, 0); logoGroup.add(lPole1);
+const lPole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.8, 8), poleMat);
+lPole2.position.set(1.5, BLDG_TOP + 5.0, 0); logoGroup.add(lPole2);
+logoPlane.position.set(0, BLDG_TOP + 5.2, 0);
+
+// Multiple lights for logo glow
+const logoLight = new THREE.PointLight(0x3b82f6, 0, 20);
+logoLight.position.set(0, BLDG_TOP + 5.5, 3);
+logoGroup.add(logoLight);
+const logoLight2 = new THREE.PointLight(0x3b82f6, 0, 15);
+logoLight2.position.set(0, BLDG_TOP + 5.5, -3);
+logoGroup.add(logoLight2);
+
+// Window glow lights (warm interior look when complete)
+const warmLight1 = new THREE.PointLight(0xffd080, 0, 12);
+warmLight1.position.set(0, BLDG_TOP * 0.5, 3);
+logoGroup.add(warmLight1);
+const warmLight2 = new THREE.PointLight(0xffd080, 0, 12);
+warmLight2.position.set(0, BLDG_TOP * 0.75, -3);
+logoGroup.add(warmLight2);
+
+logoGroup.visible = false;
+scene.add(logoGroup);
+
+// ======== GROUND (minimal) ========
+const groundGeo = new THREE.PlaneGeometry(20, 20);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x050508, metalness: 0.6, roughness: 0.9 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.01;
+scene.add(ground);
+
+// ======== FLOATING NODE NETWORK (OpenYap brain aesthetic — optimized) ========
+const NODE_COUNT = LOW_END ? 12 : 30;
+const nodePositions = [];
+const nodeGeo = new THREE.SphereGeometry(0.12, 4, 4);
+const nodeGroup = new THREE.Group();
+
+// Single shared material (no per-node cloning)
+const nodeMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.35 });
+
+for (let i = 0; i < NODE_COUNT; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 14 + Math.random() * 25;
+  const y = Math.random() * 35;
+  const pos = new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+  nodePositions.push(pos);
+  const node = new THREE.Mesh(nodeGeo, nodeMat);
+  node.position.copy(pos);
+  const s = 0.6 + Math.random() * 0.8;
+  node.scale.set(s, s, s);
+  nodeGroup.add(node);
+}
+
+// Merge connection lines into a single geometry
+const connectionMat = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.08 });
+const CONNECTION_DIST = 12;
+const connPts = [];
+for (let i = 0; i < NODE_COUNT; i++) {
+  for (let j = i + 1; j < NODE_COUNT; j++) {
+    if (nodePositions[i].distanceTo(nodePositions[j]) < CONNECTION_DIST) {
+      connPts.push(nodePositions[i].x, nodePositions[i].y, nodePositions[i].z);
+      connPts.push(nodePositions[j].x, nodePositions[j].y, nodePositions[j].z);
+    }
+  }
+}
+if (connPts.length > 0) {
+  const connGeo = new THREE.BufferGeometry();
+  connGeo.setAttribute('position', new THREE.Float32BufferAttribute(connPts, 3));
+  nodeGroup.add(new THREE.LineSegments(connGeo, connectionMat));
+}
+scene.add(nodeGroup);
+
+
+// ======== SCROLL STATE ========
+let scrollProgress = 0;
+let activeFloors = 0;
+const docHeight = () => Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+
+window.addEventListener('scroll', () => {
+  scrollProgress = Math.min(1, window.scrollY / docHeight());
+  // Map scroll 0-0.9 to building floors, 0.9-1.0 for logo reveal
+  const buildProgress = Math.min(1, scrollProgress / 0.9);
+  activeFloors = Math.floor(buildProgress * TOTAL_FLOORS);
+}, { passive: true });
+
+// Show canvas after load
+setTimeout(() => canvas.classList.add('visible'), 500);
+
+// Resize
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+// ======== FLOOR HIGHLIGHT (driven by agreement hover) ========
+// Set window.highlightFloors = {from, to} to glow a range, null to clear
+window.highlightFloors = null;
+
+// ======== ANIMATE ========
+const clock = new THREE.Clock();
+let logoAlpha = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Build floors based on scroll
+  for (let i = 0; i < floorData.length; i++) {
+    const f = floorData[i];
+    f.targetScale = i < activeFloors ? 1 : 0;
+    f.currentScale += (f.targetScale - f.currentScale) * 0.18;
+
+    if (f.currentScale > 0.01) {
+      f.group.visible = true;
+      f.group.scale.y = f.currentScale;
+
+      // Check if this floor is highlighted by agreement hover
+      const hl = window.highlightFloors;
+      const isHighlighted = hl && i >= hl.from && i <= hl.to;
+
+      if (isHighlighted) {
+        // Bright highlight — selected level
+        f.glass.material.emissive.setHex(0x60a0ff);
+        f.glass.material.emissiveIntensity = 0.9 + 0.3 * Math.sin(t * 4 + i * 0.15);
+      }
+      // Active floor: bright pulsing glow
+      else if (i === activeFloors - 1 && f.currentScale < 0.95) {
+        f.glass.material.emissive.setHex(0x5ba8f6);
+        f.glass.material.emissiveIntensity = 1.2 * (1 - f.currentScale) + 0.3 * Math.sin(t * 6);
+      }
+      // Recently built floors: fade glow
+      else if (i >= activeFloors - 4 && i < activeFloors - 1) {
+        const fadeGlow = 0.15 + 0.2 * ((activeFloors - 1 - i) < 3 ? (3 - (activeFloors - 1 - i)) / 3 : 0);
+        f.glass.material.emissive.setHex(0x3060b0);
+        f.glass.material.emissiveIntensity = fadeGlow;
+      }
+      // Rest: subtle ambient glow
+      else {
+        f.glass.material.emissive.setHex(0x2050a0);
+        f.glass.material.emissiveIntensity = 0.2 + 0.05 * Math.sin(t * 0.5 + i * 0.2);
+      }
+    } else {
+      f.group.visible = false;
+    }
+  }
+
+  // Crane: climbs with building, disassembles near end
+  const topY = activeFloors * FLOOR_H;
+  const craneDisassemble = Math.max(0, (scrollProgress - 0.78) / 0.12);
+  // Clip mast to current construction height (+ crane X offset for world space)
+  mastClip.constant = topY + 2;
+
+  if (activeFloors > 2 && craneDisassemble < 1) {
+    craneGroup.visible = true;
+    // Mast stays grounded, clipped to topY — slew rides up
+    const slewTargetY = topY + 1;
+    craneSlew.position.y += (slewTargetY - craneSlew.position.y) * 0.15;
+
+    // Normal crane operation
+    craneSlew.rotation.y = t * 0.06;
+    const tx = CRANE_JL * (0.3 + 0.3 * Math.sin(t * 0.12));
+    trolley.position.x = tx;
+    hookCable.position.x = tx;
+    hook.position.x = tx;
+    hook.position.z = Math.sin(t * 0.2) * 0.08;
+    const wp = 0.3 + 0.7 * Math.sin(t * 4);
+    wMat1.color.setRGB(wp, 0, 0);
+    wMat2.color.setRGB(wp * 0.8, 0, 0);
+    ledMat.opacity = 0.25 + 0.45 * Math.sin(t * 2);
+
+    // Disassembly: crane fades and lifts up (logo replaces it)
+    if (craneDisassemble > 0) {
+      const ease = craneDisassemble * craneDisassemble;
+      craneGroup.scale.set(1 - ease * 0.6, 1 - ease * 0.3, 1 - ease * 0.6);
+      craneGroup.position.y = ease * 5; // lifts up
+      // Fade mast lines
+      crnLn.opacity = 1 - ease;
+      crnLn.transparent = true;
+      crnGl.opacity = 0.15 * (1 - ease);
+    } else {
+      craneGroup.scale.set(1, 1, 1);
+      craneGroup.position.set(0, 0, 0);
+    }
+  } else {
+    craneGroup.visible = false;
+    craneGroup.scale.set(1, 1, 1);
+    craneGroup.position.set(0, 0, 0);
+    crnLn.opacity = 1;
+    crnGl.opacity = 0.15;
+  }
+
+  // Follow light tracks construction — pulses near active floor
+  followLight.position.y = topY + 4;
+  followLight.intensity = 6 + 2 * Math.sin(t * 3);
+
+  // Logo + rooftop reveal when building is complete (scroll > 0.88)
+  const logoProgress = Math.max(0, (scrollProgress - 0.88) / 0.12);
+  if (logoProgress > 0) {
+    logoGroup.visible = true;
+    logoAlpha += (logoProgress - logoAlpha) * 0.05;
+    logoMat.opacity = logoAlpha;
+    logoLight.intensity = logoAlpha * 10;
+    logoLight2.intensity = logoAlpha * 6;
+    // Warm interior glow fades in
+    warmLight1.intensity = logoAlpha * 3;
+    warmLight2.intensity = logoAlpha * 3;
+    // Spire light pulses
+    spireLight.material.color.setHex(Math.sin(t * 3) > 0 ? 0x3b82f6 : 0x1a4080);
+    // Helipad pulses
+    heliMat.opacity = 0.3 + 0.2 * Math.sin(t * 2);
+    // Logo gently bobs and faces camera
+    logoPlane.position.y = BLDG_TOP + 5.2 + Math.sin(t * 0.8) * 0.1;
+    logoPlane.lookAt(camera.position);
+  } else {
+    logoGroup.visible = false;
+    logoAlpha = 0;
+  }
+
+  // Node network slowly rotates around the building
+  nodeGroup.rotation.y = t * 0.02;
+
+  // Camera: closer, follows construction responsively
+  const camTargetY = 14 + topY * 0.4;
+  const lookY = 8 + topY * 0.5;
+  camera.position.x = 26 + Math.sin(t * 0.1) * 2;
+  camera.position.z = 30 + Math.cos(t * 0.08) * 1.5;
+  camera.position.y += (camTargetY - camera.position.y) * 0.1;
+  camera.lookAt(0, lookY, 0);
+
+  // No fade-out — building stays visible at end
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+
+<script>
+// 3D Card Tilt on hover
+(function() {
+  var S = '.kpi-card,.financial-card,.timeline-card,.stat-pill,.key-stat,.equity-circle';
+  document.addEventListener('mousemove', function(e) {
+    var c = e.target.closest ? e.target.closest(S) : null;
+    if (!c || !c._tilt) return;
+    var r = c.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width - 0.5;
+    var y = (e.clientY - r.top) / r.height - 0.5;
+    c.style.transform = 'translateY(-4px) perspective(600px) rotateX(' + (-y*6) + 'deg) rotateY(' + (x*6) + 'deg)';
+  });
+  document.addEventListener('mouseover', function(e) {
+    var c = e.target.closest ? e.target.closest(S) : null;
+    if (c) c._tilt = true;
+  });
+  document.addEventListener('mouseout', function(e) {
+    var c = e.target.closest ? e.target.closest(S) : null;
+    if (c && (!e.relatedTarget || !c.contains(e.relatedTarget))) {
+      c._tilt = false;
+      c.style.transform = '';
+    }
+  });
+})();
+</script>
+
+<!-- Agreement hover → building floor highlight -->
+<script>
+(function() {
+  var TOTAL = 45; // must match TOTAL_FLOORS in Three.js
+
+  // Use event delegation since accordion is dynamically rendered
+  document.addEventListener('mouseenter', function(e) {
+    var group = e.target.closest ? e.target.closest('.accordion-group') : null;
+    if (!group) return;
+    var accordion = document.getElementById('agreement-accordion');
+    if (!accordion) return;
+    var groups = Array.from(accordion.querySelectorAll('.accordion-group'));
+    var idx = groups.indexOf(group);
+    if (idx === -1) return;
+    var count = groups.length || 1;
+    var floorsPerGroup = Math.ceil(TOTAL / count);
+    // Invert: first accordion item → top floors, last → bottom floors
+    var invertedIdx = count - 1 - idx;
+    window.highlightFloors = {
+      from: invertedIdx * floorsPerGroup,
+      to: Math.min(TOTAL - 1, (invertedIdx + 1) * floorsPerGroup - 1),
+    };
+  }, true);
+
+  document.addEventListener('mouseleave', function(e) {
+    var group = e.target.closest ? e.target.closest('.accordion-group') : null;
+    if (group) {
+      window.highlightFloors = null;
+    }
+  }, true);
+})();
+</script>
+
+<!-- ===== SHADER BACKGROUND ===== -->
+<script>
+(function() {
+  var canvas = document.getElementById('shader-bg');
+  var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+
+  // --- Vertex shader (fullscreen quad) ---
+  var vsSource = `
+    attribute vec2 a_position;
+    void main() {
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }
+  `;
+
+  // --- Fragment shader (gradient mesh + aurora + noise) ---
+  var fsSource = `
+    precision mediump float;
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform float u_scroll;
+
+    // Simplex-style noise helpers
+    vec3 mod289(vec3 x) { return x - floor(x / 289.0) * 289.0; }
+    vec2 mod289v2(vec2 x) { return x - floor(x / 289.0) * 289.0; }
+    vec3 permute(vec3 x) { return mod289((x * 34.0 + 1.0) * x); }
+
+    float snoise(vec2 v) {
+      const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                         -0.577350269189626, 0.024390243902439);
+      vec2 i  = floor(v + dot(v, C.yy));
+      vec2 x0 = v - i + dot(i, C.xx);
+      vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec4 x12 = x0.xyxy + C.xxzz;
+      x12.xy -= i1;
+      i = mod289v2(i);
+      vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+      m = m * m;
+      m = m * m;
+      vec3 x = 2.0 * fract(p * C.www) - 1.0;
+      vec3 h = abs(x) - 0.5;
+      vec3 ox = floor(x + 0.5);
+      vec3 a0 = x - ox;
+      m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+      vec3 g;
+      g.x = a0.x * x0.x + h.x * x0.y;
+      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+
+    // Fractional Brownian Motion (layered noise)
+    float fbm(vec2 p) {
+      float f = 0.0;
+      f += 0.5000 * snoise(p); p *= 2.01;
+      f += 0.2500 * snoise(p); p *= 2.02;
+      f += 0.1250 * snoise(p); p *= 2.03;
+      f += 0.0625 * snoise(p);
+      return f / 0.9375;
+    }
+
+    // Hash for film grain
+    float hash(vec2 p) {
+      vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+      p3 += dot(p3, p3.yzx + 33.33);
+      return fract((p3.x + p3.y) * p3.z);
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / u_resolution;
+      float aspect = u_resolution.x / u_resolution.y;
+      vec2 p = vec2(uv.x * aspect, uv.y);
+      float t = u_time;
+
+      // === 1. GRADIENT MESH (organic flowing color blobs) ===
+      float n1 = fbm(p * 1.2 + vec2(t * 0.08, t * 0.06));
+      float n2 = fbm(p * 0.8 + vec2(-t * 0.05, t * 0.09) + 5.0);
+      float n3 = fbm(p * 1.5 + vec2(t * 0.07, -t * 0.04) + 10.0);
+
+      // Color palette: dark gray base, blue & pink accents
+      vec3 gray   = vec3(0.10, 0.11, 0.14);
+      vec3 purple = vec3(0.23, 0.51, 0.96);
+      vec3 pink   = vec3(0.80, 0.18, 0.50);
+      vec3 dark   = vec3(0.015, 0.015, 0.022);
+
+      vec3 mesh = mix(dark, gray, smoothstep(-0.2, 0.6, n1) * 0.5);
+      mesh = mix(mesh, purple, smoothstep(0.0, 0.8, n2) * 0.4);
+      mesh = mix(mesh, pink, smoothstep(0.1, 0.7, n3) * 0.3);
+
+      // Scroll shifts the mesh colors vertically
+      float scrollShift = u_scroll * 0.3;
+      mesh *= 1.0 - scrollShift * 0.5;
+
+      float meshAlpha = 0.35;
+
+      // === 2. AURORA / LIGHT STREAKS ===
+      float auroraY = uv.y + snoise(vec2(uv.x * 3.0, t * 0.15)) * 0.15;
+      float band1 = smoothstep(0.02, 0.0, abs(auroraY - 0.3 - sin(t * 0.1 + uv.x * 4.0) * 0.08));
+      float band2 = smoothstep(0.03, 0.0, abs(auroraY - 0.6 - cos(t * 0.08 + uv.x * 3.0) * 0.06));
+      float band3 = smoothstep(0.015, 0.0, abs(auroraY - 0.8 - sin(t * 0.12 + uv.x * 5.0) * 0.04));
+
+      vec3 aurora = band1 * purple * 1.5 + band2 * pink * 1.2 + band3 * gray * 1.0;
+      float auroraAlpha = 0.20;
+
+      // === 3. FILM GRAIN ===
+      float grain = hash(gl_FragCoord.xy + fract(t * 100.0)) * 2.0 - 1.0;
+      float grainAlpha = 0.04;
+
+      // === COMPOSITE ===
+      vec3 color = mesh * meshAlpha + aurora * auroraAlpha;
+      color += grain * grainAlpha;
+
+      // Vignette — darken edges
+      float vig = 1.0 - smoothstep(0.4, 1.4, length(uv - 0.5) * 1.5);
+      color *= vig;
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+
+  // --- Compile shaders ---
+  function createShader(type, source) {
+    var shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader error:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  var vs = createShader(gl.VERTEX_SHADER, vsSource);
+  var fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  if (!vs || !fs) return;
+
+  var program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program error:', gl.getProgramInfoLog(program));
+    return;
+  }
+  gl.useProgram(program);
+
+  // --- Fullscreen quad ---
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+  var posLoc = gl.getAttribLocation(program, 'a_position');
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+  // --- Uniforms ---
+  var uRes = gl.getUniformLocation(program, 'u_resolution');
+  var uTime = gl.getUniformLocation(program, 'u_time');
+  var uScroll = gl.getUniformLocation(program, 'u_scroll');
+
+  // --- Resize ---
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // --- Scroll tracking ---
+  var scrollY = 0;
+  var maxScroll = 1;
+  function updateScroll() {
+    scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  }
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  updateScroll();
+
+  // --- Animation loop ---
+  var startTime = performance.now();
+  function render() {
+    var t = (performance.now() - startTime) * 0.001;
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uTime, t);
+    gl.uniform1f(uScroll, scrollY / maxScroll);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
+
+<!-- ===== INLINE EDITOR ===== -->
+<button id="edit-toggle" title="Edit text">&#9998;</button>
+<button id="edit-save" title="Save changes">SAVE</button>
+<script>
+(function() {
+  var btn = document.getElementById('edit-toggle');
+  var save = document.getElementById('edit-save');
+  var editing = false;
+
+  // All editable selectors (includes dynamically rendered elements)
+  var editables = [
+    '.hero-title span',
+    '.hero-tagline',
+    '.stat-value',
+    '.stat-label',
+    '.section-label',
+    '.section-headline',
+    '.overview-narrative p',
+    '.equity-legend-item',
+    '.rev-bar-value',
+    '.rev-bar-label',
+    '.key-stat-value',
+    '.key-stat-label',
+    '.equity-circle',
+    '.equity-label',
+    '.equity-sublabel',
+    '.footer-line',
+    // Timeline (dynamically rendered from Google Sheets)
+    '.timeline-date',
+    '.timeline-title',
+    '.timeline-desc',
+    // Financial cards (dynamically rendered)
+    '.financial-card',
+    // Agreement accordion (dynamically rendered)
+    '.accordion-title',
+    '.accordion-body',
+    // KPI cards (dynamically rendered)
+    '.kpi-value',
+    '.kpi-title',
+    '.kpi-desc',
+  ];
+
+  function toggleEdit() {
+    editing = !editing;
+    btn.classList.toggle('active', editing);
+    save.classList.toggle('visible', editing);
+
+    var sel = editables.join(',');
+    document.querySelectorAll(sel).forEach(function(el) {
+      if (editing) {
+        el.contentEditable = 'true';
+      } else {
+        el.removeAttribute('contenteditable');
+      }
+    });
+  }
+
+  function saveEdits() {
+    // Read current DOM text back into SITE_TEXT
+    var T = window.SITE_TEXT;
+
+    var ht = document.querySelector('.hero-title span');
+    if (ht) T.heroTitle = ht.textContent;
+    var htag = document.querySelector('.hero-tagline');
+    if (htag) T.heroTagline = htag.innerHTML;
+
+    // Hero stats
+    var pills = document.querySelectorAll('.stat-pill');
+    T.heroStats = Array.from(pills).map(function(p) {
+      return {
+        value: p.querySelector('.stat-value').textContent,
+        label: p.querySelector('.stat-label').textContent,
+      };
+    });
+
+    // Overview
+    var ol = document.querySelector('#overview-section .section-label');
+    if (ol) T.overviewLabel = ol.textContent;
+    var oh = document.querySelector('#overview-section .section-headline');
+    if (oh) T.overviewHeadline = oh.innerHTML;
+    var paras = document.querySelectorAll('.overview-narrative p');
+    T.overviewParagraphs = Array.from(paras).map(function(p) { return p.innerHTML; });
+
+    // Key stats
+    var ksvs = document.querySelectorAll('.key-stat-value');
+    var ksls = document.querySelectorAll('.key-stat-label');
+    if (ksvs.length) {
+      T.keyStats = Array.from(ksvs).map(function(v, i) {
+        return {
+          value: v.textContent,
+          label: ksls[i] ? ksls[i].textContent : '',
+          style: v.classList.contains('gold') ? 'gold' : 'red',
+        };
+      });
+    }
+
+    // Revenue chart
+    var rvs = document.querySelectorAll('.rev-bar-value');
+    var rls = document.querySelectorAll('.rev-bar-label');
+    if (rvs.length) {
+      T.revenueChart = Array.from(rvs).map(function(v, i) {
+        var bar = document.getElementById('revbar-' + i);
+        return {
+          value: v.textContent,
+          label: rls[i] ? rls[i].innerHTML : '',
+          color: bar ? bar.style.background : '#34D399',
+        };
+      });
+    }
+
+    // Financials
+    var fl = document.querySelector('#financials-section .section-label');
+    if (fl) T.financialsLabel = fl.textContent;
+    var fh = document.querySelector('#financials-section .section-headline');
+    if (fh) T.financialsHeadline = fh.innerHTML;
+
+    // Timeline
+    var tl = document.querySelector('#timeline-section .section-label');
+    if (tl) T.timelineLabel = tl.textContent;
+    var th = document.querySelector('#timeline-section .section-headline');
+    if (th) T.timelineHeadline = th.innerHTML;
+
+    // Equity section
+    var eql = document.querySelector('#equity-section .section-label');
+    if (eql) T.equityLabel = eql.textContent;
+    var eqh = document.querySelector('#equity-section .section-headline');
+    if (eqh) T.equityHeadline = eqh.innerHTML;
+    var ecs = document.querySelectorAll('.equity-circle-wrap');
+    if (ecs.length) {
+      T.equityCircles = Array.from(ecs).map(function(w) {
+        var c = w.querySelector('.equity-circle');
+        return {
+          pct: c ? c.textContent : '',
+          name: w.querySelector('.equity-label') ? w.querySelector('.equity-label').textContent : '',
+          role: w.querySelector('.equity-sublabel') ? w.querySelector('.equity-sublabel').textContent : '',
+          size: c && c.classList.contains('small') ? 'small' : 'large',
+        };
+      });
+    }
+
+    // Agreement
+    var al = document.querySelector('#agreement-section .section-label');
+    if (al) T.agreementLabel = al.textContent;
+    var ah = document.querySelector('#agreement-section .section-headline');
+    if (ah) T.agreementHeadline = ah.innerHTML;
+
+    // Footer
+    var fls = document.querySelectorAll('.footer-line');
+    if (fls.length) T.footerLines = Array.from(fls).map(function(f) { return f.innerHTML; });
+
+    // Save to localStorage
+    localStorage.setItem('openyap_site_text', JSON.stringify(T));
+
+    // Exit edit mode
+    toggleEdit();
+
+    // Brief flash to confirm
+    save.textContent = 'SAVED';
+    save.style.color = '#34D399';
+    save.style.borderColor = 'rgba(52,211,153,0.4)';
+    setTimeout(function() {
+      save.textContent = 'SAVE';
+      save.style.color = '';
+      save.style.borderColor = '';
+    }, 1200);
+  }
+
+  btn.addEventListener('click', toggleEdit);
+  save.addEventListener('click', saveEdits);
+})();
+</script>
+</body>
+</html>
